@@ -1,0 +1,2438 @@
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CoffeeCRM.Data.Model;
+using CoffeeCRM.Core.Repository;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using CoffeeCRM.Core.Util;
+using CoffeeCRM.Data.Constants;
+using CoffeeCRM.Core.Service;
+using CoffeeCRM.Core.Util.Parameters;
+
+namespace CfCRM.DATN.Controllers
+{
+    [Route("[controller]")]
+    [ApiController]
+    public class TableController : ControllerBase
+    {
+        ITableService service;
+        public TableController(ITableService _service)
+        {
+            service = _service;
+        }
+
+        [HttpGet]
+        [Route("api/List")]
+        public async Task<IActionResult> List()
+        {
+            try
+            {
+                var dataList = await service.List();
+                if (dataList == null || dataList.Count == 0)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList());
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        [Route("api/ListDto")]
+        public async Task<IActionResult> ListDto()
+        {
+            try
+            {
+                var dataList = await service.ListDto();
+                if (dataList == null || dataList.Count == 0)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList());
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        [Route("api/Detail/{Id}")]
+        public async Task<IActionResult> Detail(int? Id)
+        {
+            if (Id == null)
+            {
+                return BadRequest();
+            }
+            try
+            {
+                var dataList = await service.Detail(Id);
+                if (dataList == null)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList);
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        [Route("api/ListPaging")]
+        public async Task<IActionResult> ListPaging(int pageIndex, int pageSize)
+        {
+            if (pageIndex < 0 || pageSize < 0) return BadRequest();
+            try
+            {
+                var dataList = await service.ListPaging(pageIndex, pageSize);
+
+                if (dataList == null || dataList.Count == 0)
+                {
+                    return NotFound();
+                }
+
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList());
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+        [HttpPost]
+        [Route("api/Add")]
+        public async Task<IActionResult> Add([FromBody] Table model)
+        {
+            if (ModelState.IsValid)
+            {
+                //1. business logic
+
+                //data validation
+                if (model.Active == false)
+                {
+                    return BadRequest();
+                }
+                //2. add new object
+                try
+                {
+                    await service.Add(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.CREATED(model);
+                    return Created("", coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+
+
+        [HttpPost]
+        [Route("api/Update")]
+        public async Task<IActionResult> Update([FromBody] Table model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    //1. business logic 
+                    //2. update object
+                    await service.Update(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                    return Ok(coffeemanagementResponse);
+                }
+                catch (Exception ex)
+                {
+                    if (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException")
+                    {
+                        return NotFound();
+                    }
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+        [HttpPost]
+        [Route("api/Delete")]
+        public async Task<IActionResult> Delete([FromBody] Table model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    //1. business logic
+                    await service.Delete(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                    return Ok(coffeemanagementResponse);
+                }
+                catch (Exception ex)
+                {
+                    if (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException")
+                    {
+                        return NotFound();
+                    }
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+        [HttpPost]
+        [Route("api/DeletePermanently")]
+        public async Task<IActionResult> DeletePermanently([FromBody] Table model)
+        {
+            var result = 0;
+            if (!(model.Id > 0))
+            {
+                return BadRequest();
+            }
+            try
+            {
+                //physically delete object
+                result = (int)await service.DeletePermanently(model.Id);
+                if (result == 0)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+
+        [HttpGet]
+        [Route("api/Count")]
+        public int CountTable()
+        {
+            int result = service.Count();
+            return result;
+        }
+        [HttpPost]
+        [Route("api/list-server-side")]
+        public async Task<IActionResult> ListServerSide([FromBody] TableDTParameters parameters)
+        {
+            try
+            {
+                var data = await service.ListServerSide(parameters);
+                return Ok(data);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+    }
+}
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CoffeeCRM.Data.Model;
+using CoffeeCRM.Core.Repository;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using CoffeeCRM.Core.Util;
+using CoffeeCRM.Data.Constants;
+using CoffeeCRM.Core.Service;
+using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Data.ViewModels;
+using CoffeeCRM.Core.Helper.VNPay;
+using CoffeeCRM.Data.Enums.VNPay;
+using CoffeeCRM.Data.VNPay;
+
+namespace CfCRM.DATN.Controllers
+{
+    [Route("[controller]")]
+    [ApiController]
+    public class InvoiceController : ControllerBase
+    {
+        IInvoiceService service;
+        IVNPayService _vnPayservice;
+        IConfiguration _configuration;
+        public InvoiceController(IInvoiceService _service, IVNPayService vnPayservice, IConfiguration configuration)
+        {
+            service = _service;
+            _vnPayservice = vnPayservice;
+            _configuration = configuration;
+            _vnPayservice.Initialize(_configuration["Vnpay:TmnCode"], _configuration["Vnpay:HashSecret"], _configuration["Vnpay:BaseUrl"], _configuration["Vnpay:CallbackUrl"]);
+        }
+
+        [HttpGet]
+        [Route("api/List")]
+        public async Task<IActionResult> List()
+        {
+            try
+            {
+                var dataList = await service.List();
+                if (dataList == null || dataList.Count == 0)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList());
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        [Route("api/Detail/{Id}")]
+        public async Task<IActionResult> Detail(int? Id)
+        {
+            if (Id == null)
+            {
+                return BadRequest();
+            }
+            try
+            {
+                var dataList = await service.Detail(Id);
+                if (dataList == null)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList);
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+
+
+
+        [HttpGet]
+        [Route("api/ListPaging")]
+        public async Task<IActionResult> ListPaging(int pageIndex, int pageSize)
+        {
+            if (pageIndex < 0 || pageSize < 0) return BadRequest();
+            try
+            {
+                var dataList = await service.ListPaging(pageIndex, pageSize);
+
+                if (dataList == null || dataList.Count == 0)
+                {
+                    return NotFound();
+                }
+
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList());
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+        [HttpPost]
+        [Route("api/Add")]
+        public async Task<IActionResult> Add([FromBody] Invoice model)
+        {
+            if (ModelState.IsValid)
+            {
+                //1. business logic
+
+                //data validation
+                if (model.Active == false)
+                {
+                    return BadRequest();
+                }
+                //2. add new object
+                try
+                {
+                    await service.Add(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.CREATED(model);
+                    return Created("", coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+
+
+        [HttpPost]
+        [Route("api/Update")]
+        public async Task<IActionResult> Update([FromBody] Invoice model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    //1. business logic 
+                    //2. update object
+                    await service.Update(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                    return Ok(coffeemanagementResponse);
+                }
+                catch (Exception ex)
+                {
+                    if (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException")
+                    {
+                        return NotFound();
+                    }
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+        [HttpPost]
+        [Route("api/Delete")]
+        public async Task<IActionResult> Delete([FromBody] Invoice model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    //1. business logic
+                    await service.Delete(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                    return Ok(coffeemanagementResponse);
+                }
+                catch (Exception ex)
+                {
+                    if (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException")
+                    {
+                        return NotFound();
+                    }
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+        [HttpPost]
+        [Route("api/DeletePermanently")]
+        public async Task<IActionResult> DeletePermanently([FromBody] Invoice model)
+        {
+            var result = 0;
+            if (!(model.Id > 0))
+            {
+                return BadRequest();
+            }
+            try
+            {
+                //physically delete object
+                result = (int)await service.DeletePermanently(model.Id);
+                if (result == 0)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+
+        [HttpGet]
+        [Route("api/Count")]
+        public int CountInvoice()
+        {
+            int result = service.Count();
+            return result;
+        }
+        [HttpPost]
+        [Route("api/list-server-side")]
+        public async Task<IActionResult> ListServerSide([FromBody] InvoiceDTParameters parameters)
+        {
+            try
+            {
+                var data = await service.ListServerSide(parameters);
+                return Ok(data);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+
+        [HttpPost]
+        [Route("api/AddOrUpdateVM")]
+        public async Task<IActionResult> AddOrUpdateVM([FromBody] InvoiceViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var invoiceCreated = await service.AddOrUpdateVM(model);
+                    if (invoiceCreated == null)
+                    {
+                        return BadRequest();
+                    }
+                    if (model.PaymentMethod == PaymentMethodConst.CASH)
+                    {
+                        return Created("", CoffeeManagementResponse.SUCCESS(invoiceCreated));
+                    }
+                    var ipAddress = NetworkHelper.GetIpAddress(HttpContext); // Lấy địa chỉ IP của thiết bị thực hiện giao dịch
+                    var request = new PaymentRequest
+                    {
+                        PaymentId = DateTime.Now.Ticks,
+                        Money = (double)model.TotalMoney,
+                        Description = model.Id.ToString(),
+                        IpAddress = ipAddress,
+                        BankCode = BankCode.ANY, // Tùy chọn. Mặc định là tất cả phương thức giao dịch
+                        CreatedDate = DateTime.Now, // Tùy chọn. Mặc định là thời điểm hiện tại
+                        Currency = Currency.VND, // Tùy chọn. Mặc định là VND (Việt Nam đồng)
+                        Language = DisplayLanguage.Vietnamese // Tùy chọn. Mặc định là tiếng Việt
+                    };
+
+                    var paymentUrl = _vnPayservice.GetPaymentUrl(request);
+                    invoiceCreated.UriVnPay = paymentUrl;
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(invoiceCreated);
+                    return Created("", coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+
+        [HttpPost]
+        [Route("api/UpdateStatus")]
+        public async Task<IActionResult> UpdateStatus([FromBody] InvoiceViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var invoiceCreated = await service.UpdateStatus(model);
+                    if (invoiceCreated == null)
+                    {
+                        return BadRequest();
+                    }
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(invoiceCreated);
+                    return Created("", coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+
+        [HttpGet]
+        [Route("api/InvoiceDetailVM")]
+        public async Task<IActionResult> DetailVM(int invoiceId)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+
+                    var result = await service.InvoiceDetailById(invoiceId);
+                    if (result == null)
+                    {
+                        return BadRequest();
+                    }
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(result);
+                    return Created("", coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+
+        [HttpPost]
+        [Route("api/PaymentSuccess")]
+        public async Task<IActionResult> PaymentSuccess(int id, string invoiceCode)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await service.PaymentSuccess(id, invoiceCode);
+                    
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS();
+                    return Created("", coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+    }
+}
+
+     
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using CoffeeCRM.Data.Model;
+    using CoffeeCRM.Core.Repository;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using CoffeeCRM.Core.Util;
+    using CoffeeCRM.Data.Constants;
+    using CoffeeCRM.Core.Service;
+    using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Data.ViewModels;
+using CoffeeCRM.Core.Helper;
+using CoffeeCRM.Data.DTO;
+
+namespace CfCRM.DATN.Controllers
+    {
+        [Route("[controller]")]
+        [ApiController]
+        public class TableBookingController : ControllerBase
+        {
+            ITableBookingService service;
+            public TableBookingController(ITableBookingService _service)
+            {
+                service = _service;
+            }
+            
+            [HttpGet]
+            [Route("api/List")]
+            public async Task<IActionResult> List()
+            {
+                try
+                {
+                    var dataList = await service.List();
+                    if (dataList == null || dataList.Count == 0)
+                    {
+                        return NotFound();
+                    }
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList());
+                    return Ok(coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+                    return BadRequest();
+                }
+            }
+            
+            [HttpGet]
+            [Route("api/Detail/{Id}")]
+            public async Task<IActionResult> Detail(int? Id)
+            {
+                if (Id == null)
+                {
+                    return BadRequest();
+                }
+                try
+                {
+                    var dataList = await service.Detail(Id);
+                    if (dataList == null)
+                    {
+                        return NotFound();
+                    }
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList);
+                    return Ok(coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+                    return BadRequest();
+                }
+            }
+
+
+            [HttpGet]
+            [Route("api/ListPaging")]
+            public async Task<IActionResult> ListPaging(int pageIndex, int pageSize)
+            {
+                if (pageIndex < 0 || pageSize < 0) return BadRequest();
+                try
+                {
+                    var dataList = await service.ListPaging(pageIndex, pageSize);
+
+                    if (dataList == null || dataList.Count == 0)
+                    {
+                        return NotFound();
+                    }
+
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList());
+                    return Ok(coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+                    return BadRequest();
+                }
+            }
+            [HttpPost]
+            [Route("api/Add")]
+            public async Task<IActionResult> Add([FromBody]TableBooking model)
+            {
+                if (ModelState.IsValid)
+                {
+                    //1. business logic
+
+                    //data validation
+                    if (model.Active == false)
+                    {
+                        return BadRequest();
+                    }
+                    //2. add new object
+                    try
+                    {
+                        await service.Add(model);
+                        var coffeemanagementResponse = CoffeeManagementResponse.CREATED(model);
+                        return Created("", coffeemanagementResponse);
+                    }
+                    catch (Exception)
+                    {
+
+                        return BadRequest();
+                    }
+                }
+                return BadRequest();
+            }
+
+
+            [HttpPost]
+            [Route("api/Update")]
+            public async Task<IActionResult> Update([FromBody]TableBooking model)
+            {
+                if (ModelState.IsValid)
+                {
+                    try
+                    {
+                        //1. business logic 
+                        //2. update object
+                        await service.Update(model);
+                        var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                        return Ok(coffeemanagementResponse);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException")
+                        {
+                            return NotFound();
+                        }
+                        return BadRequest();
+                    }
+                }
+                return BadRequest();
+            }
+            [HttpPost]
+            [Route("api/Delete")]
+            public async Task<IActionResult> Delete([FromBody]TableBooking model)
+            {
+                if (ModelState.IsValid)
+                {
+                    try
+                    {
+                        //1. business logic
+                        await service.Delete(model);
+                        var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                        return Ok(coffeemanagementResponse);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException")
+                        {
+                            return NotFound();
+                        }
+                        return BadRequest();
+                    }
+                }
+                return BadRequest();
+            }
+            [HttpPost]
+            [Route("api/DeletePermanently")]
+            public async Task<IActionResult> DeletePermanently([FromBody]TableBooking model)
+            {
+                var result = 0;
+                if (!(model.Id > 0))
+                {
+                    return BadRequest();
+                }
+                try
+                {
+                    //physically delete object
+                    result = (int)await service.DeletePermanently(model.Id);
+                    if (result == 0)
+                    {
+                        return NotFound();
+                    }
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                    return Ok(coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+                    return BadRequest();
+                }
+            }
+
+
+            [HttpGet]
+            [Route("api/Count")]
+            public int CountTableBooking()
+            {
+                int result = service.Count();
+                return result;
+            }
+            [HttpPost]
+            [Route("api/list-server-side")]
+            public async Task<IActionResult> ListServerSide([FromBody] TableBookingDTParameters parameters)
+            {
+                try
+                {
+                    var data = await service.ListServerSide(parameters);
+                    return Ok(data);
+                }
+                catch (Exception e)
+                {
+                    return BadRequest(e);
+                }
+            }
+        [HttpPost]
+        [Route("api/AddOrUpdate")]
+        public async Task<IActionResult> AddOrUpdate([FromBody] TableBookingDto model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var userId = this.GetLoggedInUserId();
+                    model.AccountId = userId;
+                    if (!(await service.AddOrUpdate(model)))
+                    {
+                        return BadRequest();
+                    }
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                    return Created("", coffeemanagementResponse);
+                }
+                catch(BadHttpRequestException e)
+                {
+                    var cfRes = CoffeeManagementResponse.BAD_REQUEST(e.Message);
+                    return BadRequest(cfRes);
+                }
+                catch (Exception e)
+                {
+
+                    var cfRes = CoffeeManagementResponse.BAD_REQUEST(e.Message);
+                    return BadRequest(cfRes);
+                }
+            }
+            return BadRequest();
+        }
+
+
+    }
+    }
+    
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CoffeeCRM.Data.Model;
+using CoffeeCRM.Core.Repository;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using CoffeeCRM.Core.Util;
+using CoffeeCRM.Data.Constants;
+using CoffeeCRM.Core.Service;
+using CoffeeCRM.Core.Util.Parameters;
+using CfCRM.View.Models.ViewModels;
+using CoffeeCRM.Data.DTO;
+
+namespace CfCRM.DATN.Controllers
+{
+    [Route("[controller]")]
+    [ApiController]
+    public class DishController : ControllerBase
+    {
+        IDishService service;
+        public DishController(IDishService _service)
+        {
+            service = _service;
+        }
+
+        [HttpGet]
+        [Route("api/List")]
+        public async Task<IActionResult> List()
+        {
+            try
+            {
+                var dataList = await service.List();
+                if (dataList == null || dataList.Count == 0)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList());
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        [Route("api/Detail/{Id}")]
+        public async Task<IActionResult> Detail(int? Id)
+        {
+            if (Id == null)
+            {
+                return BadRequest();
+            }
+            try
+            {
+                var dataList = await service.Detail(Id);
+                if (dataList == null)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList);
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        [Route("api/getDishStatistics")]
+        public async Task<IActionResult> GetDishStatistics()
+        {
+            try
+            {
+                var dataList = await service.GetDishStatisticsAsync();
+                if (dataList == null)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList);
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        [Route("api/ListPaging")]
+        public async Task<IActionResult> ListPaging(int pageIndex, int pageSize)
+        {
+            if (pageIndex < 0 || pageSize < 0) return BadRequest();
+            try
+            {
+                var dataList = await service.ListPaging(pageIndex, pageSize);
+
+                if (dataList == null || dataList.Count == 0)
+                {
+                    return NotFound();
+                }
+
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList());
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+        [HttpPost]
+        [Route("api/Add")]
+        public async Task<IActionResult> Add([FromBody] Dish model)
+        {
+            if (ModelState.IsValid)
+            {
+                //1. business logic
+
+                //data validation
+                if (model.Active == false)
+                {
+                    return BadRequest();
+                }
+                //2. add new object
+                try
+                {
+                    await service.Add(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.CREATED(model);
+                    return Created("", coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+
+        [HttpPost]
+        [Route("api/addOrUpdate")]
+        public async Task<IActionResult> AddOrUpdate([FromForm] DishDto model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    //1. business logic
+                    //2. add new object
+                    await service.AddOrUpdateDto(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                    return Ok(coffeemanagementResponse);
+                }
+                catch(BadRequestException ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    if (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException")
+                    {
+                        return NotFound();
+                    }
+                    return StatusCode(500, ex.Message);
+                }
+            }
+            return BadRequest();
+        }
+
+        [HttpGet("api/popular")]
+        public async Task<IActionResult> GetPopularDishes(
+            [FromQuery] int count = 5,
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null)
+        {
+            try
+            {
+                var dishes = await service.GetTopPopularDishesAsync(count, startDate, endDate);
+
+                var res = CoffeeManagementResponse.SUCCESS(dishes);
+
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(CoffeeManagementResponse.BAD_REQUEST(ex.Message));
+            }
+        }
+
+        [HttpPost("api/list-popular-server-side")]
+        public async Task<IActionResult> ListPopularServerSide([FromBody] DishDTParameters parameters)
+        {
+            try
+            {
+                var result = await service.ListPopularServerSide(parameters);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                var mess = ex.Message;
+                if (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException")
+                {
+                    return NotFound();
+                }
+                return BadRequest(CoffeeManagementResponse.BAD_REQUEST(ex.Message));
+            }
+        }
+
+
+        [HttpPost]
+        [Route("api/Update")]
+        public async Task<IActionResult> Update([FromBody] Dish model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    //1. business logic 
+                    //2. update object
+                    await service.Update(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                    return Ok(coffeemanagementResponse);
+                }
+                catch (Exception ex)
+                {
+                    if (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException")
+                    {
+                        return NotFound();
+                    }
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+        [HttpPost]
+        [Route("api/Delete")]
+        public async Task<IActionResult> Delete([FromBody] Dish model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    //1. business logic
+                    await service.Delete(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                    return Ok(coffeemanagementResponse);
+                }
+                catch (Exception ex)
+                {
+                    if (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException")
+                    {
+                        return NotFound();
+                    }
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+        [HttpPost]
+        [Route("api/DeletePermanently")]
+        public async Task<IActionResult> DeletePermanently([FromBody] Dish model)
+        {
+            var result = 0;
+            if (!(model.Id > 0))
+            {
+                return BadRequest();
+            }
+            try
+            {
+                //physically delete object
+                result = (int)await service.DeletePermanently(model.Id);
+                if (result == 0)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpPost]
+        [Route("api/Search")]
+        public async Task<IActionResult> Search(Select2VM search)
+        {
+            try
+            {
+                var dataList = await service.Search(search);
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList());
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+
+        [HttpGet]
+        [Route("api/Count")]
+        public int CountDish()
+        {
+            int result = service.Count();
+            return result;
+        }
+        [HttpPost]
+        [Route("api/list-server-side")]
+        public async Task<IActionResult> ListServerSide([FromBody] DishDTParameters parameters)
+        {
+            try
+            {
+                var data = await service.ListServerSide(parameters);
+                return Ok(data);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+    }
+}
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CoffeeCRM.Data.Model;
+using CoffeeCRM.Core.Repository;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using CoffeeCRM.Core.Util;
+using CoffeeCRM.Data.Constants;
+using CoffeeCRM.Core.Service;
+using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Core.Helper;
+using CoffeeCRM.Data.ViewModels;
+
+namespace CfCRM.DATN.Controllers
+{
+    [Route("[controller]")]
+    [ApiController]
+    public class DishOrderController : ControllerBase
+    {
+        IDishOrderService service;
+        INotificationService notificationService;
+        public DishOrderController(IDishOrderService _service, 
+            INotificationService notificationService)
+        {
+            service = _service;
+            this.notificationService = notificationService;
+        }
+
+        [HttpGet]
+        [Route("api/ListQueue")]
+        public async Task<IActionResult> ListQueue(int pageIndex, int pageSize)
+        {
+            try
+            {
+                var accountId = this.GetLoggedInUserId();
+                var roleId = this.GetLoggedInRoleId();
+                if (roleId == RoleConst.BARTENDER)
+                {
+                    var dataList = await service.ListDishOrderNotification();
+                    if (dataList == null || dataList.Count == 0)
+                    {
+                        return Ok(CoffeeManagementResponse.SUCCESS(new List<DishOrderViewModel>()));
+                    }
+                    return Ok(CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList()));
+                }
+                else
+                {
+
+                    var dataList = await notificationService.ListPaging(accountId, pageIndex, pageSize);
+                    //if (dataList == null || dataList.Count == 0)
+                    //{
+                    //    return Ok(CoffeeManagementResponse.SUCCESS(new List<DishOrderViewModel>()));
+                    //}
+                    return Ok(CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList()));
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("api/List")]
+        public async Task<IActionResult> List()
+        {
+            try
+            {
+                var dataList = await service.List();
+                if (dataList == null || dataList.Count == 0)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList());
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        [Route("api/Detail/{Id}")]
+        public async Task<IActionResult> Detail(int? Id)
+        {
+            if (Id == null)
+            {
+                return BadRequest();
+            }
+            try
+            {
+                var dataList = await service.Detail(Id);
+                if (dataList == null)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList);
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        [Route("api/DetailByTableId/{Id}")]
+        public async Task<IActionResult> DetailByTableId(int Id)
+        {
+            try
+            {
+                var dataList = await service.DishOrderDetailByTableId(Id);
+                if (dataList == null)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList);
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        [Route("api/DishDetailByTableId/{Id}")]
+        public async Task<IActionResult> DishDetailByTableId(int Id)
+        {
+            try
+            {
+                var dataList = await service.ListDishOrderInvoice(Id);
+                if (dataList == null)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList);
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        [Route("api/ListPaging")]
+        public async Task<IActionResult> ListPaging(int pageIndex, int pageSize)
+        {
+            if (pageIndex < 0 || pageSize < 0) return BadRequest();
+            try
+            {
+                var dataList = await service.ListPaging(pageIndex, pageSize);
+
+                if (dataList == null || dataList.Count == 0)
+                {
+                    return NotFound();
+                }
+
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList());
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+        [HttpPost]
+        [Route("api/Add")]
+        public async Task<IActionResult> Add([FromBody] DishOrder model)
+        {
+            if (ModelState.IsValid)
+            {
+                //1. business logic
+
+                //data validation
+                if (model.Active == false)
+                {
+                    return BadRequest();
+                }
+                //2. add new object
+                try
+                {
+                    await service.Add(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.CREATED(model);
+                    return Created("", coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+
+        [HttpPost]
+        [Route("api/AddOrUpdate")]
+        public async Task<IActionResult> AddOrUpdate([FromBody] DishOrderViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var userId = this.GetLoggedInUserId();
+                    model.AccountId = userId;
+                    if (!(await service.AddOrUpdateByVm(model)))
+                    {
+                        return BadRequest();
+                    }
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                    return Created("", coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+        [HttpPost]
+        [Route("api/Update")]
+        public async Task<IActionResult> Update([FromBody] DishOrder model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    //1. business logic 
+                    //2. update object
+                    await service.Update(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                    return Ok(coffeemanagementResponse);
+                }
+                catch (Exception ex)
+                {
+                    if (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException")
+                    {
+                        return NotFound();
+                    }
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+        [HttpPost]
+        [Route("api/Delete")]
+        public async Task<IActionResult> Delete([FromBody] DishOrder model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    //1. business logic
+                    await service.Delete(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                    return Ok(coffeemanagementResponse);
+                }
+                catch (Exception ex)
+                {
+                    if (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException")
+                    {
+                        return NotFound();
+                    }
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+        [HttpPost]
+        [Route("api/DeletePermanently")]
+        public async Task<IActionResult> DeletePermanently([FromBody] DishOrder model)
+        {
+            var result = 0;
+            if (!(model.Id > 0))
+            {
+                return BadRequest();
+            }
+            try
+            {
+                //physically delete object
+                result = (int)await service.DeletePermanently(model.Id);
+                if (result == 0)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+
+        [HttpGet]
+        [Route("api/Count")]
+        public int CountDishOrder()
+        {
+            int result = service.Count();
+            return result;
+        }
+        [HttpPost]
+        [Route("api/list-server-side")]
+        public async Task<IActionResult> ListServerSide([FromBody] DishOrderDTParameters parameters)
+        {
+            try
+            {
+                var data = await service.ListServerSide(parameters);
+                return Ok(data);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+    }
+}
+
+using CoffeeCRM.Data.Model;
+using CoffeeCRM.Core.Repository;
+
+using CoffeeCRM.Core.Util;using CoffeeCRM.Data;
+using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Data.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using CoffeeCRM.Data.DTO;
+
+namespace CoffeeCRM.Core.Service
+{
+    public class TableService : ITableService
+    {
+        ITableRepository tableRepository;
+        public TableService(
+            ITableRepository _tableRepository
+            )
+        {
+            tableRepository = _tableRepository;
+        }
+        public async Task Add(Table obj)
+        {
+            obj.Active = true;
+            obj.CreatedTime = DateTime.Now;
+            await tableRepository.Add(obj);
+        }
+
+        public int Count()
+        {
+            var result = tableRepository.Count();
+            return result;
+        }
+
+        public async Task Delete(Table obj)
+        {
+            obj.Active = false;
+            await tableRepository.Delete(obj);
+        }
+
+        public async Task<long> DeletePermanently(long? id)
+        {
+            return await tableRepository.DeletePermanently(id);
+        }
+
+        public async Task<Table> Detail(long? id)
+        {
+            return await tableRepository.Detail(id);
+        }
+
+        public async Task<List<Table>> List()
+        {
+            return await tableRepository.List();
+        }
+
+        public async Task<List<TableDto>> ListDto()
+        {
+            return await tableRepository.ListDto();
+        }
+
+        public async Task<List<Table>> ListPaging(int pageIndex, int pageSize)
+        {
+            return await tableRepository.ListPaging(pageIndex, pageSize);
+        }
+
+        public async Task<DTResult<Table>> ListServerSide(TableDTParameters parameters)
+        {
+            return await tableRepository.ListServerSide(parameters);
+        }
+
+        //public async Task<List<Table>> Search(string keyword)
+        //{
+        //    return await tableRepository.Search(keyword);
+        //}
+
+        public async Task Update(Table obj)
+        {
+            await tableRepository.Update(obj);
+        }
+    }
+}
+using CoffeeCRM.Data.Model;
+using CoffeeCRM.Core.Repository;
+using CoffeeCRM.Core.Util;
+using CoffeeCRM.Data;
+using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Data.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using CoffeeCRM.Data.Constants;
+using CoffeeCRM.Core.Repository.Interfaces;
+using Microsoft.AspNetCore.SignalR;
+using CoffeeCRM.Data.DTO;
+using NetTopologySuite.Noding;
+using CoffeeCRM.Core.Helper.VNPay;
+using CoffeeCRM.Data.Enums.VNPay;
+using CoffeeCRM.Data.VNPay;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+
+namespace CoffeeCRM.Core.Service
+{
+    public class InvoiceService : IInvoiceService
+    {
+        IInvoiceRepository invoiceRepository;
+        IDishOrderRepository dishOrderRepository;
+        IDishOrderDetailRepository dishOrderDetailRepository;
+        IInvoiceDetailRepository invoiceDetailRepository;
+        ITableRepository tableRepository;
+        ICashFlowRepository cashFlowRepository;
+        IAccountRepository accountRepository;
+        INotificationRepository notificationRepository;
+        IHubContext<NotificationHub, INotificationHub> notificationHub;
+        IVNPayService _vnPayservice;
+        IConfiguration _configuration;
+
+        public InvoiceService(
+            IInvoiceRepository _invoiceRepository, IDishOrderRepository _dishOrderRepository, IDishOrderDetailRepository _dishOrderDetailRepository,
+            IInvoiceDetailRepository _invoiceDetailRepository, ITableRepository _tableRepository, ICashFlowRepository _cashFlowRepository,
+            IAccountRepository _accountRepository, INotificationRepository _notificationRepository,
+            IHubContext<NotificationHub, INotificationHub> _notificationHub, IVNPayService vnPayservice, IConfiguration configuration)         
+        {
+            _configuration = configuration;
+            _vnPayservice = vnPayservice;
+            invoiceRepository = _invoiceRepository;
+            dishOrderRepository = _dishOrderRepository;
+            dishOrderDetailRepository = _dishOrderDetailRepository;
+            invoiceDetailRepository = _invoiceDetailRepository;
+            tableRepository = _tableRepository;
+            cashFlowRepository = _cashFlowRepository;
+            accountRepository = _accountRepository;
+            notificationRepository = _notificationRepository;
+            notificationHub = _notificationHub;
+            _vnPayservice.Initialize(_configuration["Vnpay:TmnCode"], _configuration["Vnpay:HashSecret"], _configuration["Vnpay:BaseUrl"], _configuration["Vnpay:CallbackUrl"]);
+        }
+        public async Task Add(Invoice obj)
+        {
+            obj.Active = true;
+            obj.CreatedTime = DateTime.Now;
+            await invoiceRepository.Add(obj);
+        }
+
+        public int Count()
+        {
+            var result = invoiceRepository.Count();
+            return result;
+        }
+
+        public async Task Delete(Invoice obj)
+        {
+            obj.Active = false;
+            await invoiceRepository.Delete(obj);
+        }
+
+        public async Task<long> DeletePermanently(long? id)
+        {
+            return await invoiceRepository.DeletePermanently(id);
+        }
+
+        public async Task<Invoice> Detail(long? id)
+        {
+            return await invoiceRepository.Detail(id);
+        }
+
+        public async Task<List<Invoice>> List()
+        {
+            return await invoiceRepository.List();
+        }
+
+        public async Task<List<Invoice>> ListPaging(int pageIndex, int pageSize)
+        {
+            return await invoiceRepository.ListPaging(pageIndex, pageSize);
+        }
+
+        public async Task<DTResult<Invoice>> ListServerSide(InvoiceDTParameters parameters)
+        {
+            return await invoiceRepository.ListServerSide(parameters);
+        }
+
+        public async Task Update(Invoice obj)
+        {
+            await invoiceRepository.Update(obj);
+        }
+
+        public async Task<InvoiceViewModel> AddByVm(InvoiceViewModel model)
+        {
+            using (var transaction = invoiceRepository.GetDatabase().BeginTransaction())
+            {
+                try
+                {
+                    var invoiceId = model.Id;
+                    var currentYear = DateTime.Now.Year;
+                    var lastInvoice = await invoiceRepository.getLastestInvoice();
+                    // Lấy ID tiếp theo (hoặc bắt đầu từ 1 nếu là hóa đơn đầu tiên của năm)
+                    int nextId;
+                    if (lastInvoice != null)
+                    {
+                        string[] parts = lastInvoice.InvoiceCode.Split('-');
+
+                        // Kiểm tra xem phần tử cuối có thể chuyển thành int không
+                        if (parts.Length > 2 && int.TryParse(parts.Last(), out int lastId))
+                        {
+                            nextId = lastId + 1;
+                        }
+                        else
+                        {
+                            nextId = 1; // Reset ID nếu không tìm thấy hoặc không thể parse
+                        }
+                    }
+                    else
+                    {
+                        nextId = 1; // Nếu chưa có hóa đơn nào trong năm
+                    }
+                    // Tạo mã hóa đơn mới
+                    string newInvoiceCode = $"HD-{currentYear}-{nextId}";
+                    if (model.Id == 0) // Nếu Id = 0 thì thêm mới
+                    {
+                        var newInvoice = new Invoice();
+                        newInvoice.InvoiceCode = newInvoiceCode;
+                        newInvoice.AccountId = model.AccountId;
+                        newInvoice.PaymentMethod = model.PaymentMethod;
+                        newInvoice.PaymentStatus = PaymentStatusStringConst.PAID;
+                        newInvoice.TotalMoney = model.TotalMoney;
+                        newInvoice.CreatedTime = DateTime.Now;
+                        newInvoice.Active = true;
+                        await invoiceRepository.Add(newInvoice);
+                        if (newInvoice.Id <= 0)
+                        {
+                            await transaction.RollbackAsync();
+                            return null;
+                        }
+                        invoiceId = newInvoice.Id;
+                    }
+                    var listInvoiceDetail = model.InvoiceDetails;
+                    var listCrrInvoiceDetail = await invoiceDetailRepository.ListByInvoideId(invoiceId);
+                    if (listInvoiceDetail == null || listInvoiceDetail.Count <= 0)
+                    {
+                        await transaction.RollbackAsync();
+                        return null;
+                    }
+                    foreach (var item in listInvoiceDetail)
+                    {
+                        if (item.Id == 0)
+                        {
+                            var newInvoiceDetail = item;
+                            newInvoiceDetail.InvoiceId = invoiceId;
+                            newInvoiceDetail.Quantity = item.Quantity;
+                            newInvoiceDetail.UnitPrice = item.UnitPrice;
+                            newInvoiceDetail.DishId = item.DishId;
+                            newInvoiceDetail.CreatedTime = DateTime.Now;
+                            newInvoiceDetail.Active = true;
+                            await invoiceDetailRepository.Add(newInvoiceDetail);
+                            if (newInvoiceDetail.Id <= 0)
+                            {
+                                await transaction.RollbackAsync();
+                                return null;
+                            }
+
+                        }
+                    }
+                    CashFlow cflow = new CashFlow();
+                    cflow.TotalMoney = model.TotalMoney;
+                    cflow.FlowType = CashFlowConst.CASH_FLOW_TYPE_INCOME;
+                    cflow.Note = "Hóa đơn bán hàng";
+                    cflow.CreatedTime = DateTime.Now;
+                    cflow.Active = true;
+                    cflow.AccountId = model.AccountId;
+                    await cashFlowRepository.Add(cflow);
+                    if (cflow.Id <= 0)
+                    {
+                        await transaction.RollbackAsync();
+                        return null;
+                    }
+
+                    bool isExist;
+                    foreach (var item in listCrrInvoiceDetail)
+                    {
+                        isExist = false;
+                        foreach (var i in listInvoiceDetail)
+                        {
+                            if (item.Id == i.Id) isExist = true;
+                        }
+                        if (!isExist)
+                        {
+                            var od = new InvoiceDetail();
+                            od.Id = item.Id;
+                            od.Active = false;
+                            await invoiceDetailRepository.Delete(od);
+                        }
+                    }                 
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return null;
+                }
+                await transaction.CommitAsync();
+                return model;
+            }
+        }
+
+        public async Task<InvoiceViewModel> AddOrUpdateVM(InvoiceViewModel model)
+        {
+            using (var transaction = invoiceRepository.GetDatabase().BeginTransaction())
+            {
+                var invoiceCode = "";
+                var accountId = 0;
+                var invoiceId = model.Id;
+                try
+                {                                   
+                    if (model.Id > 0)
+                    {
+                        var invoice = await invoiceRepository.Detail(model.Id);
+                        if(invoice == null)
+                        {
+                            await transaction.RollbackAsync();
+                            return null;
+                        }
+                        //invoice.PaymentMethod = model.PaymentMethod;
+                        invoice.PaymentStatus = model.PaymentStatus; // calcel or paid
+                        //invoice.TotalMoney = model.TotalMoney;
+                        
+                        await invoiceRepository.Update(invoice);
+                        invoiceCode = invoice.InvoiceCode;
+                        accountId = invoice.AccountId;
+                    }
+                    else if(model.Id == 0)
+                    {
+                        var currentYear = DateTime.Now.Year;
+                        var lastInvoice = await invoiceRepository.getLastestInvoice();
+                        // Lấy ID tiếp theo (hoặc bắt đầu từ 1 nếu là hóa đơn đầu tiên của năm)
+                        int nextId;
+                        if (lastInvoice != null)
+                        {
+                            string[] parts = lastInvoice.InvoiceCode.Split('-');
+
+                            // Kiểm tra xem phần tử cuối có thể chuyển thành int không
+                            if (parts.Length > 2 && int.TryParse(parts.Last(), out int lastId))
+                            {
+                                nextId = lastId + 1;
+                            }
+                            else
+                            {
+                                nextId = 1; // Reset ID nếu không tìm thấy hoặc không thể parse
+                            }
+                        }
+                        else
+                        {
+                            nextId = 1; // Nếu chưa có hóa đơn nào trong năm
+                        }
+                        // Tạo mã hóa đơn mới
+                        string newInvoiceCode = $"HD-{currentYear}-{nextId}";
+
+                        var invoice = new Invoice();
+                        invoice.InvoiceCode = newInvoiceCode;
+                        invoice.AccountId = model.AccountId;
+                        invoice.PaymentMethod = model.PaymentMethod;
+                        invoice.PaymentStatus = PaymentStatusStringConst.PENDING;
+                        invoice.TotalMoney = model.TotalMoney;
+                        invoice.TableId = model.TableId;
+                        invoice.CreatedTime = DateTime.Now;
+                        invoice.Active = true;
+                        await invoiceRepository.Add(invoice);
+                        if (invoice.Id <= 0)
+                        {
+                            await transaction.RollbackAsync();
+                            return null;
+                        }
+                        invoiceId = invoice.Id;
+                        invoiceCode = invoice.InvoiceCode;
+                        accountId = invoice.AccountId;
+                    }
+
+                    var details = model.InvoiceDetails;
+                    var listCrrInvoiceDetail = await invoiceDetailRepository.ListByInvoideId(invoiceId);
+
+                    if (details == null || details.Count <= 0)
+                    {
+                        await transaction.RollbackAsync();
+                        return null;
+                    }
+
+                    foreach (var item in details)
+                    {
+                        if(item.Id == 0)
+                        {
+                            var newInvoiceDetail = new InvoiceDetail();
+                            newInvoiceDetail.InvoiceId = invoiceId;
+                            newInvoiceDetail.Quantity = item.Quantity;
+                            newInvoiceDetail.UnitPrice = item.UnitPrice;
+                            newInvoiceDetail.DishId = item.DishId;
+                            newInvoiceDetail.CreatedTime = DateTime.Now;
+                            newInvoiceDetail.Active = true;
+                            await invoiceDetailRepository.Add(newInvoiceDetail);
+                            if (newInvoiceDetail.Id <= 0)
+                            {
+                                await transaction.RollbackAsync();
+                                return null;
+                            }
+                        }
+                        else if(item.Id > 0)
+                        {
+                            var invoiceDetail = await invoiceDetailRepository.Detail(item.Id);
+                            if (invoiceDetail == null)
+                            {
+                                await transaction.RollbackAsync();
+                                return null;
+                            }
+                            invoiceDetail.Quantity = item.Quantity;
+                            invoiceDetail.UnitPrice = item.UnitPrice;
+                            invoiceDetail.DishId = item.DishId;
+                            invoiceDetail.Active = true;
+                            await invoiceDetailRepository.Update(invoiceDetail);
+                        }
+                    }
+
+                    //bool isExist;
+                    //foreach (var item in listCrrInvoiceDetail)
+                    //{
+                    //    isExist = false;
+                    //    foreach (var i in details)
+                    //    {
+                    //        if (item.Id == i.Id) isExist = true;
+                    //    }
+                    //    if (!isExist)
+                    //    {
+                    //        var od = new InvoiceDetail();
+                    //        od.Id = item.Id;
+                    //        od.Active = false;
+                    //        await invoiceDetailRepository.Delete(od);
+                    //    }
+                    //}
+
+                    if (model.PaymentStatus == PaymentStatusStringConst.PAID)
+                    {
+                        CashFlow cflow = new CashFlow();
+                        cflow.TotalMoney = model.TotalMoney;
+                        cflow.FlowType = CashFlowConst.CASH_FLOW_TYPE_INCOME;
+                        cflow.Note = "Hóa đơn bán hàng";
+                        cflow.CreatedTime = DateTime.Now;
+                        cflow.Active = true;
+                        cflow.AccountId = model.AccountId;
+                        await cashFlowRepository.Add(cflow);
+                        if (cflow.Id <= 0)
+                        {
+                            await transaction.RollbackAsync();
+                            return null;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return null;
+                }
+
+                var listOldDishOrder = await dishOrderRepository.ListUnPaid(model.TableId);
+                foreach (var item in listOldDishOrder)
+                {
+                    item.DishOrderStatusId = DishOrderStatudConst.PAID;
+                    if (!await dishOrderRepository.Update(item))
+                    {
+                        await transaction.RollbackAsync();
+                        return null;
+                    }
+                }
+
+                var table = await tableRepository.Detail(model.TableId);
+                if(table == null)
+                {
+                    await transaction.RollbackAsync();
+                    return null;
+                }
+                table.TableStatus = TableConst.AVAILABLE;
+                await tableRepository.Update(table);
+
+                var accountName = await accountRepository.Detail(accountId);
+                var listAdmin = await accountRepository.GetByRoleId(RoleConst.ADMIN);
+                var ids = listAdmin.Select(x => x.Id).ToList();
+                ids.Add(accountId);
+                var mess = model.Id > 0 ? $"{accountName} đã cập nhật hoá đơn {invoiceCode}" : $"{accountName} đã tạo mới hoá đơn {invoiceCode}";
+
+                foreach (var id in ids)
+                {
+                    var noti = new Notification();
+                    noti.AccountId = id;
+                    noti.NotificationStatusId = NotificationStatusId.Unread;
+                    noti.Name = mess;
+                    noti.Description = mess;
+                    noti.SenderId = accountId;
+                    noti.CreatedTime = DateTime.Now;
+                    noti.Active = true;
+                    noti.Url = $"/invoice/detail/{invoiceId}";
+                    await notificationHub.Clients.All.ReceiveNotification(noti);
+                }
+
+                await transaction.CommitAsync();
+
+                model.Id = invoiceId;
+                return model;
+            }
+        }
+        public async Task<InvoiceVM> InvoiceDetailById(int invoiceId)
+        {
+            return await invoiceRepository.InvoiceDetailById(invoiceId);
+        }
+
+        public async Task<InvoiceViewModel> UpdateStatus(InvoiceViewModel model)
+        {
+            using (var transaction = invoiceRepository.GetDatabase().BeginTransaction())
+            {
+                try
+                {
+                    if (model.Id <= 0)
+                    {
+                        throw new BadRequestException("ID không tồn tại");
+                    }
+
+                    var invoice = await invoiceRepository.Detail(model.Id);
+                    if (invoice == null)
+                    {
+                        await transaction.RollbackAsync();
+                        return null;
+                    }
+                    //invoice.PaymentMethod = model.PaymentMethod;
+                    invoice.PaymentStatus = model.PaymentStatus; 
+                    invoice.PaymentMethod = model.PaymentMethod; 
+
+                    await invoiceRepository.Update(invoice);
+
+                    if (model.PaymentStatus == PaymentStatusStringConst.PAID)
+                    {
+                        CashFlow cflow = new CashFlow();
+                        cflow.TotalMoney = model.TotalMoney;
+                        cflow.FlowType = CashFlowConst.CASH_FLOW_TYPE_INCOME;
+                        cflow.Note = "Hóa đơn bán hàng";
+                        cflow.CreatedTime = DateTime.Now;
+                        cflow.Active = true;
+                        cflow.AccountId = model.AccountId;
+                        await cashFlowRepository.Add(cflow);
+                        if (cflow.Id <= 0)
+                        {
+                            await transaction.RollbackAsync();
+                            return null;
+                        }
+                    }
+
+                    await transaction.CommitAsync();
+                    return model;
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return null;
+                }
+            }
+        }
+
+        public async Task PaymentSuccess(int id, string transCode)
+        {
+            // invoice - invoiceCode
+            using (var transaction = invoiceRepository.GetDatabase().BeginTransaction())
+            {
+                try
+                {
+                    if (id <= 0)
+                    {
+                        throw new BadRequestException("ID không tồn tại");
+                    }
+
+                    var invoice = await invoiceRepository.Detail(id);
+                    if (invoice == null)
+                    {
+                        await transaction.RollbackAsync();
+                        return;
+                    }
+
+                    invoice.InvoiceCode = transCode != "" ? transCode : ""; // Cập nhật mã giao dịch từ VNPay
+                    invoice.PaymentStatus = PaymentStatusStringConst.PAID;
+                    await invoiceRepository.Update(invoice);
+
+                    CashFlow cflow = new CashFlow();
+                    cflow.TotalMoney = invoice.TotalMoney;
+                    cflow.FlowType = CashFlowConst.CASH_FLOW_TYPE_INCOME;
+                    cflow.Note = "Hóa đơn bán hàng";
+                    cflow.CreatedTime = DateTime.Now;
+                    cflow.Active = true;
+                    cflow.AccountId = 1;
+                    await cashFlowRepository.Add(cflow);
+                    if (cflow.Id <= 0)
+                    {
+                        await transaction.RollbackAsync();
+                        return;
+                    }
+
+                    await transaction.CommitAsync();
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return;
+                }
+            }
+        }
+    }
+}
+
+using CoffeeCRM.Data.Model;
+using CoffeeCRM.Core.Repository;
+
+using CoffeeCRM.Core.Util;using CoffeeCRM.Data;
+using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Data.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using CoffeeCRM.Data.DTO;
+using CoffeeCRM.Data.Constants;
+
+namespace CoffeeCRM.Core.Service
+{
+    public class TableBookingService : ITableBookingService
+    {
+        ITableBookingRepository tableBookingRepository;
+        ITableRepository tableRepository;
+        public TableBookingService(
+            ITableBookingRepository _tableBookingRepository,
+            ITableRepository _tableRepository
+            )
+        {
+            tableBookingRepository = _tableBookingRepository;
+            tableRepository = _tableRepository;
+        }
+        public async Task Add(TableBooking obj)
+        {
+            obj.Active = true;
+            obj.CreatedTime = DateTime.Now;
+            await tableBookingRepository.Add(obj);
+        }
+
+        public int Count()
+        {
+            var result = tableBookingRepository.Count();
+            return result;
+        }
+
+        public async Task Delete(TableBooking obj)
+        {
+            obj.Active = false;
+            await tableBookingRepository.Delete(obj);
+        }
+
+        public async Task<long> DeletePermanently(long? id)
+        {
+            return await tableBookingRepository.DeletePermanently(id);
+        }
+
+        public async Task<TableBooking> Detail(long? id)
+        {
+            return await tableBookingRepository.Detail(id);
+        }
+
+        public async Task<List<TableBooking>> List()
+        {
+            return await tableBookingRepository.List();
+        }
+
+        public async Task<List<TableBooking>> ListPaging(int pageIndex, int pageSize)
+        {
+            return await tableBookingRepository.ListPaging(pageIndex, pageSize);
+        }
+
+        public async Task<DTResult<TableBookingDto>> ListServerSide(TableBookingDTParameters parameters)
+        {
+            return await tableBookingRepository.ListServerSide(parameters);
+        }
+
+        public async Task Update(TableBooking obj)
+        {
+            await tableBookingRepository.Update(obj);
+        }
+
+        public async Task<bool> AddOrUpdate(TableBookingDto obj)
+        {
+            var isConflict = await tableBookingRepository.IsBookingTimeConflict(obj.BookingTime, obj.TableId, obj.Id == 0 ? null : obj.Id);
+            if (isConflict)
+            {
+                throw new BadRequestException("Thời gian đã có người đặt bàn, vui lòng chọn thời gian khác");
+            }
+            if (obj.Id == 0)
+            {
+
+                var booking = new TableBooking();
+
+                booking.Deposit = obj.Deposit != null ? obj.Deposit : 0;
+                booking.AccountId = obj.AccountId;
+                booking.TableId = obj.TableId;
+                booking.CustomerName = obj.CustomerName;
+                booking.PhoneNumber = obj.PhoneNumber;
+                booking.BookingTime = obj.BookingTime;
+                booking.Active = true;
+                booking.CreatedTime = DateTime.Now;
+                booking.CheckinTime = null;
+                booking.BookingStatus = TableBookingConst.CONFIRMED;
+
+                await tableBookingRepository.Add(booking);
+                return true;
+            }
+            else
+            {
+                var updateObj = await tableBookingRepository.Detail(obj.Id);
+
+                updateObj.BookingTime = obj.BookingTime;
+                updateObj.CheckinTime = obj.CheckinTime;
+                updateObj.Deposit = obj.Deposit != null ? obj.Deposit : 0;
+                updateObj.TableId = obj.TableId;
+                updateObj.CustomerName = obj.CustomerName;
+                updateObj.PhoneNumber = obj.PhoneNumber;
+                updateObj.BookingStatus = obj.BookingStatus;
+                updateObj.Active = true;
+
+                if(obj.BookingStatus == TableBookingConst.COMPLETED)
+                {
+                    updateObj.CheckinTime = DateTime.Now;               
+                }
+
+                if (obj.BookingStatus != TableBookingConst.CONFIRMED)
+                {
+                    var tb = await tableRepository.Detail(obj.TableId);
+                    tb.TableStatus = TableConst.AVAILABLE;
+                    await tableRepository.Update(tb);    
+                }
+
+                await tableBookingRepository.Update(updateObj);
+                return true;
+            }
+        }
+    }
+}
+
+using CoffeeCRM.Data.Model;
+using CoffeeCRM.Core.Repository;
+using CoffeeCRM.Core.Util;using CoffeeCRM.Data;
+using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Data.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using CfCRM.View.Models.ViewModels;
+using Google.Apis.Logging;
+using Microsoft.Extensions.Logging;
+using CoffeeCRM.Data.DTO;
+using CoffeeCRM.Core.Helper;
+using Microsoft.Extensions.Caching.Memory;
+using NuGet.Protocol.Core.Types;
+
+namespace CoffeeCRM.Core.Service
+{
+    public class DishService : IDishService
+    {
+        IDishRepository dishRepository;
+        private readonly ILogger<DishService> _logger;
+        private readonly IMemoryCache _cache;
+
+        public DishService(
+            IDishRepository _dishRepository
+            , ILogger<DishService> logger,
+            IMemoryCache cache
+            )
+        {
+            dishRepository = _dishRepository;
+            _logger = logger;
+            _cache = cache;
+        }
+        public async Task Add(Dish obj)
+        {
+            obj.Active = true;
+            obj.CreatedTime = DateTime.Now;
+            await dishRepository.Add(obj);
+        }
+
+        public async Task AddOrUpdateDto(DishDto dto)
+        {
+            dto.DishCode = CodeConnvert.ConvertToCode(dto.DishName);
+            var dishExit = await dishRepository.GetDishByCode(dto.DishCode);
+            if( dishExit != null && dto.DishCode != dishExit.DishCode)
+            {
+                _logger.LogError("Món ăn đã tồn tại");
+                throw new BadRequestException("Món ăn đã tồn tại");
+            }
+
+            bool isNew = dto.Id == 0;
+            if (isNew && dto.Image == null)
+            {
+                dto.Photo = "images/coffeedefault.jpg";
+            }
+            dto.Photo = dto.Image != null ? await FileHelper.SaveImageAsync(dto.Image, "images/dish") : dto.Photo;
+
+            if(isNew)
+            {
+                var dish = new Dish()
+                {
+                    DishCode = CodeConnvert.ConvertToCode(dto.DishName),
+                    DishName = dto.DishName,
+                    Price = dto.Price,
+                    Photo = dto.Photo,
+                    CreatedTime = DateTime.Now,
+                    Active = true,
+                    DishCategoryId = dto.DishCategoryId
+                };
+                await dishRepository.Add(dish);
+            }else
+            {
+                var dish = await dishRepository.Detail(dto.Id);
+                if (dish == null)
+                {
+                    _logger.LogError("Món ăn không tồn tại");
+                    throw new BadRequestException("Món ăn không tồn tại");
+                }
+                dish.DishName = dto.DishName;
+                dish.DishCode = CodeConnvert.ConvertToCode(dto.DishName);
+                dish.Price = dto.Price;
+                dish.Photo = string.IsNullOrEmpty(dto.Photo) ? dish.Photo : dto.Photo;
+                dish.DishCategoryId = dto.DishCategoryId;
+                await dishRepository.Update(dish);
+            }
+        }
+
+        public async Task<List<PopularDishModel>> GetTopPopularDishesAsync(int count, DateTime? startDate = null, DateTime? endDate = null)
+        {
+            try
+            {
+                // Tạo cache key dựa trên tham số
+                string cacheKey = $"TopPopularDishes_{count}_{startDate}_{endDate}";
+
+                // Kiểm tra cache
+                if (_cache.TryGetValue(cacheKey, out List<PopularDishModel> cachedData))
+                {
+                    return cachedData;
+                }
+
+                // Lấy dữ liệu từ repository
+                var result = await dishRepository.GetTopPopularDishesAsync(count, startDate, endDate);
+
+                // Lưu vào cache trong 10 phút
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+
+                _cache.Set(cacheKey, result, cacheOptions);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting top popular dishes");
+                throw;
+            }
+        }
+
+        public async Task<DTResult<PopularDishModel>> ListPopularServerSide(DishDTParameters parameters)
+        {
+            try
+            {
+                // Không cache kết quả DataTables vì mỗi request có thể khác nhau
+                return await dishRepository.ListPopularServerSide(parameters);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting dishes list server side");
+                throw;
+            }
+        }
+        public int Count()
+        {
+            var result = dishRepository.Count();
+            return result;
+        }
+
+        public async Task Delete(Dish obj)
+        {
+            obj.Active = false;
+            await dishRepository.Delete(obj);
+        }
+
+        public async Task<long> DeletePermanently(long? id)
+        {
+            return await dishRepository.DeletePermanently(id);
+        }
+
+        public async Task<Dish> Detail(long? id)
+        {
+            return await dishRepository.Detail(id);
+        }
+
+        public async Task<List<Dish>> List()
+        {
+            return await dishRepository.List();
+        }
+
+        public async Task<List<Dish>> ListPaging(int pageIndex, int pageSize)
+        {
+            return await dishRepository.ListPaging(pageIndex, pageSize);
+        }
+
+        public async Task<DTResult<DishViewModel>> ListServerSide(DishDTParameters parameters)
+        {
+            return await dishRepository.ListServerSide(parameters);
+        }
+
+        public async Task<List<Dish>> Search(Select2VM selectVM)
+        {
+            return await dishRepository.Search(selectVM);
+        }
+
+        public async Task Update(Dish obj)
+        {
+            await dishRepository.Update(obj);
+        }
+
+        public async Task<DishStaticDto> GetDishStatisticsAsync()
+        {
+            return await dishRepository.GetDishStatisticsAsync();
+        }
+    }
+}
+
+
+
