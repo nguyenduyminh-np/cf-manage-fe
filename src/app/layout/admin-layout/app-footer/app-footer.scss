@@ -1,0 +1,27 @@
+@use '../../../../assets/styles/color-kit' as *;
+@use '../../../../assets/styles/mixins' as *;
+
+.admin-footer {
+  margin-top: 3rem;
+  padding: 2rem 0 1.5rem;
+  border-top: 1px solid rgba($color-outline-variant, 0.1);
+  text-align: center;
+
+  .brand-text {
+    @include flex-center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: $color-secondary;
+    font-weight: 500;
+
+    .icon {
+      font-size: 1rem;
+    }
+  }
+
+  .sub-text {
+    font-size: 0.75rem;
+    color: rgba($color-secondary, 0.5);
+    margin-top: 0.25rem;
+  }
+}

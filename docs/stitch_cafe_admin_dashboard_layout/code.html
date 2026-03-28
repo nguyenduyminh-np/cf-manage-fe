@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Artisanal Interface - Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "inverse-on-surface": "#f2f1ee",
+                "surface-container-lowest": "#ffffff",
+                "surface-tint": "#725a42",
+                "on-primary-fixed": "#291806",
+                "primary-container": "#4b3621",
+                "secondary-fixed": "#e5e2dd",
+                "on-secondary-fixed": "#1c1c19",
+                "error": "#ba1a1a",
+                "secondary-fixed-dim": "#c9c6c2",
+                "on-tertiary-fixed-variant": "#23501e",
+                "surface-variant": "#e3e2e0",
+                "on-surface": "#1a1c1a",
+                "on-error-container": "#93000a",
+                "on-primary": "#ffffff",
+                "outline": "#80756c",
+                "secondary-container": "#e5e2dd",
+                "on-secondary-fixed-variant": "#474743",
+                "primary-fixed": "#fedcbe",
+                "on-secondary": "#ffffff",
+                "on-surface-variant": "#4e453d",
+                "on-tertiary-container": "#7fb174",
+                "tertiary": "#002c02",
+                "outline-variant": "#d2c4ba",
+                "inverse-primary": "#e1c1a4",
+                "surface-container-low": "#f4f3f1",
+                "on-tertiary-fixed": "#002201",
+                "on-background": "#1a1c1a",
+                "background": "#faf9f6",
+                "surface-container-highest": "#e3e2e0",
+                "on-primary-container": "#bd9f83",
+                "inverse-surface": "#2f312f",
+                "surface-container-high": "#e9e8e5",
+                "surface-bright": "#faf9f6",
+                "on-tertiary": "#ffffff",
+                "tertiary-container": "#164313",
+                "on-primary-fixed-variant": "#59422c",
+                "tertiary-fixed": "#bcf0ae",
+                "surface-dim": "#dbdad7",
+                "tertiary-fixed-dim": "#a1d494",
+                "primary-fixed-dim": "#e1c1a4",
+                "on-error": "#ffffff",
+                "error-container": "#ffdad6",
+                "secondary": "#5f5e5b",
+                "surface-container": "#efeeeb",
+                "surface": "#faf9f6",
+                "primary": "#33210d",
+                "on-secondary-container": "#656461"
+              },
+              fontFamily: {
+                "headline": ["Manrope"],
+                "body": ["Inter"],
+                "label": ["Inter"]
+              },
+              borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            font-size: 20px;
+        }
+        body {
+            background-color: #faf9f6;
+            color: #1a1c1a;
+            font-family: 'Inter', sans-serif;
+        }
+        .editorial-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+        .glass-dropdown {
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+        }
+        .tonal-button-primary {
+            background: linear-gradient(to bottom right, #33210d, #4b3621);
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body class="font-body selection:bg-primary-fixed selection:text-primary">
+<!-- SideNavBar Component -->
+<aside class="h-screen w-64 fixed left-0 top-0 overflow-y-auto bg-[#f4f3f1] dark:bg-stone-900 flex flex-col py-6 px-4 gap-2 z-50">
+<div class="mb-8 px-4 flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined">coffee</span>
+</div>
+<div>
+<h1 class="text-xl font-bold text-[#33210d] dark:text-stone-100 font-headline leading-none">Artisanal Admin</h1>
+<p class="text-xs text-secondary font-medium tracking-tight mt-1 opacity-70">Premium Roast</p>
+</div>
+</div>
+<nav class="flex flex-col gap-1">
+<!-- Active Item: Statistics -->
+<a class="relative flex items-center gap-3 text-[#33210d] dark:text-white font-semibold before:content-[''] before:w-1 before:h-6 before:bg-[#33210d] dark:before:bg-stone-200 before:rounded-full before:absolute before:left-[-16px] py-2.5 px-4 rounded-lg bg-[#faf9f6]/50 transition-all duration-200 translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span class="font-manrope text-sm font-medium tracking-tight">Statistics</span>
+</a>
+<a class="flex items-center gap-3 text-[#5f5e5b] dark:text-stone-400 opacity-70 hover:bg-[#faf9f6]/50 dark:hover:bg-stone-800/50 transition-colors duration-200 py-2.5 px-4 rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" data-icon="event_seat">event_seat</span>
+<span class="font-manrope text-sm font-medium tracking-tight">Booking</span>
+</a>
+<a class="flex items-center gap-3 text-[#5f5e5b] dark:text-stone-400 opacity-70 hover:bg-[#faf9f6]/50 dark:hover:bg-stone-800/50 transition-colors duration-200 py-2.5 px-4 rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" data-icon="table_restaurant">table_restaurant</span>
+<span class="font-manrope text-sm font-medium tracking-tight">Tables</span>
+</a>
+<a class="flex items-center gap-3 text-[#5f5e5b] dark:text-stone-400 opacity-70 hover:bg-[#faf9f6]/50 dark:hover:bg-stone-800/50 transition-colors duration-200 py-2.5 px-4 rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" data-icon="receipt_long">receipt_long</span>
+<span class="font-manrope text-sm font-medium tracking-tight">Invoices</span>
+</a>
+<a class="flex items-center gap-3 text-[#5f5e5b] dark:text-stone-400 opacity-70 hover:bg-[#faf9f6]/50 dark:hover:bg-stone-800/50 transition-colors duration-200 py-2.5 px-4 rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" data-icon="input">input</span>
+<span class="font-manrope text-sm font-medium tracking-tight">Imports</span>
+</a>
+<a class="flex items-center gap-3 text-[#5f5e5b] dark:text-stone-400 opacity-70 hover:bg-[#faf9f6]/50 dark:hover:bg-stone-800/50 transition-colors duration-200 py-2.5 px-4 rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" data-icon="inventory_2">inventory_2</span>
+<span class="font-manrope text-sm font-medium tracking-tight">Warehouse</span>
+</a>
+<a class="flex items-center gap-3 text-[#5f5e5b] dark:text-stone-400 opacity-70 hover:bg-[#faf9f6]/50 dark:hover:bg-stone-800/50 transition-colors duration-200 py-2.5 px-4 rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" data-icon="manage_accounts">manage_accounts</span>
+<span class="font-manrope text-sm font-medium tracking-tight">Accounts</span>
+</a>
+<a class="flex items-center gap-3 text-[#5f5e5b] dark:text-stone-400 opacity-70 hover:bg-[#faf9f6]/50 dark:hover:bg-stone-800/50 transition-colors duration-200 py-2.5 px-4 rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" data-icon="liquor">liquor</span>
+<span class="font-manrope text-sm font-medium tracking-tight">Ingredients</span>
+</a>
+<a class="flex items-center gap-3 text-[#5f5e5b] dark:text-stone-400 opacity-70 hover:bg-[#faf9f6]/50 dark:hover:bg-stone-800/50 transition-colors duration-200 py-2.5 px-4 rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" data-icon="restaurant">restaurant</span>
+<span class="font-manrope text-sm font-medium tracking-tight">Menu</span>
+</a>
+<a class="flex items-center gap-3 text-[#5f5e5b] dark:text-stone-400 opacity-70 hover:bg-[#faf9f6]/50 dark:hover:bg-stone-800/50 transition-colors duration-200 py-2.5 px-4 rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" data-icon="local_shipping">local_shipping</span>
+<span class="font-manrope text-sm font-medium tracking-tight">Suppliers</span>
+</a>
+<a class="flex items-center gap-3 text-[#5f5e5b] dark:text-stone-400 opacity-70 hover:bg-[#faf9f6]/50 dark:hover:bg-stone-800/50 transition-colors duration-200 py-2.5 px-4 rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" data-icon="payments">payments</span>
+<span class="font-manrope text-sm font-medium tracking-tight">Cash Flow</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 px-4">
+<div class="bg-primary/5 rounded-xl p-4">
+<p class="text-[10px] font-bold text-primary/40 uppercase tracking-widest mb-2">Shift Status</p>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-tertiary-container"></span>
+<span class="text-xs font-semibold text-primary">Open • AM Shift</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- TopNavBar Component -->
+<header class="fixed top-0 right-0 left-64 h-16 z-40 bg-[#faf9f6]/85 dark:bg-stone-950/85 backdrop-blur-md border-b border-[#d2c4ba]/15 shadow-sm shadow-[#33210d]/5 flex justify-between items-center px-8 w-auto">
+<div class="flex items-center bg-surface-container-low rounded-full px-4 py-2 w-96 group focus-within:ring-1 focus-within:ring-outline-variant/30 transition-all">
+<span class="material-symbols-outlined text-secondary opacity-50 mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none text-sm w-full focus:ring-0 placeholder:text-secondary/50 font-inter" placeholder="Search invoices, customers, ingredients..." type="text"/>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<button class="p-2 text-secondary hover:bg-[#f4f3f1] dark:hover:bg-stone-800 rounded-lg transition-colors relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full ring-2 ring-background"></span>
+</button>
+<button class="p-2 text-secondary hover:bg-[#f4f3f1] dark:hover:bg-stone-800 rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+<div class="h-8 w-[1px] bg-outline-variant/20"></div>
+<div class="relative group">
+<button class="flex items-center gap-3 hover:bg-[#f4f3f1] dark:hover:bg-stone-800 p-1.5 pr-3 rounded-xl transition-all active:scale-95 duration-150">
+<img alt="Cafe Admin Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-primary/10" data-alt="Close up portrait of a professional male barista in a dark canvas apron with coffee beans in background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2uSja0VXPHs6t5v0_FSpugMfEyfggDMZWl_GYD7Xaf7SPCFtcBkEktHdp4eYpnvi6QyJ6JoyB4ElcPUsmvBug7mw3Hehnm30SSwMZTSH-8E1mHM7JgDY9zsYfBZKn94D2Zrl-oKyRudMqllY5Rt-qizQhvxhmWBympZozy-gJnGq6JX7WfKtLMulHJXlJ4SZFqEoR6k7twDr1oTIjwQCESKWh6dptC1AMSnzeUXO-3PFRaUxdQWhrha1ny15RpSfF-g6HoPUMl6nf"/>
+<div class="text-left hidden lg:block">
+<p class="text-sm font-bold text-primary font-manrope leading-tight">Admin User</p>
+<p class="text-[10px] text-secondary font-medium">Store Manager</p>
+</div>
+<span class="material-symbols-outlined text-secondary text-xs" data-icon="expand_more">expand_more</span>
+</button>
+<!-- Dropdown (Mockup) -->
+<div class="absolute right-0 top-full mt-2 w-56 glass-dropdown rounded-xl shadow-xl shadow-primary/5 border border-outline-variant/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0 p-2 overflow-hidden">
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-primary/5 text-sm text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+                        Thông tin cá nhân
+                    </a>
+<div class="h-[1px] bg-outline-variant/10 my-1"></div>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-error/5 text-sm text-error transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+                        Đăng xuất
+                    </a>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-64 pt-16 min-h-screen">
+<div class="p-8 max-w-7xl mx-auto">
+<!-- Dashboard Header Section -->
+<section class="mb-12 flex justify-between items-end">
+<div>
+<h2 class="text-4xl font-extrabold text-primary font-headline tracking-tight mb-2">Thống kê Tổng quan</h2>
+<p class="text-secondary font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary-container" data-icon="calendar_today">calendar_today</span>
+                        Hôm nay, 24 Tháng 5 2024 • Hoạt động ổn định
+                    </p>
+</div>
+<div class="flex gap-3">
+<button class="px-6 py-2.5 rounded-xl bg-surface-container-high text-primary font-bold text-sm hover:bg-surface-container-highest transition-colors">
+                        Xuất báo cáo
+                    </button>
+<button class="px-6 py-2.5 rounded-xl tonal-button-primary font-bold text-sm shadow-lg shadow-primary/20 hover:opacity-90 transition-all">
+                        Tạo đơn mới
+                    </button>
+</div>
+</section>
+<!-- Bento Grid Layout -->
+<div class="editorial-grid">
+<!-- Main Stat Card -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container-lowest rounded-3xl p-8 border border-outline-variant/10 relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-primary/10 transition-colors duration-500"></div>
+<div class="flex justify-between items-start mb-8 relative z-10">
+<div>
+<p class="text-sm font-bold text-secondary uppercase tracking-widest mb-1">Doanh thu hôm nay</p>
+<h3 class="text-5xl font-extrabold text-primary font-headline tracking-tighter">18.420.000 <span class="text-2xl">VNĐ</span></h3>
+</div>
+<div class="px-4 py-2 bg-tertiary-fixed rounded-full flex items-center gap-2 border border-tertiary-container/10">
+<span class="material-symbols-outlined text-on-tertiary-fixed-variant" data-icon="trending_up">trending_up</span>
+<span class="text-sm font-bold text-on-tertiary-fixed-variant">+12.4%</span>
+</div>
+</div>
+<!-- Chart Mockup -->
+<div class="h-64 flex items-end gap-2 px-4 mb-4">
+<div class="flex-1 bg-surface-container-low rounded-t-lg h-[40%] hover:h-[45%] transition-all duration-300 cursor-pointer group/bar relative">
+<div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-primary text-on-primary text-[10px] px-2 py-1 rounded opacity-0 group-hover/bar:opacity-100 transition-opacity">8AM</div>
+</div>
+<div class="flex-1 bg-surface-container-low rounded-t-lg h-[60%] hover:h-[65%] transition-all duration-300 cursor-pointer group/bar relative"></div>
+<div class="flex-1 bg-surface-container-low rounded-t-lg h-[85%] hover:h-[90%] transition-all duration-300 cursor-pointer group/bar relative"></div>
+<div class="flex-1 bg-primary-container rounded-t-lg h-[100%] hover:h-[105%] transition-all duration-300 cursor-pointer group/bar relative"></div>
+<div class="flex-1 bg-surface-container-low rounded-t-lg h-[75%] hover:h-[80%] transition-all duration-300 cursor-pointer group/bar relative"></div>
+<div class="flex-1 bg-surface-container-low rounded-t-lg h-[90%] hover:h-[95%] transition-all duration-300 cursor-pointer group/bar relative"></div>
+<div class="flex-1 bg-surface-container-low rounded-t-lg h-[65%] hover:h-[70%] transition-all duration-300 cursor-pointer group/bar relative"></div>
+<div class="flex-1 bg-surface-container-low rounded-t-lg h-[45%] hover:h-[50%] transition-all duration-300 cursor-pointer group/bar relative"></div>
+</div>
+<div class="flex justify-between text-[10px] font-bold text-secondary/40 uppercase tracking-widest px-4">
+<span>08:00</span>
+<span>10:00</span>
+<span>12:00</span>
+<span>14:00</span>
+<span>16:00</span>
+<span>18:00</span>
+<span>20:00</span>
+<span>22:00</span>
+</div>
+</div>
+<!-- Secondary Metrics Column -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-6">
+<div class="bg-surface-container-low rounded-3xl p-6 flex items-center justify-between group cursor-pointer hover:bg-surface-container-high transition-colors">
+<div>
+<p class="text-xs font-bold text-secondary uppercase tracking-widest mb-1">Đơn đang xử lý</p>
+<h4 class="text-3xl font-extrabold text-primary font-headline">24</h4>
+</div>
+<div class="w-12 h-12 rounded-2xl bg-surface-container-lowest flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-sm">
+<span class="material-symbols-outlined" data-icon="coffee_maker">coffee_maker</span>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-3xl p-6 flex items-center justify-between group cursor-pointer hover:bg-surface-container-high transition-colors">
+<div>
+<p class="text-xs font-bold text-secondary uppercase tracking-widest mb-1">Bàn đang trống</p>
+<h4 class="text-3xl font-extrabold text-primary font-headline">12/30</h4>
+</div>
+<div class="w-12 h-12 rounded-2xl bg-surface-container-lowest flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-sm">
+<span class="material-symbols-outlined" data-icon="deck">deck</span>
+</div>
+</div>
+<div class="bg-tertiary-container rounded-3xl p-6 flex items-center justify-between group cursor-pointer relative overflow-hidden">
+<div class="relative z-10">
+<p class="text-xs font-bold text-on-tertiary-container uppercase tracking-widest mb-1">Kho hàng</p>
+<h4 class="text-3xl font-extrabold text-on-tertiary font-headline">Tốt</h4>
+<p class="text-[10px] text-on-tertiary/70 mt-1">98% nguyên liệu sẵn sàng</p>
+</div>
+<div class="w-12 h-12 rounded-2xl bg-tertiary/20 flex items-center justify-center text-on-tertiary group-hover:rotate-12 transition-transform relative z-10">
+<span class="material-symbols-outlined" data-icon="inventory">inventory</span>
+</div>
+<div class="absolute inset-0 bg-gradient-to-br from-tertiary to-transparent opacity-20"></div>
+</div>
+</div>
+<!-- Live Orders Section -->
+<div class="col-span-12 lg:col-span-7 bg-surface-container-lowest rounded-3xl p-8 border border-outline-variant/10">
+<div class="flex justify-between items-center mb-8">
+<h4 class="text-xl font-bold text-primary font-headline">Hóa đơn gần đây</h4>
+<button class="text-xs font-bold text-primary hover:underline underline-offset-4 tracking-tight">Xem tất cả</button>
+</div>
+<div class="space-y-1">
+<!-- Order Item -->
+<div class="flex items-center justify-between p-4 rounded-2xl hover:bg-surface-container-low transition-colors group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-secondary font-bold text-xs">
+                                    #124
+                                </div>
+<div>
+<p class="text-sm font-bold text-primary">Caramel Macchiato, Croissant</p>
+<p class="text-[10px] text-secondary">Bàn số 04 • 12:45 PM</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-primary">155.000đ</p>
+<span class="text-[10px] font-bold text-on-tertiary-fixed-variant bg-tertiary-fixed px-2 py-0.5 rounded-full">Hoàn tất</span>
+</div>
+</div>
+<!-- Order Item -->
+<div class="flex items-center justify-between p-4 rounded-2xl hover:bg-surface-container-low transition-colors group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-secondary font-bold text-xs">
+                                    #123
+                                </div>
+<div>
+<p class="text-sm font-bold text-primary">Cold Brew, Avocado Toast</p>
+<p class="text-[10px] text-secondary">Mang về • 12:42 PM</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-primary">185.000đ</p>
+<span class="text-[10px] font-bold text-on-tertiary-fixed-variant bg-tertiary-fixed px-2 py-0.5 rounded-full">Hoàn tất</span>
+</div>
+</div>
+<!-- Order Item -->
+<div class="flex items-center justify-between p-4 rounded-2xl bg-primary/5 hover:bg-primary/10 transition-colors group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xs">
+                                    #122
+                                </div>
+<div>
+<p class="text-sm font-bold text-primary">Espresso (Double), Muffin</p>
+<p class="text-[10px] text-secondary">Bàn số 12 • 12:38 PM</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-primary">110.000đ</p>
+<span class="text-[10px] font-bold text-on-primary-fixed-variant bg-primary-fixed px-2 py-0.5 rounded-full">Đang pha chế</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Best Sellers / Menu Performance -->
+<div class="col-span-12 lg:col-span-5 bg-surface-container-lowest rounded-3xl p-8 border border-outline-variant/10">
+<h4 class="text-xl font-bold text-primary font-headline mb-8">Món ăn bán chạy</h4>
+<div class="space-y-6">
+<div class="flex items-center gap-4">
+<img alt="Caramel Macchiato" class="w-14 h-14 rounded-2xl object-cover" data-alt="High angle shot of a perfectly layered caramel macchiato in a tall glass with steam rising and soft bokeh light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkTd_D_7-AFRV-xtbDCqhJJ4M6V9ipt7u3r2IbS42iaRkYjZ2cqhaVXoSynD-vM2RfYKJM0Ytu7Gn2xj0FrXoYtEJMgHwpNPhbmUCWRFRR_WAMvnV7crLicUN_Cgu0oJUOHVna1kxkKZ3eJYltIuUlbh3k4U_2yO6aa5-afzx-vo8abZoJuVoj2y22-NggMcNavMzo6vxBOg2pseTCYv2vGKKr06j1jVo-rpxKA4FrXQVb7m0bi9Imyvt7ksRZDEcl01OVwfYTBBj3"/>
+<div class="flex-1">
+<div class="flex justify-between items-end mb-1">
+<p class="text-sm font-bold text-primary">Caramel Macchiato</p>
+<p class="text-xs font-medium text-secondary">84 đơn</p>
+</div>
+<div class="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 85%"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<img alt="Avocado Toast" class="w-14 h-14 rounded-2xl object-cover" data-alt="Close up of artisanal sourdough avocado toast with poached egg and microgreens on a matte black plate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDm6Ln1yk2tnSDrTmZqTOGKcUiFWBAhRSkR_zChriesk7nAbUge-njAf2P3IooxSIGil7y0t0IcTzvmJg1g-zEmmXigyxe17ParqqplOt9q_qmeD57Ku5aT9Tm5I5sgmeFxWwThz5Ye_XmeT4kT3qLZ-hP5C1WHOo6Ldezo2HRmfaT0ArcSOfs7FoYEY-KjMK0pkni9N3GHC-_aUu42ef5Kc72NK8Uu_jpkaxyPkSN-L7UjmL70i68hMXiO5VOkhb1f2LBk8FeAMutL"/>
+<div class="flex-1">
+<div class="flex justify-between items-end mb-1">
+<p class="text-sm font-bold text-primary">Avocado Toast</p>
+<p class="text-xs font-medium text-secondary">52 đơn</p>
+</div>
+<div class="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 62%"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<img alt="Croissant" class="w-14 h-14 rounded-2xl object-cover" data-alt="Close up of flaky golden brown French croissant on a white marble background with crumbs scattered around" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJi0zyGWvUyRQ7I1XgeCNx7U-BODYF17nnecs88Nr-kaaipNwOxjpn1gOQY6yntTzACo_T_EetYiOzjWPsy68LVXW4gA14lj6ftoRWp9aNZieF9yqlHASPfNfEOLBNG8aN7uLk1cB9ogCuT5qEOTIWOEmAbQHQ_LpxO5QRcV29-JWhncuizMPCsw64AdIxTJB_o_lvV4MnjWoaJFsVYWHxvbBTdlV7rmxXdoPioodTfr6xZ4AcfsRDjv-tDp0Z2Zi34_mbrp5UIJbf"/>
+<div class="flex-1">
+<div class="flex justify-between items-end mb-1">
+<p class="text-sm font-bold text-primary">Croissant</p>
+<p class="text-xs font-medium text-secondary">41 đơn</p>
+</div>
+<div class="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 45%"></div>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-8 py-3 rounded-2xl border border-outline-variant/30 text-primary font-bold text-sm hover:bg-surface-container-low transition-colors">
+                        Quản lý thực đơn
+                    </button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

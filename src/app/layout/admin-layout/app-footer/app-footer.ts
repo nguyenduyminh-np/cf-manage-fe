@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-app-footer',
+  selector: 'app-footer',
   imports: [],
   templateUrl: './app-footer.html',
   styleUrl: './app-footer.scss',
 })
 export class AppFooter {
-
+  currentYear = new Date().getFullYear();
 }

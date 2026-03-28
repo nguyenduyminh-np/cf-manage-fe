@@ -1,1 +1,43 @@
-<p>app-admin-layout works!</p>
+<div class="layout-wrapper">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">
+        <span class="material-symbols-outlined">coffee</span>
+      </div>
+      <div class="brand-info">
+        <h1>Artisanal Admin</h1>
+        <p>Premium Roast</p>
+      </div>
+    </div>
+
+    <nav class="navigation">
+      @for (item of menuItems; track item.name) {
+        <a [routerLink]="item.route" routerLinkActive="active" class="nav-item">
+          <span class="material-symbols-outlined icon">{{ item.icon }}</span>
+          <span class="label">{{ item.name }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="shift-card-wrapper">
+      <div class="shift-card">
+        <p class="shift-title">Shift Status</p>
+        <div class="shift-status">
+          <span class="dot"></span>
+          <span class="text">Open • AM Shift</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <app-header></app-header>
+
+    <main class="content-scroll">
+      <div class="content-container">
+        <router-outlet></router-outlet>
+      </div>
+      <app-footer></app-footer>
+    </main>
+  </div>
+</div>
