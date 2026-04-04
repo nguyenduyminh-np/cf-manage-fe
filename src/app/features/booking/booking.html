@@ -1,1 +1,185 @@
-<p>booking works!</p>
+<div class="booking-page">
+  <section class="booking-page__breadcrumb">
+    <span>Trang chủ</span>
+    <span class="booking-page__breadcrumb-separator">›</span>
+    <strong>Đặt bàn</strong>
+  </section>
+
+  <form class="booking-filters" [formGroup]="searchForm" (ngSubmit)="search()">
+    <div class="booking-field booking-field--keyword">
+      <label for="booking-keyword">Từ khóa</label>
+      <div class="booking-searchbox">
+        <span class="material-symbols-outlined booking-searchbox__icon">search</span>
+        <input
+          id="booking-keyword"
+          type="text"
+          formControlName="keyword"
+          placeholder="Tìm mã bàn hoặc tên bàn..."
+        />
+      </div>
+    </div>
+
+    <div class="booking-field">
+      <label for="booking-seats">Số chỗ</label>
+      <select id="booking-seats" formControlName="seats">
+        @for (option of seatOptions; track option.value) {
+          <option [ngValue]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="booking-field">
+      <label for="booking-status">Trạng thái</label>
+      <select id="booking-status" formControlName="status">
+        @for (option of statusOptions; track option.value) {
+          <option [ngValue]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="booking-field">
+      <label for="booking-floor">Tầng</label>
+      <select id="booking-floor" formControlName="floor">
+        @for (option of floorOptions; track option.value) {
+          <option [ngValue]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+
+    <button
+      tuiButton
+      type="submit"
+      class="booking-button booking-button--search"
+      [disabled]="isLoading"
+    >
+      Tìm kiếm
+    </button>
+  </form>
+
+  <section class="booking-toolbar">
+    <div class="booking-floor-tabs" role="tablist" aria-label="Chọn tầng">
+      @for (floor of floorTabs; track floor) {
+        <button
+          tuiButton
+          type="button"
+          class="booking-button booking-button--floor"
+          [class.booking-button--active]="selectedFloor === floor.value"
+          (click)="setFloorTab(floor.value)"
+          [attr.aria-pressed]="selectedFloor === floor.value"
+        >
+          {{ floor.label }}
+        </button>
+      }
+    </div>
+
+    <button tuiButton type="button" class="booking-button booking-button--create">
+      <span class="booking-button__icon">+</span>
+      <span>Đặt bàn mới</span>
+    </button>
+  </section>
+
+  @if (isLoading) {
+    <section class="booking-empty">
+      <h3>Đang tải dữ liệu bàn</h3>
+      <p>Vui lòng chờ trong giây lát.</p>
+    </section>
+  } @else if (loadError) {
+    <section class="booking-empty booking-empty--error">
+      <h3>{{ loadError }}</h3>
+      <p>Kiểm tra kết nối hoặc thử tải lại danh sách bàn.</p>
+      <button
+        tuiButton
+        type="button"
+        class="booking-button booking-button--search"
+        (click)="search()"
+      >
+        Tải lại
+      </button>
+    </section>
+  } @else if (pagedTables.length) {
+    <section class="booking-grid" aria-label="Danh sách bàn">
+      @for (table of pagedTables; track table.tableId) {
+        <article
+          class="booking-card"
+          title="Nhấp đúp để xem chi tiết"
+          (dblclick)="openTableDetail(table.tableId)"
+        >
+          <div class="booking-card__header">
+            <div>
+              <h3>{{ table.tableName }}</h3>
+              <p class="booking-card__code">{{ table.tableCode }}</p>
+            </div>
+            <div class="booking-card__capacity">
+              <span>{{ table.slot }}</span>
+              <span class="material-symbols-outlined">
+                {{ table.slot >= 6 ? 'group' : 'person' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="booking-card__badge" [ngClass]="badgeClass(table.tableStatus)">
+            {{ table.tableStatusName }}
+          </div>
+
+          <dl class="booking-card__body booking-card__metadata">
+            @for (item of table.metadata; track item.label) {
+              <div class="booking-card__metadata-item">
+                <dt>{{ item.label }}</dt>
+                <dd>{{ item.value }}</dd>
+              </div>
+            }
+          </dl>
+        </article>
+      }
+    </section>
+  } @else {
+    <section class="booking-empty">
+      <h3>Không tìm thấy bàn phù hợp</h3>
+      <p>Hãy thử đổi từ khóa hoặc bộ lọc để xem kết quả khác.</p>
+    </section>
+  }
+
+  <footer class="booking-footer">
+    <p>
+      Hiển thị <strong>{{ countStart === 0 ? 0 : visibleCount }}</strong> trên
+      <strong>{{ totalCount }}</strong> bàn
+    </p>
+
+    <nav class="booking-pagination" aria-label="Phân trang">
+      <button
+        tuiButton
+        type="button"
+        class="booking-pagination__button"
+        [disabled]="currentPageWithinRange === 1"
+        (click)="goToPreviousPage()"
+        aria-label="Trang trước"
+      >
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+
+      @for (page of visiblePageNumbers; track page) {
+        <button
+          tuiButton
+          type="button"
+          class="booking-pagination__button"
+          [class.booking-pagination__button--active]="currentPageWithinRange === page"
+          (click)="goToPage(page)"
+          [attr.aria-current]="currentPageWithinRange === page ? 'page' : null"
+        >
+          {{ page }}
+        </button>
+      }
+
+      <button
+        tuiButton
+        type="button"
+        class="booking-pagination__button"
+        [disabled]="currentPageWithinRange === totalPages"
+        (click)="goToNextPage()"
+        aria-label="Trang sau"
+      >
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
+    </nav>
+  </footer>
+</div>

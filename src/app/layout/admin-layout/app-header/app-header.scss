@@ -87,6 +87,10 @@
     background-color: rgba($color-outline-variant, 0.2);
   }
 
+  .profile-menu-wrap {
+    position: relative;
+  }
+
   .profile-trigger {
     @include flex-center;
     gap: 0.75rem;
@@ -131,6 +135,62 @@
     .expand-icon {
       font-size: 1rem;
       color: $color-secondary;
+      transition: transform 0.2s ease;
+    }
+
+    &[aria-expanded='true'] {
+      background-color: $color-surface-container-low;
+
+      .expand-icon {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  .profile-dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    min-width: 12.5rem;
+    padding: 0.375rem;
+    border-radius: 0.75rem;
+    background-color: $color-surface;
+    border: 1px solid rgba($color-outline-variant, 0.5);
+    box-shadow: 0 12px 32px rgba($color-primary, 0.08);
+    z-index: 60;
+
+    .menu-item {
+      width: 100%;
+      @include flex-center(flex-start);
+      gap: 0.625rem;
+      padding: 0.625rem 0.75rem;
+      border: none;
+      background: transparent;
+      border-radius: 0.5rem;
+      color: $color-primary;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: background-color 0.18s ease;
+
+      &:hover {
+        background-color: $color-surface-container-low;
+      }
+
+      .material-symbols-outlined {
+        font-size: 1.125rem;
+        color: $color-secondary;
+      }
+
+      &.logout {
+        color: $color-error;
+
+        .material-symbols-outlined {
+          color: $color-error;
+        }
+      }
     }
   }
 }

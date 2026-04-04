@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Table Details - Artisan Roast Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Work+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed": "#2b1611",
+                        "on-primary-container": "#c19c94",
+                        "secondary-container": "#a0f399",
+                        "primary": "#361f1a",
+                        "surface-bright": "#fbf9f5",
+                        "surface-container-low": "#f5f3ef",
+                        "tertiary-fixed-dim": "#f0bd8b",
+                        "primary-fixed-dim": "#e5beb5",
+                        "error-container": "#ffdad6",
+                        "secondary": "#1b6d24",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-high": "#eae8e4",
+                        "secondary-fixed": "#a3f69c",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#002204",
+                        "on-surface": "#1b1c1a",
+                        "on-surface-variant": "#504442",
+                        "background": "#fbf9f5",
+                        "on-secondary-container": "#217128",
+                        "outline-variant": "#d4c3bf",
+                        "on-background": "#1b1c1a",
+                        "primary-container": "#4e342e",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#54330c",
+                        "surface-container-highest": "#e4e2de",
+                        "primary-fixed": "#ffdad2",
+                        "inverse-surface": "#30312e",
+                        "surface-dim": "#dbdad6",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#623f18",
+                        "surface-container": "#efeeea",
+                        "tertiary-fixed": "#ffdcbd",
+                        "tertiary": "#391e00",
+                        "surface": "#fbf9f5",
+                        "outline": "#827471",
+                        "inverse-on-surface": "#f2f0ed",
+                        "on-primary-fixed-variant": "#5c403a",
+                        "secondary-fixed-dim": "#88d982",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e4e2de",
+                        "on-tertiary-container": "#cb9b6c",
+                        "on-secondary-fixed-variant": "#005312",
+                        "inverse-primary": "#e5beb5",
+                        "surface-tint": "#755750",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Work Sans"],
+                        "label": ["Work Sans"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Work Sans', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#FDFBF7] text-[#4E342E] min-h-screen flex items-center justify-center p-4">
+<!-- Modal Backdrop -->
+<div class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-40 flex items-center justify-center p-4">
+<!-- Modal Dialog Container -->
+<div class="bg-[#FDFBF7] w-full max-w-lg rounded-xl shadow-2xl overflow-hidden border border-stone-200 flex flex-col transform transition-all duration-300">
+<!-- Header -->
+<div class="flex justify-between items-center px-6 py-4 border-b border-stone-100">
+<h2 class="text-xl font-extrabold text-[#4E342E] tracking-tight">Chi tiết bàn</h2>
+<button class="p-2 hover:bg-stone-100 rounded-full transition-colors text-stone-500">
+<span class="material-symbols-outlined block">close</span>
+</button>
+</div>
+<!-- Body: Grid Layout -->
+<div class="p-6 space-y-6">
+<!-- Top Section: Status & Iconography -->
+<div class="flex items-center gap-4 bg-stone-50 p-4 rounded-xl border border-stone-100">
+<div class="w-16 h-16 bg-[#4E342E] rounded-xl flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-3xl">table_restaurant</span>
+</div>
+<div>
+<h3 class="text-lg font-bold text-[#4E342E]">Bàn A1</h3>
+<p class="text-sm text-stone-500 font-medium">Mã: TB-101-6</p>
+</div>
+<div class="ml-auto">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#D4A373]/20 text-[#4E342E] border border-[#D4A373]/30 uppercase tracking-wider">
+                            Đã đặt
+                        </span>
+</div>
+</div>
+<!-- Info Grid -->
+<div class="grid grid-cols-2 gap-y-6 gap-x-4">
+<div class="space-y-1">
+<label class="text-xs font-semibold text-stone-400 uppercase tracking-wider">Tên bàn</label>
+<p class="text-sm font-semibold text-[#4E342E]">Bàn A1</p>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-semibold text-stone-400 uppercase tracking-wider">Mã bàn</label>
+<p class="text-sm font-semibold text-[#4E342E]">TB-101-6</p>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-semibold text-stone-400 uppercase tracking-wider">Tầng</label>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-stone-400 text-sm">layers</span>
+<p class="text-sm font-semibold text-[#4E342E]">Tầng 1</p>
+</div>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-semibold text-stone-400 uppercase tracking-wider">Số chỗ</label>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-stone-400 text-sm">groups</span>
+<p class="text-sm font-semibold text-[#4E342E]">4 người</p>
+</div>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-semibold text-stone-400 uppercase tracking-wider">Hoạt động</label>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<p class="text-sm font-semibold text-[#4E342E]">Đang hoạt động</p>
+</div>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-semibold text-stone-400 uppercase tracking-wider">Ngày tạo</label>
+<p class="text-sm font-semibold text-[#4E342E]">07/04/2025 23:02</p>
+</div>
+</div>
+<!-- Bento Style Card for additional visual interest -->
+<div class="relative overflow-hidden group bg-[#4E342E] text-white p-4 rounded-xl">
+<div class="relative z-10">
+<p class="text-xs opacity-70 mb-1">Ghi chú quản lý</p>
+<p class="text-sm italic">Bàn vị trí cửa sổ tầng 1, hướng nhìn ra phố. Ưu tiên khách đặt trước.</p>
+</div>
+<span class="material-symbols-outlined absolute -bottom-4 -right-4 text-white/10 text-8xl pointer-events-none">info</span>
+</div>
+</div>
+<!-- Footer -->
+<div class="px-6 py-4 bg-stone-50 border-t border-stone-200 flex justify-end gap-3">
+<button class="px-6 py-2 rounded-lg text-sm font-bold bg-[#4E342E] text-white hover:opacity-90 active:scale-95 transition-all shadow-sm">
+                    Đóng
+                </button>
+</div>
+</div>
+</div>
+<!-- Background Content Simulator (Blurred behind modal) -->
+<div class="fixed inset-0 -z-10 grid grid-cols-4 gap-4 p-8 pointer-events-none opacity-20">
+<div class="aspect-square bg-stone-200 rounded-xl"></div>
+<div class="aspect-square bg-stone-200 rounded-xl"></div>
+<div class="aspect-square bg-stone-200 rounded-xl"></div>
+<div class="aspect-square bg-stone-200 rounded-xl"></div>
+<div class="col-span-2 aspect-video bg-stone-200 rounded-xl"></div>
+<div class="col-span-2 aspect-video bg-stone-200 rounded-xl"></div>
+</div>
+</body></html>

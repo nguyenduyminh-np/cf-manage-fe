@@ -1,1 +1,117 @@
-<p>invoice works!</p>
+<div class="invoice-page">
+  <header class="invoice-page__header">
+    <div>
+      <h1>Hóa đơn bán hàng</h1>
+      <p>Quản lý và theo dõi các giao dịch thanh toán của quán.</p>
+    </div>
+
+    <div class="invoice-page__actions">
+      <button type="button" class="invoice-btn invoice-btn--ghost">
+        <span class="material-symbols-outlined">download</span>
+        <span>Xuất file</span>
+      </button>
+      <button type="button" class="invoice-btn invoice-btn--primary">
+        <span class="material-symbols-outlined">add</span>
+        <span>Tạo mới</span>
+      </button>
+    </div>
+  </header>
+
+  <section class="invoice-table-wrap" aria-label="Danh sách hóa đơn">
+    <div class="invoice-table-scroll">
+      <table class="invoice-table" aria-label="Bảng hóa đơn">
+        <thead>
+          <tr class="invoice-table__heading-row">
+            <th>STT</th>
+            <th>Mã hóa đơn</th>
+            <th>Tổng tiền</th>
+            <th>Trạng thái</th>
+            <th>Phương thức</th>
+            <th>Người tạo</th>
+            <th>Ngày tạo</th>
+            <th>Thao tác</th>
+          </tr>
+
+          <tr class="invoice-table__filters-row">
+            <th><input type="text" placeholder="..." /></th>
+            <th><input type="text" placeholder="Tìm mã..." /></th>
+            <th><input type="text" placeholder="Lọc tiền..." /></th>
+            <th>
+              <select>
+                <option>Tất cả</option>
+                <option>Đã thanh toán</option>
+                <option>Chờ thanh toán</option>
+              </select>
+            </th>
+            <th><input type="text" placeholder="PTTT..." /></th>
+            <th><input type="text" placeholder="Lọc tên..." /></th>
+            <th><input type="text" placeholder="Chọn ngày..." /></th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (invoice of invoices; track invoice.code) {
+            <tr>
+              <td class="invoice-table__index">{{ invoice.no }}</td>
+              <td class="invoice-table__code">{{ invoice.code }}</td>
+              <td class="invoice-table__amount">{{ invoice.totalAmount }}</td>
+
+              <td>
+                <span class="invoice-status" [class]="statusClass(invoice.status)">
+                  {{ statusLabel(invoice.status) }}
+                </span>
+              </td>
+
+              <td>
+                <span class="invoice-payment-method">
+                  <span class="material-symbols-outlined">{{
+                    paymentIcon(invoice.paymentMethod)
+                  }}</span>
+                  <span>{{ paymentLabel(invoice.paymentMethod) }}</span>
+                </span>
+              </td>
+
+              <td>{{ invoice.createdBy }}</td>
+              <td class="invoice-table__time">{{ invoice.createdAt }}</td>
+
+              <td>
+                <button type="button" class="invoice-view-btn" aria-label="Xem chi tiết hóa đơn">
+                  <span class="material-symbols-outlined">visibility</span>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <footer class="invoice-pagination">
+      <p>Đang xem 1 đến 10 trong tổng số 71 mục</p>
+
+      <div class="invoice-pagination__actions">
+        <button type="button" class="invoice-pagination__arrow" aria-label="Trang trước">
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+
+        @for (item of paginationItems; track item.label) {
+          @if (item.type === 'page') {
+            <button
+              type="button"
+              class="invoice-pagination__page"
+              [class.invoice-pagination__page--active]="item.active"
+            >
+              {{ item.label }}
+            </button>
+          } @else {
+            <span class="invoice-pagination__dots">{{ item.label }}</span>
+          }
+        }
+
+        <button type="button" class="invoice-pagination__arrow" aria-label="Trang sau">
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
+    </footer>
+  </section>
+</div>

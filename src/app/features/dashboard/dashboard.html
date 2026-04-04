@@ -1,1 +1,168 @@
-<p>dashboard works!</p>
+<div class="dashboard-page">
+  <header class="dashboard-header">
+    <div>
+      <h1 class="dashboard-title">Thống kê chi tiết</h1>
+      <p class="dashboard-subtitle">Phân tích hiệu suất kinh doanh từ 01/10 - 07/10</p>
+    </div>
+
+    <div class="dashboard-actions">
+      <button type="button" class="dashboard-btn dashboard-btn--ghost">
+        <span class="material-symbols-outlined">calendar_today</span>
+        <span>Tuần này</span>
+      </button>
+      <button type="button" class="dashboard-btn dashboard-btn--primary">
+        <span class="material-symbols-outlined">download</span>
+        <span>Xuất báo cáo</span>
+      </button>
+    </div>
+  </header>
+
+  <section class="dashboard-metrics" aria-label="Chỉ số tổng quan">
+    @for (metric of metrics; track metric.title) {
+      <article class="metric-card">
+        <div class="metric-card__head">
+          <span class="metric-card__icon" [class]="metric.iconToneClass">
+            <span
+              class="material-symbols-outlined metric-card__icon-symbol"
+              [class.metric-card__icon-symbol--filled]="metric.iconFilled"
+            >
+              {{ metric.icon }}
+            </span>
+          </span>
+
+          <span
+            class="metric-card__trend"
+            [class.metric-card__trend--down]="metric.trendDirection === 'down'"
+          >
+            <span class="material-symbols-outlined">{{ metric.trendIcon }}</span>
+            {{ metric.trend }}
+          </span>
+        </div>
+
+        <p class="metric-card__title">{{ metric.title }}</p>
+        <p class="metric-card__value">{{ metric.value }}</p>
+
+        @if (metric.progress !== null) {
+          <div class="metric-card__progress-track">
+            <div class="metric-card__progress-fill" [style.width.%]="metric.progress"></div>
+          </div>
+        }
+
+        @if (metric.satisfactionBars.length > 0) {
+          <div class="metric-card__satisfaction">
+            @for (active of metric.satisfactionBars; track $index) {
+              <span
+                class="metric-card__satisfaction-bar"
+                [class.metric-card__satisfaction-bar--off]="!active"
+              ></span>
+            }
+          </div>
+        }
+
+        @if (metric.note) {
+          <p class="metric-card__note">{{ metric.note }}</p>
+        }
+      </article>
+    }
+  </section>
+
+  <section class="dashboard-insights">
+    <article class="panel panel--chart" aria-label="Biểu đồ xu hướng doanh thu">
+      <div class="panel__head panel__head--chart">
+        <div>
+          <h2>Xu hướng doanh thu tuần</h2>
+          <p>So sánh doanh thu thực tế và dự báo</p>
+        </div>
+
+        <div class="chart-legend">
+          <span><i class="dot dot--actual"></i> Thực tế</span>
+          <span><i class="dot dot--forecast"></i> Dự báo</span>
+        </div>
+      </div>
+
+      <div class="weekly-chart">
+        <div class="weekly-chart__grid-lines" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+
+        @for (point of weeklyRevenue; track point.day) {
+          <div class="weekly-chart__item">
+            <div class="weekly-chart__track">
+              <div class="weekly-chart__bar" [style.height.px]="point.actual"></div>
+            </div>
+            <span class="weekly-chart__label">{{ point.day }}</span>
+          </div>
+        }
+      </div>
+    </article>
+
+    <article class="panel panel--products" aria-label="Sản phẩm bán chạy">
+      <div class="panel__head">
+        <div>
+          <h2>Sản phẩm bán chạy</h2>
+          <p>7 ngày vừa qua</p>
+        </div>
+      </div>
+
+      <div class="product-list">
+        @for (product of topProducts; track product.name) {
+          <div class="product-item">
+            <div class="product-item__image-wrap">
+              <img [src]="product.image" [alt]="product.alt" class="product-item__image" />
+            </div>
+
+            <div class="product-item__main">
+              <p class="product-item__name">{{ product.name }}</p>
+              <p class="product-item__sold">{{ product.sold }}</p>
+            </div>
+
+            <div class="product-item__trend-wrap">
+              <span
+                class="product-item__trend"
+                [class.product-item__trend--down]="product.trendDirection === 'down'"
+              >
+                {{ product.trend }}
+              </span>
+              <span class="product-item__note">{{ product.note }}</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <button type="button" class="product-list__action">Xem toàn bộ thực đơn</button>
+    </article>
+  </section>
+
+  <section class="panel panel--heatmap" aria-label="Mật độ khách hàng theo giờ">
+    <div class="panel__head panel__head--heatmap">
+      <div>
+        <h2>Mật độ khách hàng theo giờ</h2>
+        <p>Xác định khung giờ cao điểm để điều phối nhân sự</p>
+      </div>
+
+      <div class="heatmap-legend">
+        <span>Cường độ:</span>
+        <i class="heatmap-legend__cell heatmap-legend__cell--1"></i>
+        <i class="heatmap-legend__cell heatmap-legend__cell--2"></i>
+        <i class="heatmap-legend__cell heatmap-legend__cell--3"></i>
+      </div>
+    </div>
+
+    <div class="heatmap-grid">
+      @for (item of heatmap; track $index) {
+        <div [class]="heatClass(item)"></div>
+      }
+    </div>
+
+    <div class="heatmap-hours">
+      <span>0h</span>
+      <span>6h</span>
+      <span>12h</span>
+      <span>18h</span>
+      <span>23h</span>
+    </div>
+  </section>
+</div>

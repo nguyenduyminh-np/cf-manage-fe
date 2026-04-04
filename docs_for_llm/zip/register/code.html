@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Đăng ký - Caffè Harmony Artisan Roast Admin</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Work+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-dim": "#dbdad6",
+              "inverse-surface": "#30312e",
+              "surface-container-high": "#eae8e4",
+              "on-secondary-fixed-variant": "#005312",
+              "surface-container": "#efeeea",
+              "surface-tint": "#755750",
+              "tertiary-fixed-dim": "#f0bd8b",
+              "secondary-fixed": "#a3f69c",
+              "surface-container-low": "#f5f3ef",
+              "secondary-container": "#a0f399",
+              "secondary": "#1b6d24",
+              "surface-bright": "#fbf9f5",
+              "on-primary": "#ffffff",
+              "primary-fixed-dim": "#e5beb5",
+              "primary": "#361f1a",
+              "on-tertiary-fixed": "#2c1600",
+              "on-error": "#ffffff",
+              "inverse-primary": "#e5beb5",
+              "surface-container-highest": "#e4e2de",
+              "outline-variant": "#d4c3bf",
+              "inverse-on-surface": "#f2f0ed",
+              "on-tertiary": "#ffffff",
+              "on-surface": "#1b1c1a",
+              "on-secondary": "#ffffff",
+              "on-primary-fixed": "#2b1611",
+              "surface-variant": "#e4e2de",
+              "on-surface-variant": "#504442",
+              "primary-fixed": "#ffdad2",
+              "on-primary-container": "#c19c94",
+              "tertiary-fixed": "#ffdcbd",
+              "tertiary-container": "#54330c",
+              "primary-container": "#4e342e",
+              "outline": "#827471",
+              "tertiary": "#391e00",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary-fixed": "#002204",
+              "error": "#ba1a1a",
+              "on-secondary-container": "#217128",
+              "on-tertiary-container": "#cb9b6c",
+              "on-primary-fixed-variant": "#5c403a",
+              "background": "#fbf9f5",
+              "surface": "#fbf9f5",
+              "secondary-fixed-dim": "#88d982",
+              "on-tertiary-fixed-variant": "#623f18",
+              "on-error-container": "#93000a",
+              "on-background": "#1b1c1a",
+              "error-container": "#ffdad6"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Work Sans"],
+              "label": ["Work Sans"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24
+    }
+.bg-coffee-texture {
+    background-color: #fbf9f5;
+    background-image: linear-gradient(rgba(251, 249, 245, 0.85), rgba(251, 249, 245, 0.85)), url(https://lh3.googleusercontent.com/aida-public/AB6AXuBTLceVqT-U7kkCFN4o9lSdde5kIouYKTnbkXjsmwgfN1bGa1Um0SpSoprQbPxFhMpjZRHbUJOWgahmuI8Ft5BwG91x3eyiVQM47U5th6jPY90wsERTscHK3JN5t_pNECuxIr5fX9kDPwdfW14i_5op2rtIblqLZ7WgD-JxCVCV-8Qlvaeiixkk2Av4S60prHyDL2mb_5SCln-Shwm1sZdqARRQHs9x9gx8mlJR8-5aAQyUwYqlgOI3YxPfu5grrtEMovRa9rDfGg);
+    background-size: cover;
+    background-position: center
+    }</style>
+</head>
+<body class="bg-coffee-texture min-h-screen flex flex-col font-body text-on-surface overflow-x-hidden">
+<!-- Header (Suppressed Nav - Simplified Brand Only as per focus rule) -->
+<header class="w-full flex justify-between items-center px-6 py-6 absolute top-0 z-10">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-3xl" data-icon="coffee">coffee</span>
+<span class="font-headline font-extrabold text-2xl text-primary-container tracking-tight">Caffè Harmony</span>
+</div>
+</header>
+<!-- Main Registration Section -->
+<main class="flex-grow flex items-center justify-center p-6 mt-12 mb-12">
+<div class="w-full max-w-lg bg-surface-container-lowest/90 backdrop-blur-md rounded-xl shadow-xl p-8 md:p-12 border border-outline-variant">
+<!-- Form Header -->
+<div class="text-center mb-10">
+<h1 class="font-headline font-extrabold text-3xl text-primary-container mb-2">Artisan Roast Admin</h1>
+<p class="text-on-surface-variant font-medium">Bắt đầu quản lý không gian cafe của bạn</p>
+</div>
+<!-- Registration Form -->
+<form action="#" class="space-y-5">
+<!-- Email Field -->
+<div class="space-y-1.5">
+<label class="text-sm font-semibold text-on-surface-variant block" for="email">Email</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-xl" data-icon="mail">mail</span>
+<input class="w-full pl-11 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary-container focus:border-transparent outline-none transition-all placeholder:text-outline-variant text-on-surface" id="email" name="email" placeholder="example@harmony.com" type="email"/>
+</div>
+</div>
+<!-- Username Field -->
+<div class="space-y-1.5">
+<label class="text-sm font-semibold text-on-surface-variant block" for="username">Tên đăng nhập</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-xl" data-icon="person">person</span>
+<input class="w-full pl-11 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary-container focus:border-transparent outline-none transition-all placeholder:text-outline-variant text-on-surface" id="username" name="username" placeholder="roastmaster_01" type="text"/>
+</div>
+</div>
+<!-- Date of Birth Field -->
+<div class="space-y-1.5">
+<label class="text-sm font-semibold text-on-surface-variant block" for="dob">Ngày sinh</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-xl" data-icon="calendar_today">calendar_today</span>
+<input class="w-full pl-11 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary-container focus:border-transparent outline-none transition-all text-on-surface" id="dob" name="dob" type="date"/>
+</div>
+</div>
+<!-- Password Fields Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="space-y-1.5">
+<label class="text-sm font-semibold text-on-surface-variant block" for="password">Mật khẩu</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-xl" data-icon="lock">lock</span>
+<input class="w-full pl-11 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary-container focus:border-transparent outline-none transition-all placeholder:text-outline-variant text-on-surface" id="password" name="password" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<div class="space-y-1.5">
+<label class="text-sm font-semibold text-on-surface-variant block" for="confirm_password">Nhập lại mật khẩu</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-xl" data-icon="lock_reset">lock_reset</span>
+<input class="w-full pl-11 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary-container focus:border-transparent outline-none transition-all placeholder:text-outline-variant text-on-surface" id="confirm_password" name="confirm_password" placeholder="••••••••" type="password"/>
+</div>
+</div>
+</div>
+<!-- Register Button -->
+<div class="pt-4">
+<button class="w-full bg-primary-container text-on-primary py-4 rounded-xl font-headline font-bold text-lg hover:bg-primary transition-colors flex items-center justify-center gap-2 group" type="submit">
+                        Đăng ký
+                        <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</form>
+<!-- Footer Link -->
+<div class="mt-8 text-center">
+<p class="text-on-surface-variant font-medium">
+                    Bạn đã có tài khoản? 
+                    <a class="text-primary-container font-bold hover:underline decoration-2 underline-offset-4 transition-all" href="#">Đăng nhập!</a>
+</p>
+</div>
+</div>
+</main>
+<!-- Decoration Element: Coffee Beans Background Blur -->
+<div class="fixed bottom-0 left-0 w-64 h-64 -mb-32 -ml-32 bg-primary-container/10 rounded-full blur-3xl -z-10"></div>
+<div class="fixed top-0 right-0 w-96 h-96 -mt-48 -mr-48 bg-secondary-container/20 rounded-full blur-3xl -z-10"></div>
+<!-- Footer Component from JSON Mapping -->
+<footer class="w-full py-8 px-6 flex flex-col items-center gap-4 bg-[#FDFBF7] dark:bg-stone-950 border-t border-stone-200 dark:border-stone-800">
+<div class="flex items-center gap-2 mb-2">
+<span class="font-manrope font-semibold text-[#4E342E] text-lg">Caffè Harmony</span>
+</div>
+<div class="flex flex-wrap justify-center gap-6 mb-4">
+<a class="font-workSans text-sm text-stone-500 hover:text-[#2E7D32] transition-colors" href="#">Privacy Policy</a>
+<a class="font-workSans text-sm text-stone-500 hover:text-[#2E7D32] transition-colors" href="#">Terms of Service</a>
+<a class="font-workSans text-sm text-stone-500 hover:text-[#2E7D32] transition-colors" href="#">Contact Us</a>
+</div>
+<p class="font-workSans text-sm text-stone-500">© 2024 Caffè Harmony. All rights reserved.</p>
+</footer>
+</body></html>

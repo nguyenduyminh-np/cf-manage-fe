@@ -1,0 +1,131 @@
+<section class="table-detail-dialog" aria-label="Chi tiết bàn">
+  <!-- <header class="table-detail-dialog__header">
+    <h2>Chi tiết bàn</h2>
+    <button
+      tuiButton
+      type="button"
+      class="table-detail-dialog__close"
+      (click)="close()"
+      aria-label="Đóng dialog"
+    >
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </header> -->
+
+  @if (detailState$ | async; as state) {
+    @if (state.isLoading) {
+      <div class="table-detail-dialog__loading" aria-live="polite">
+        <div class="table-detail-skeleton table-detail-skeleton--hero"></div>
+        <div class="table-detail-skeleton table-detail-skeleton--line"></div>
+        <div class="table-detail-skeleton table-detail-skeleton--line"></div>
+        <div class="table-detail-skeleton table-detail-skeleton--line"></div>
+      </div>
+    } @else if (state.error) {
+      <div class="table-detail-dialog__error" role="alert">
+        <h3>Không thể tải thông tin bàn</h3>
+        <p>{{ state.error }}</p>
+        <div class="table-detail-dialog__error-actions">
+          <button
+            tuiButton
+            type="button"
+            class="table-detail-button table-detail-button--ghost"
+            (click)="retry()"
+          >
+            Thử lại
+          </button>
+          <button
+            tuiButton
+            type="button"
+            class="table-detail-button table-detail-button--primary"
+            (click)="close()"
+          >
+            Đóng
+          </button>
+        </div>
+      </div>
+    } @else if (state.vm; as vm) {
+      <div class="table-detail-dialog__body">
+        <article class="table-overview">
+          <div class="table-overview__icon" aria-hidden="true">
+            <span class="material-symbols-outlined">table_restaurant</span>
+          </div>
+
+          <div class="table-overview__content">
+            <h3>{{ vm.tableName }}</h3>
+            <p>Mã: {{ vm.tableCode }}</p>
+          </div>
+
+          <div class="table-overview__status">
+            <span class="table-status-pill" [ngClass]="vm.statusClass">{{ vm.statusLabel }}</span>
+          </div>
+        </article>
+
+        <dl class="table-detail-grid" aria-label="Thông tin bàn">
+          <div class="table-detail-item">
+            <dt>Tên bàn</dt>
+            <dd>{{ vm.tableName }}</dd>
+          </div>
+
+          <div class="table-detail-item">
+            <dt>Mã bàn</dt>
+            <dd>{{ vm.tableCode }}</dd>
+          </div>
+
+          <div class="table-detail-item">
+            <dt>Tầng</dt>
+            <dd>
+              <span class="material-symbols-outlined" aria-hidden="true">layers</span>
+              <span>{{ vm.floorLabel }}</span>
+            </dd>
+          </div>
+
+          <div class="table-detail-item">
+            <dt>Số chỗ</dt>
+            <dd>
+              <span class="material-symbols-outlined" aria-hidden="true">groups</span>
+              <span>{{ vm.seatLabel }}</span>
+            </dd>
+          </div>
+
+          <div class="table-detail-item">
+            <dt>Hoạt động</dt>
+            <dd>
+              <span class="table-active-dot" [ngClass]="vm.activeClass" aria-hidden="true"></span>
+              <span>{{ vm.activeLabel }}</span>
+            </dd>
+          </div>
+
+          <div class="table-detail-item">
+            <dt>Tổng lượt đặt</dt>
+            <dd>{{ vm.totalBookingLabel }}</dd>
+          </div>
+
+          <div class="table-detail-item table-detail-item--full">
+            <dt>Lần đặt gần nhất</dt>
+            <dd>
+              <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+              <span>{{ vm.lastBookingLabel }}</span>
+            </dd>
+          </div>
+        </dl>
+
+        <article class="table-note" aria-label="Ghi chú quản lý">
+          <p class="table-note__label">Ghi chú quản lý</p>
+          <p class="table-note__content">{{ vm.managementNote }}</p>
+          <span class="material-symbols-outlined table-note__icon" aria-hidden="true">info</span>
+        </article>
+      </div>
+
+      <footer class="table-detail-dialog__footer">
+        <button
+          tuiButton
+          type="button"
+          class="table-detail-button table-detail-button--primary"
+          (click)="close()"
+        >
+          Đóng
+        </button>
+      </footer>
+    }
+  }
+</section>

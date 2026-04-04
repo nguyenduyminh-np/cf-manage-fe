@@ -17,16 +17,37 @@
 
     <div class="divider"></div>
 
-    <button class="profile-trigger">
-      <img
-        src="https://ui-avatars.com/api/?name=Admin+User&background=33210d&color=fff"
-        alt="Admin Profile"
-      />
-      <div class="profile-info">
-        <p class="name">Admin User</p>
-        <p class="role">Store Manager</p>
-      </div>
-      <span class="material-symbols-outlined expand-icon">expand_more</span>
-    </button>
+    <div class="profile-menu-wrap" (click)="$event.stopPropagation()">
+      <button
+        class="profile-trigger"
+        type="button"
+        (click)="toggleProfileMenu($event)"
+        [attr.aria-expanded]="isProfileMenuOpen"
+        aria-haspopup="menu"
+      >
+        <img
+          src="https://ui-avatars.com/api/?name=Admin+User&background=33210d&color=fff"
+          alt="Admin Profile"
+        />
+        <div class="profile-info">
+          <p class="name">Admin User</p>
+          <p class="role">Store Manager</p>
+        </div>
+        <span class="material-symbols-outlined expand-icon">expand_more</span>
+      </button>
+
+      @if (isProfileMenuOpen) {
+        <div class="profile-dropdown" role="menu">
+          <a class="menu-item" role="menuitem" href="/user-profile" (click)="closeProfileMenu()">
+            <span class="material-symbols-outlined">account_circle</span>
+            <span>Quản lý Profile</span>
+          </a>
+          <a class="menu-item logout" role="menuitem" href="#" (click)="closeProfileMenu()">
+            <span class="material-symbols-outlined">logout</span>
+            <span>Đăng xuất</span>
+          </a>
+        </div>
+      }
+    </div>
   </div>
 </header>
