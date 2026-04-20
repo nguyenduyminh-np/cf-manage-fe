@@ -1,21 +1,72 @@
 <div class="layout-wrapper">
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="logo">
-        <span class="material-symbols-outlined">coffee</span>
-      </div>
-      <div class="brand-info">
-        <h1>Artisanal Admin</h1>
-        <p>Premium Roast</p>
-      </div>
+  <aside class="sidebar" [class.sidebar--collapsed]="isSidebarCollapsed">
+    <div class="sidebar-top">
+      <a routerLink="/dashboard">
+        <div class="brand-info">
+          <p class="brand-title">CHƯƠNG TRÌNH QUẢN LÝ CF-M</p>
+        </div>
+      </a>
+      @if (!isSidebarCollapsed) {
+        <a class="brand" routerLink="/dashboard" title="Về trang chủ">
+          <div class="logo">
+            <img class="logo-image" src="icon.png" alt="Main icon" />
+          </div>
+        </a>
+      }
+      <button
+        type="button"
+        class="sidebar-toggle"
+        [attr.aria-label]="isSidebarCollapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar'"
+        [attr.title]="isSidebarCollapsed ? 'Mở rộng menu' : 'Thu gọn menu'"
+        (click)="toggleSidebar()"
+      >
+        <span class="material-symbols-outlined">menu</span>
+      </button>
     </div>
 
     <nav class="navigation">
       @for (item of menuItems; track item.name) {
-        <a [routerLink]="item.route" routerLinkActive="active" class="nav-item">
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          class="nav-item"
+          [attr.title]="item.name"
+        >
           <span class="material-symbols-outlined icon">{{ item.icon }}</span>
           <span class="label">{{ item.name }}</span>
         </a>
+      }
+
+      <button
+        type="button"
+        class="nav-item nav-item--button"
+        [class.active]="isDialogRoute"
+        [attr.aria-expanded]="shouldShowDialogMenu"
+        aria-controls="dialog-submenu"
+        title="Dialog"
+        (click)="toggleDialogMenu()"
+      >
+        <span class="material-symbols-outlined icon">dialogs</span>
+        <span class="label">Dialog</span>
+        <span class="material-symbols-outlined chevron">{{
+          shouldShowDialogMenu ? 'expand_less' : 'expand_more'
+        }}</span>
+      </button>
+
+      @if (shouldShowDialogMenu) {
+        <div id="dialog-submenu" class="nav-submenu" role="group" aria-label="Danh sách dialog">
+          @for (dialogItem of dialogMenuItems; track dialogItem.key) {
+            <a
+              [routerLink]="dialogItem.route"
+              routerLinkActive="active"
+              class="nav-subitem"
+              [attr.title]="dialogItem.name"
+            >
+              <span class="material-symbols-outlined subitem-icon">open_in_new</span>
+              <span class="label">{{ dialogItem.name }}</span>
+            </a>
+          }
+        </div>
       }
     </nav>
 
@@ -30,7 +81,7 @@
     </div>
   </aside>
 
-  <div class="main-content">
+  <div class="main-content" [class.main-content--sidebar-collapsed]="isSidebarCollapsed">
     <app-header></app-header>
 
     <main class="content-scroll">

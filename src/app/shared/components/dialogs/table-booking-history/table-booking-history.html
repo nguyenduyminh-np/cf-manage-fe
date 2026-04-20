@@ -1,0 +1,382 @@
+<section class="table-booking-history" aria-label="Lịch sử đặt bàn">
+  @if (detailState$ | async; as state) {
+    <!-- Header: nhận state hiện tại để hiển thị tên bàn và mở luồng đặt bàn mới. Input: view state. Output: tiêu đề và action button. -->
+    <header class="table-booking-history__header">
+      <div class="table-booking-history__title-wrap">
+        <span class="material-symbols-outlined" aria-hidden="true">history</span>
+        <div>
+          <h2>Danh sách lịch sử đặt bàn</h2>
+          <p>{{ displayTableName(state) }}</p>
+        </div>
+      </div>
+
+      <button tuiButton type="button" class="btn btn--primary" (click)="openCreateBooking()">
+        <span class="material-symbols-outlined" aria-hidden="true">calendar_add_on</span>
+        <span>Đặt bàn</span>
+      </button>
+    </header>
+
+    <!-- Search bar: nhập/chọn filter để tự động gọi lại API danh sách lịch sử. Input: filter state. Output: query mới. -->
+    <section class="table-booking-history__searchbar" aria-label="Bộ lọc lịch sử đặt bàn">
+      <form class="table-booking-history__search-form" (ngSubmit)="applySearch()">
+        <div class="table-booking-history__search-grid">
+          <!-- Filter: trạng thái booking. Input: chọn option. Output: update filter + debounce reload. -->
+          <label class="table-booking-history__field">
+            <span>Trạng thái booking</span>
+            <div class="table-booking-history__custom-select" (click)="$event.stopPropagation()">
+              <button
+                type="button"
+                class="table-booking-history__select-trigger"
+                [class.table-booking-history__select-trigger--open]="
+                  openedDropdown === 'bookingStatus'
+                "
+                [attr.aria-expanded]="openedDropdown === 'bookingStatus'"
+                aria-haspopup="listbox"
+                (click)="toggleDropdown('bookingStatus')"
+              >
+                <span>{{ selectedBookingStatusLabel }}</span>
+                <span class="table-booking-history__select-chevron" aria-hidden="true"></span>
+              </button>
+
+              @if (openedDropdown === 'bookingStatus') {
+                <ul
+                  class="table-booking-history__select-menu"
+                  role="listbox"
+                  aria-label="Trạng thái booking"
+                >
+                  @for (option of bookingStatusOptions; track option.value) {
+                    <li>
+                      <button
+                        type="button"
+                        class="table-booking-history__select-option"
+                        [class.table-booking-history__select-option--selected]="
+                          searchFilters.bookingStatus === option.value
+                        "
+                        (click)="setBookingStatus(option.value)"
+                      >
+                        {{ option.label }}
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          </label>
+
+          <!-- Filter: tên khách. Input: text change. Output: debounce reload. -->
+          <label class="table-booking-history__field">
+            <span>Tên khách</span>
+            <input
+              name="customerName"
+              type="text"
+              [(ngModel)]="searchFilters.customerName"
+              (ngModelChange)="onFiltersChanged()"
+              placeholder="Nhập tên khách"
+              autocomplete="off"
+            />
+          </label>
+
+          <label class="table-booking-history__field">
+            <span>Check-in từ ngày</span>
+            <input
+              name="checkInAt"
+              type="date"
+              lang="en-GB"
+              [(ngModel)]="searchFilters.checkInAt"
+              (ngModelChange)="onFiltersChanged()"
+            />
+          </label>
+
+          <label class="table-booking-history__field">
+            <span>Check-out đến ngày</span>
+            <input
+              name="checkOutAt"
+              type="date"
+              lang="en-GB"
+              [(ngModel)]="searchFilters.checkOutAt"
+              (ngModelChange)="onFiltersChanged()"
+            />
+          </label>
+        </div>
+
+        <!-- Actions: submit thủ công và reset filter. Input: click/submit. Output: trigger query reload hoặc reset. -->
+        <div class="table-booking-history__search-actions">
+          <button
+            tuiButton
+            type="button"
+            class="btn btn--ghost btn--small"
+            [class.btn--advanced-active]="hasAdvancedFiltersApplied"
+            (click)="toggleAdvancedSearch(); $event.stopPropagation()"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">tune</span>
+            <span>Advanced search</span>
+          </button>
+
+          <button tuiButton type="button" class="btn btn--ghost btn--small" (click)="resetSearch()">
+            <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+            <span>Làm mới</span>
+          </button>
+
+          <button tuiButton type="submit" class="btn btn--primary btn--small">
+            <span class="material-symbols-outlined" aria-hidden="true">search</span>
+            <span>Tìm kiếm</span>
+          </button>
+
+          <button
+            tuiButton
+            type="button"
+            class="btn btn--primary btn--small"
+            (click)="searchPendingJob()"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">upcoming</span>
+            <span>Đơn hàng sắp tới ...</span>
+          </button>
+        </div>
+
+        @if (advancedSearchOpen) {
+          <section
+            class="table-booking-history__advanced-popup"
+            aria-label="Tìm kiếm nâng cao"
+            (click)="$event.stopPropagation()"
+          >
+            <header class="table-booking-history__advanced-header">
+              <h3>Tìm kiếm nâng cao</h3>
+              <button
+                tuiButton
+                type="button"
+                class="btn btn--ghost btn--small"
+                (click)="closeAdvancedSearch()"
+              >
+                Đóng
+              </button>
+            </header>
+
+            <div class="table-booking-history__advanced-grid">
+              <label class="table-booking-history__field">
+                <span>Số điện thoại</span>
+                <input
+                  name="phoneNumber"
+                  type="text"
+                  [(ngModel)]="searchFilters.phoneNumber"
+                  (ngModelChange)="onAdvancedFiltersChanged()"
+                  placeholder="Nhập số điện thoại"
+                  autocomplete="off"
+                />
+              </label>
+
+              <label class="table-booking-history__field">
+                <span>Sắp xếp theo</span>
+                <div class="table-booking-history__select-wrap">
+                  <select
+                    name="sortField"
+                    [(ngModel)]="searchFilters.sortField"
+                    (ngModelChange)="onAdvancedFiltersChanged()"
+                  >
+                    @for (option of sortFieldOptions; track option.value) {
+                      <option [ngValue]="option.value">{{ option.label }}</option>
+                    }
+                  </select>
+                  <span class="table-booking-history__select-chevron" aria-hidden="true"></span>
+                </div>
+              </label>
+
+              <label class="table-booking-history__field">
+                <span>Thứ tự</span>
+                <div class="table-booking-history__select-wrap">
+                  <select
+                    name="sortDir"
+                    [(ngModel)]="searchFilters.sortDir"
+                    (ngModelChange)="onAdvancedFiltersChanged()"
+                  >
+                    @for (option of sortDirOptions; track option.value) {
+                      <option [ngValue]="option.value">{{ option.label }}</option>
+                    }
+                  </select>
+                  <span class="table-booking-history__select-chevron" aria-hidden="true"></span>
+                </div>
+              </label>
+
+              <label class="table-booking-history__field">
+                <span>Active</span>
+                <div
+                  class="table-booking-history__custom-select"
+                  (click)="$event.stopPropagation()"
+                >
+                  <button
+                    type="button"
+                    class="table-booking-history__select-trigger"
+                    [class.table-booking-history__select-trigger--open]="
+                      openedDropdown === 'active'
+                    "
+                    [attr.aria-expanded]="openedDropdown === 'active'"
+                    aria-haspopup="listbox"
+                    (click)="toggleDropdown('active')"
+                  >
+                    <span>{{ selectedActiveLabel }}</span>
+                    <span class="table-booking-history__select-chevron" aria-hidden="true"></span>
+                  </button>
+
+                  @if (openedDropdown === 'active') {
+                    <ul
+                      class="table-booking-history__select-menu"
+                      role="listbox"
+                      aria-label="Trạng thái active"
+                    >
+                      @for (option of activeOptions; track option.value) {
+                        <li>
+                          <button
+                            type="button"
+                            class="table-booking-history__select-option"
+                            [class.table-booking-history__select-option--selected]="
+                              searchFilters.active === option.value
+                            "
+                            (click)="setActive(option.value)"
+                          >
+                            {{ option.label }}
+                          </button>
+                        </li>
+                      }
+                    </ul>
+                  }
+                </div>
+              </label>
+            </div>
+          </section>
+        }
+      </form>
+    </section>
+
+    <!-- Loading state: hiển thị khi đang gọi API. Input: state.isLoading. Output: thông báo tiến trình. -->
+    @if (state.isLoading) {
+      <div class="table-booking-history__loading-bar" aria-live="polite">
+        Đang tải lịch sử đặt bàn...
+      </div>
+    }
+
+    <!-- Error state: hiển thị khi API trả lỗi. Input: state.error. Output: cảnh báo cho người dùng. -->
+    @if (state.error) {
+      <section class="table-booking-history__error" role="alert">
+        <p>{{ state.error }}</p>
+      </section>
+    }
+
+    <!-- Grid: render danh sách booking history theo state hiện tại. Input: rowData. Output: bảng dữ liệu. -->
+    <div class="table-booking-history__grid-wrap">
+      <ag-grid-angular
+        class="ag-theme-quartz table-booking-history__grid"
+        [columnDefs]="columnDefs"
+        [defaultColDef]="defaultColDef"
+        [rowData]="state.rowData"
+        [pagination]="false"
+        [rowBuffer]="rowBuffer"
+        [valueCache]="valueCache"
+        [animateRows]="animateRows"
+        [suppressColumnMoveAnimation]="suppressColumnMoveAnimation"
+        [loading]="state.isLoading"
+        [overlayLoadingTemplate]="'Đang tải lịch sử đặt bàn...'"
+        [overlayNoRowsTemplate]="
+          'HIỆN KHÔNG CÓ ĐƠN ĐẶT SẮP TỚI NÀO CHO BÀN NÀY, HÃY ẤN TÌM KIẾM ĐỂ XEM TOÀN BỘ DANH SÁCH ĐƠN ĐẶT ĐÃ HOÀN THÀNH'
+        "
+        [suppressCellFocus]="true"
+        [headerHeight]="46"
+        [rowHeight]="46"
+        (gridReady)="onGridReady($event)"
+        (gridSizeChanged)="onGridSizeChanged($event)"
+        (rowDoubleClicked)="onRowDoubleClicked($event)"
+      />
+    </div>
+
+    <!-- Footer: tổng số bản ghi, page size và paging controls. Input: state pagination. Output: điều hướng trang. -->
+    <footer class="table-booking-history__footer">
+      <div class="table-booking-history__result-controls">
+        <p>Tổng số bản ghi: {{ state.totalElements }}</p>
+
+        <label
+          class="table-booking-history__limit-control"
+          for="table-booking-history-limit-select"
+        >
+          <span>Hiển thị</span>
+          <div
+            class="table-booking-history__custom-select table-booking-history__custom-select--compact"
+            (click)="$event.stopPropagation()"
+          >
+            <button
+              id="table-booking-history-limit-select"
+              type="button"
+              class="table-booking-history__select-trigger table-booking-history__select-trigger--compact"
+              [class.table-booking-history__select-trigger--open]="openedDropdown === 'pageSize'"
+              [attr.aria-expanded]="openedDropdown === 'pageSize'"
+              aria-haspopup="listbox"
+              [disabled]="state.isLoading"
+              (click)="toggleDropdown('pageSize')"
+            >
+              <span>{{ state.pageSize }}</span>
+              <span class="table-booking-history__select-chevron" aria-hidden="true"></span>
+            </button>
+
+            @if (openedDropdown === 'pageSize') {
+              <ul
+                class="table-booking-history__select-menu table-booking-history__select-menu--compact"
+                role="listbox"
+                aria-label="Số lượng bản ghi hiển thị"
+              >
+                @for (pageSize of pageSizeOptions; track pageSize) {
+                  <li>
+                    <button
+                      type="button"
+                      class="table-booking-history__select-option"
+                      [class.table-booking-history__select-option--selected]="
+                        state.pageSize === pageSize
+                      "
+                      (click)="setPageSize(pageSize)"
+                    >
+                      {{ pageSize }}
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+          <span>bản ghi</span>
+        </label>
+      </div>
+
+      <div class="table-booking-history__pagination">
+        <button
+          tuiButton
+          type="button"
+          class="btn btn--ghost btn--icon"
+          [disabled]="!canGoPrevious(state)"
+          (click)="previousPage()"
+          aria-label="Trang trước"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+        </button>
+
+        <span class="table-booking-history__page-indicator">{{ pageSummary(state) }}</span>
+
+        <button
+          tuiButton
+          type="button"
+          class="btn btn--ghost btn--icon"
+          [disabled]="!canGoNext(state)"
+          (click)="nextPage()"
+          aria-label="Trang sau"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+        </button>
+      </div>
+    </footer>
+
+    <!-- Actions: đóng dialog. Input: click. Output: complete dialog and emit close event. -->
+    <div class="table-booking-history__actions">
+      <button tuiButton type="button" class="btn btn--ghost" (click)="close()">Đóng</button>
+    </div>
+  } @else {
+    <!-- Initial loading state: dùng khi dialog chưa nhận đủ data state. Input: no state. Output: placeholder. -->
+    <section class="table-booking-history__loading" aria-live="polite">
+      <h3>Đang khởi tạo dialog</h3>
+      <p>Vui lòng chờ trong giây lát.</p>
+    </section>
+  }
+</section>

@@ -1,0 +1,380 @@
+***************** DTO/Model/Constant *********************
+
+using System;
+using System.Collections.Generic;
+
+namespace CoffeeCRM.Data.Model
+{
+    public partial class Dish
+    {
+        public Dish()
+        {
+            DishOrderDetails = new HashSet<DishOrderDetail>();
+        }
+
+        public int Id { get; set; }
+        public string? DishCode { get; set; }
+        public string DishName { get; set; } = null!;
+        public decimal Price { get; set; }
+        public string Photo { get; set; } = null!;
+        public DateTime CreatedTime { get; set; }
+        public bool Active { get; set; }
+        public int DishCategoryId { get; set; }
+
+        public virtual DishCategory? DishCategory { get; set; } = null!;
+        public virtual ICollection<DishOrderDetail> DishOrderDetails { get; set; }
+    }
+}
+
+using System;
+using System.Collections.Generic;
+
+namespace CoffeeCRM.Data.Model
+{
+    public partial class Dish
+    {
+        public Dish()
+        {
+            DishOrderDetails = new HashSet<DishOrderDetail>();
+        }
+
+        public int Id { get; set; }
+        public string? DishCode { get; set; }
+        public string DishName { get; set; } = null!;
+        public decimal Price { get; set; }
+        public string Photo { get; set; } = null!;
+        public DateTime CreatedTime { get; set; }
+        public bool Active { get; set; }
+        public int DishCategoryId { get; set; }
+
+        public virtual DishCategory? DishCategory { get; set; } = null!;
+        public virtual ICollection<DishOrderDetail> DishOrderDetails { get; set; }
+    }
+}
+
+namespace CfCRM.View.Models.ViewModels
+{
+    public class Select2VM
+    {
+        public string searchString { get; set; }
+    }
+}
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+
+namespace CoffeeCRM.Data.DTO
+{
+    public class DishDto
+    {
+        public int Id { get; set; }
+        public string? DishCode { get; set; }
+        public string DishName { get; set; } = null!;
+        public decimal Price { get; set; }
+        public string? Photo { get; set; } = null!;
+        public IFormFile? Image { get; set; }
+        public int DishCategoryId { get; set; }
+        public string? DishCategoryName { get; set; } = null!;
+    }
+
+    public class DishStaticDto
+    {
+        public int TotalDishCate { get; set; }
+        public int TotalDish { get; set; }
+        public int AvgDishPrice { get; set; }
+    }
+}
+
+using System;
+using System.Collections.Generic;
+
+namespace CoffeeCRM.Data.Model
+{
+    public partial class DishOrder
+    {
+        public DishOrder()
+        {
+            DishOrderDetails = new HashSet<DishOrderDetail>();
+        }
+
+        public int Id { get; set; }
+        public string? Note { get; set; }
+        public int DishOrderStatusId { get; set; }
+        public int TableId { get; set; }
+        public DateTime CreatedTime { get; set; }
+        public bool Active { get; set; }
+        public int AccountId { get; set; }
+
+        public virtual Account? Account { get; set; } = null!;
+        public virtual DishOrderStatus? DishOrderStatus { get; set; } = null!;
+        public virtual Table? Table { get; set; } = null!;
+        public virtual ICollection<DishOrderDetail> DishOrderDetails { get; set; }
+    }
+}
+
+using System;
+using System.Collections.Generic;
+
+namespace CoffeeCRM.Data.Model
+{
+    public partial class DishOrderDetail
+    {
+        public int Id { get; set; }
+        public int Quantity { get; set; }
+        public string? Note { get; set; }
+        public int DishOrderId { get; set; }
+        public int DishId { get; set; }
+        public DateTime CreatedTime { get; set; }
+        public bool Active { get; set; }
+        public decimal Price { get; set; }
+
+        public virtual Dish Dish { get; set; } = null!;
+        public virtual DishOrder DishOrder { get; set; } = null!;
+    }
+}
+
+using System;
+using System.Collections.Generic;
+
+namespace CoffeeCRM.Data.Model
+{
+    public partial class DishOrderStatus
+    {
+        public DishOrderStatus()
+        {
+            DishOrders = new HashSet<DishOrder>();
+        }
+
+        public int Id { get; set; }
+        public string? DishOrderStatusCode { get; set; }
+        public string DishOrderStatusName { get; set; } = null!;
+        public DateTime CreatedTime { get; set; }
+        public bool Active { get; set; }
+
+        public virtual ICollection<DishOrder> DishOrders { get; set; }
+    }
+}
+
+using CoffeeCRM.Data.Model;
+
+namespace CoffeeCRM.Data.ViewModels
+{
+    public class DishOrderViewModel
+    {
+        public int Id { get; set; }
+        public int TableId { get; set; }
+        public int AccountId { get; set; }
+        public string? OrdererName { get; set; }
+        public string? TableName { get; set; }
+        public string? Description { get; set; }
+        public int DishOrderStatusId { get; set; }
+        public string? DishOrderStatusName { get; set; }
+        public DateTime CreatedTime { get; set; }
+        public List<DishOrderDetailVM>? DishOrderDetails { get; set; }
+    }
+    public partial class DishOrderDetailVM
+    {
+        public int Id { get; set; }
+        public int DishOrderId { get; set; }
+        public int DishId { get; set; }
+        public string? DishName { get; set; }
+        public string? Note { get; set; }
+        public int Quantity { get; set; }
+        public bool Active { get; set; }
+    }
+}
+
+
+using System;
+using System.Collections.Generic;
+
+namespace CoffeeCRM.Data.Model
+{
+    public partial class Invoice
+    {
+        public int Id { get; set; }
+        public string? InvoiceCode { get; set; }
+        public decimal TotalMoney { get; set; }
+        public string PaymentStatus { get; set; } = null!;
+        public DateTime CreatedTime { get; set; }
+        public bool Active { get; set; }
+        public string PaymentMethod { get; set; } = null!;
+        public int AccountId { get; set; }
+        public int TableId { get; set; }
+        public int? TotalGuest { get; set; }
+
+        public virtual Account Account { get; set; } = null!;
+        public virtual Table Table { get; set; } = null!;
+    }
+}
+
+using System;
+using System.Collections.Generic;
+
+namespace CoffeeCRM.Data.Model
+{
+    public partial class InvoiceDetail
+    {
+        public int Id { get; set; }
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public DateTime CreatedTime { get; set; }
+        public bool Active { get; set; }
+        public int InvoiceId { get; set; }
+        public int DishId { get; set; }
+    }
+}
+
+using CoffeeCRM.Data.Model;
+
+namespace CoffeeCRM.Data.ViewModels
+{
+    public class InvoiceViewModel
+    {
+        public int Id { get; set; }
+        public string? InvoiceCode { get; set; }
+        public decimal TotalMoney { get; set; }
+        public string PaymentStatus { get; set; }
+        public DateTime CreatedTime { get; set; }
+        public bool Active { get; set; }
+        public int PaymentMethodId { get; set; }
+        public string  PaymentMethod { get; set; }
+        public int AccountId { get; set; }
+        public int TableId { get; set; }
+        public string? TableName { get; set; }
+        public string? OrdererName { get; set; }
+        public string? UriVnPay { get; set; }
+        public List<InvoiceDetail>? InvoiceDetails { get; set; }
+    }
+}
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using CoffeeCRM.Data.Enums.VNPay;
+
+namespace CoffeeCRM.Data.VNPay
+{
+    /// <summary>
+    /// Yêu cầu thanh toán gửi đến cổng thanh toán VNPAY.
+    /// </summary>
+    public class PaymentRequest
+    {
+        /// <summary>
+        /// Mã tham chiếu giao dịch (Transaction Reference). Đây là mã số duy nhất dùng để xác định giao dịch.  
+        /// Lưu ý: Giá trị này bắt buộc và cần đảm bảo không bị trùng lặp giữa các giao dịch.
+        /// </summary>
+        [Required]
+        public long PaymentId { get; set; }
+
+        /// <summary>
+        /// Thông tin mô tả nội dung thanh toán, không dấu và không bao gồm các ký tự đặc biệt
+        /// </summary>
+        [Required]
+        public string Description { get; set; }
+
+        /// <summary>
+        /// Số tiền thanh toán. Số tiền không mang các ký tự phân tách thập phân, phần nghìn, ký tự tiền tệ. Số tiền phải nằm trong khoảng 5.000 (VND) đến 1.000.000.000 (VND).
+        /// </summary>
+        [Required]
+        public double Money { get; set; }
+
+        /// <summary>
+        /// Địa chỉ IP của thiết bị thực hiện giao dịch.  
+        /// </summary>
+        [Required]
+        public string IpAddress { get; set; }
+
+        /// <summary>
+        /// Mã phương thức thanh toán, mã loại ngân hàng hoặc ví điện tử thanh toán. Nếu mang giá trị <c>BankCode.ANY</c> thì chuyển hướng người dùng sang VNPAY chọn phương thức thanh toán.
+        /// </summary>
+        public BankCode BankCode { get; set; } = BankCode.ANY;
+
+        /// <summary>
+        /// Thời điểm khởi tạo giao dịch. Giá trị mặc định là ngày và giờ hiện tại tại thời điểm yêu cầu được khởi tạo.  
+        /// </summary>
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+        /// <summary>
+        /// Đơn vị tiền tệ sử dụng thanh toán. Hiện tại chỉ hỗ trợ VND
+        /// </summary>
+        public Currency Currency { get; set; } = Currency.VND;
+
+        /// <summary>
+        /// Ngôn ngữ hiển thị trên giao diện thanh toán của VNPAY, mặc định là tiếng Việt.  
+        /// </summary>
+        public DisplayLanguage Language { get; set; } = DisplayLanguage.Vietnamese;
+    }
+}
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Transactions;
+
+namespace CoffeeCRM.Data.VNPay
+{
+    /// <summary>
+    /// Phản hồi từ VNPAY sau khi thực hiện giao dịch thanh toán.
+    /// </summary>
+    public class PaymentResult
+    {
+        /// <summary>
+        /// Mã tham chiếu giao dịch (Transaction Reference). Đây là mã số duy nhất dùng để xác định giao dịch.
+        /// </summary>
+        public long PaymentId { get; set; }
+
+        /// <summary>
+        /// Trạng thái thành công của giao dịch. 
+        /// Giá trị là <c>true</c> nếu chữ ký chính xác, <see cref="PaymentResponse.ResponseCode"/> và <see cref="TransactionStatus"/> đều bằng <c>0</c>.
+        /// </summary>
+        public bool IsSuccess { get; set; }
+
+        /// <summary>
+        /// Thông tin mô tả nội dung thanh toán, viết bằng tiếng Việt không dấu.
+        /// </summary>
+        public string Description { get; set; }
+
+        /// <summary>
+        /// Thời gian phản hồi từ VNPAY, được ghi nhận tại thời điểm giao dịch kết thúc.
+        /// </summary>
+        public DateTime Timestamp { get; set; }
+
+        /// <summary>
+        /// Mã giao dịch được ghi nhận trên hệ thống VNPAY, đại diện cho giao dịch duy nhất tại VNPAY.
+        /// </summary>
+        public long VnpayTransactionId { get; set; }
+
+        /// <summary>
+        /// Phương thức thanh toán được sử dụng, ví dụ: thẻ tín dụng, ví điện tử, hoặc chuyển khoản ngân hàng.
+        /// </summary>
+        public string PaymentMethod { get; set; }
+
+        /// <summary>
+        /// Phản hồi chi tiết từ hệ thống VNPAY về giao dịch.
+        /// </summary>
+        public PaymentResponse PaymentResponse { get; set; }
+
+        /// <summary>
+        /// Trạng thái giao dịch sau khi thực hiện, ví dụ: Chờ xử lý, Thành công, hoặc Thất bại.
+        /// </summary>
+        public TransactionStatus TransactionStatus { get; set; }
+
+        /// <summary>
+        /// Thông tin ngân hàng liên quan đến giao dịch, bao gồm tên ngân hàng và mã ngân hàng.
+        /// </summary>
+        public BankingInfor BankingInfor { get; set; }
+    }
+}
+
+
+

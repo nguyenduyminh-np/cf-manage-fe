@@ -1,0 +1,105 @@
+<div class="login-page">
+  <header class="login-page__header" aria-label="Thương hiệu Caffe Harmony">
+    <div class="login-brand">
+      <span class="material-symbols-outlined" aria-hidden="true">coffee</span>
+      <span class="type-title-lg">Caffe Harmony</span>
+    </div>
+  </header>
+
+  <main class="login-page__main">
+    <section class="login-card" aria-label="Form đăng nhập tài khoản admin">
+      <div class="login-card__head">
+        <h1 class="type-headline-lg">Artisan Roast Admin</h1>
+        <p class="type-body-md text-measure">Đăng nhập để quản lý không gian cafe của bạn</p>
+      </div>
+
+      @if (sessionRevokedMessage()) {
+        <div class="login-alert login-alert--warning" role="alert">
+          <span class="material-symbols-outlined" aria-hidden="true">warning</span>
+          <span class="type-body-sm">{{ sessionRevokedMessage() }}</span>
+        </div>
+      }
+
+      @if (serverError()) {
+        <div class="login-alert login-alert--error" role="alert">
+          <span class="material-symbols-outlined" aria-hidden="true">error</span>
+          <span class="type-body-sm">{{ serverError() }}</span>
+        </div>
+      }
+
+      <form class="login-form" [formGroup]="loginForm" (ngSubmit)="submit()" novalidate>
+        <div class="login-field" [class.login-field--invalid]="showFieldError('username')">
+          <label class="type-label-md" for="login-username">Nhập tên đăng nhập</label>
+          <div class="login-control">
+            <span class="material-symbols-outlined" aria-hidden="true">person</span>
+            <input
+              id="login-username"
+              type="text"
+              formControlName="username"
+              placeholder="roastmaster_01"
+              autocomplete="username"
+            />
+          </div>
+          @if (showFieldError('username')) {
+            <p class="type-label-sm login-field__error">
+              Tên đăng nhập gồm 4-30 ký tự, chỉ chứa chữ, số hoặc dấu gạch dưới.
+            </p>
+          }
+        </div>
+
+        <div class="login-field" [class.login-field--invalid]="showFieldError('password')">
+          <label class="type-label-md" for="login-password">Mật khẩu</label>
+          <div class="login-control">
+            <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+            <input
+              id="login-password"
+              type="password"
+              formControlName="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+            />
+          </div>
+          @if (showFieldError('password')) {
+            <p class="type-label-sm login-field__error">Mật khẩu cần tối thiểu 8 ký tự.</p>
+          }
+        </div>
+
+        <button
+          tuiButton
+          type="submit"
+          class="login-submit type-label-md"
+          [disabled]="isSubmitDisabled()"
+          [attr.aria-disabled]="isSubmitDisabled() ? 'true' : null"
+        >
+          @if (isLoading()) {
+            <span class="login-spinner" aria-hidden="true"></span>
+            <span>Đang đăng nhập...</span>
+          } @else {
+            <span>Đăng nhập</span>
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          }
+        </button>
+      </form>
+
+      <p class="login-card__register type-body-md">
+        Bạn chưa có tài khoản?
+        <a routerLink="/register">Đăng ký!</a>
+      </p>
+    </section>
+  </main>
+
+  <footer class="login-page__footer" aria-label="Thông tin bản quyền">
+    <div class="type-title-md login-page__footer-brand">Caffe Harmony</div>
+
+    <nav class="login-page__footer-nav type-body-sm" aria-label="Liên kết hỗ trợ">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+      <a href="#">Contact Us</a>
+    </nav>
+
+    <p class="type-body-sm login-page__footer-copy">© 2024 Caffe Harmony. All rights reserved.</p>
+  </footer>
+
+  <div class="login-page__blur login-page__blur--left" aria-hidden="true"></div>
+  <div class="login-page__blur login-page__blur--right" aria-hidden="true"></div>
+</div>

@@ -26,23 +26,23 @@
         aria-haspopup="menu"
       >
         <img
-          src="https://ui-avatars.com/api/?name=Admin+User&background=33210d&color=fff"
-          alt="Admin Profile"
+          [src]="'https://ui-avatars.com/api/?name=' + userName + '&background=33210d&color=fff'"
+          [alt]="userName + ' Profile'"
         />
         <div class="profile-info">
-          <p class="name">Admin User</p>
-          <p class="role">Store Manager</p>
+          <p class="name">{{ userName }}</p>
+          <p class="role">{{ userRole }}</p>
         </div>
         <span class="material-symbols-outlined expand-icon">expand_more</span>
       </button>
 
       @if (isProfileMenuOpen) {
         <div class="profile-dropdown" role="menu">
-          <a class="menu-item" role="menuitem" href="/user-profile" (click)="closeProfileMenu()">
+          <a class="menu-item" role="menuitem" routerLink="/user-profile" (click)="closeProfileMenu()">
             <span class="material-symbols-outlined">account_circle</span>
             <span>Quản lý Profile</span>
           </a>
-          <a class="menu-item logout" role="menuitem" href="#" (click)="closeProfileMenu()">
+          <a class="menu-item logout" role="menuitem" href="#" (click)="onLogout($event)">
             <span class="material-symbols-outlined">logout</span>
             <span>Đăng xuất</span>
           </a>

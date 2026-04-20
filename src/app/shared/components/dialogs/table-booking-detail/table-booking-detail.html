@@ -1,0 +1,312 @@
+<section class="table-booking-detail" aria-label="Chi tiết đơn đặt bàn">
+  @if (detailState(); as state) {
+    @if (state.isLoading) {
+      <div class="table-booking-detail__body">
+        <article class="table-booking-detail__card table-booking-detail__card--col-12">
+          <p class="type-body-md">Đang tải chi tiết đơn đặt bàn...</p>
+        </article>
+      </div>
+    } @else if (state.error) {
+      <div class="table-booking-detail__body">
+        <article class="table-booking-detail__card table-booking-detail__card--col-12">
+          <h3 class="type-title-md">Không thể tải chi tiết đơn đặt bàn</h3>
+          <p class="type-body-sm">{{ state.error }}</p>
+          <div class="table-booking-detail__footer-actions">
+            <button
+              type="button"
+              class="table-booking-detail__btn table-booking-detail__btn--ghost type-label-md"
+              (click)="retry()"
+            >
+              <span class="material-symbols-outlined">refresh</span>
+              Thử lại
+            </button>
+            <button
+              type="button"
+              class="table-booking-detail__btn table-booking-detail__btn--primary type-label-md"
+              (click)="close()"
+            >
+              <span class="material-symbols-outlined">close</span>
+              Đóng
+            </button>
+          </div>
+        </article>
+      </div>
+    } @else if (state.vm; as vm) {
+      <header class="table-booking-detail__header">
+        <div class="table-booking-detail__header-title-wrap">
+          <div class="table-booking-detail__header-icon">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1"
+              >receipt_long</span
+            >
+          </div>
+          <div>
+            <h2 class="type-title-lg">Chi tiết đơn đặt bàn</h2>
+            <p class="type-body-sm table-booking-detail__meta">Mã đơn: {{ vm.bookingCode }}</p>
+          </div>
+        </div>
+        <div class="type-status table-booking-detail__status-chip" [ngClass]="vm.statusChipClass">
+          <span class="material-symbols-outlined">{{ vm.statusIcon }}</span>
+          {{ vm.statusLabel }}
+        </div>
+      </header>
+
+      <form class="table-booking-detail__body" [formGroup]="editForm" novalidate>
+        <div class="table-booking-detail__grid">
+          <article
+            class="table-booking-detail__card table-booking-detail__card--col-4 table-booking-detail__card--interactive"
+          >
+            <div class="table-booking-detail__card-bg-icon">
+              <span class="material-symbols-outlined">table_bar</span>
+            </div>
+            <h3 class="type-label-md table-booking-detail__card-title">
+              <span class="material-symbols-outlined">info</span>
+              THÔNG TIN BÀN
+            </h3>
+            <div class="table-booking-detail__field-group">
+              <div class="table-booking-detail__field">
+                <span class="type-label-sm">Tên bàn</span>
+                <strong class="type-title-md">{{ vm.tableName }}</strong>
+              </div>
+              <div class="table-booking-detail__field">
+                <span class="type-label-sm">Mã bàn</span>
+                <div class="table-booking-detail__code-badge">{{ vm.tableCode }}</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="table-booking-detail__card table-booking-detail__card--col-8">
+            <h3 class="type-label-md table-booking-detail__card-title">
+              <span class="material-symbols-outlined">person</span>
+              THÔNG TIN KHÁCH HÀNG
+            </h3>
+            <div class="table-booking-detail__customer-grid">
+              <label class="table-booking-detail__field">
+                <span class="type-label-sm">Tên khách hàng</span>
+                <input
+                  class="table-booking-detail__input"
+                  type="text"
+                  formControlName="customerName"
+                  placeholder="Nhập tên khách hàng"
+                  [disabled]="isUpdating()"
+                />
+                @if (showControlError('customerName')) {
+                  <small class="table-booking-detail__field-error"
+                    >Tên khách hàng không hợp lệ.</small
+                  >
+                }
+              </label>
+              <label class="table-booking-detail__field">
+                <span class="type-label-sm">Số điện thoại</span>
+                <input
+                  class="table-booking-detail__input"
+                  type="tel"
+                  formControlName="phoneNumber"
+                  placeholder="Nhập số điện thoại"
+                  [disabled]="isUpdating()"
+                />
+                @if (showControlError('phoneNumber')) {
+                  <small class="table-booking-detail__field-error"
+                    >Số điện thoại không hợp lệ.</small
+                  >
+                }
+              </label>
+              <div class="table-booking-detail__badge table-booking-detail__badge--full">
+                <span class="material-symbols-outlined">{{ vm.customerBadgeIcon }}</span>
+                <span class="type-label-md">{{ vm.customerBadgeLabel }}</span>
+              </div>
+            </div>
+          </article>
+
+          <article
+            class="table-booking-detail__card table-booking-detail__card--col-12 table-booking-detail__card--gray"
+          >
+            <h3 class="type-label-md table-booking-detail__card-title">
+              <span class="material-symbols-outlined">schedule</span>
+              LỊCH TRÌNH DỰ KIẾN
+            </h3>
+            <div class="table-booking-detail__time-grid">
+              <label class="table-booking-detail__field table-booking-detail__time-box">
+                <span class="type-label-sm">Giờ đến</span>
+                <input
+                  class="table-booking-detail__input"
+                  type="datetime-local"
+                  formControlName="expectedArriveTime"
+                  [disabled]="isUpdating()"
+                />
+                @if (showControlError('expectedArriveTime')) {
+                  <small class="table-booking-detail__field-error">Vui lòng chọn giờ đến.</small>
+                }
+              </label>
+              <label class="table-booking-detail__field table-booking-detail__time-box">
+                <span class="type-label-sm">Giờ đi</span>
+                <input
+                  class="table-booking-detail__input"
+                  type="datetime-local"
+                  formControlName="expectedCheckOut"
+                  [disabled]="isUpdating()"
+                />
+                @if (showControlError('expectedCheckOut')) {
+                  <small class="table-booking-detail__field-error">Vui lòng chọn giờ đi.</small>
+                }
+              </label>
+            </div>
+
+            <label class="table-booking-detail__field">
+              <span class="type-label-sm">Trạng thái booking</span>
+              <select
+                class="table-booking-detail__select"
+                formControlName="bookingStatus"
+                [disabled]="isUpdating()"
+              >
+                @for (option of bookingStatusOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+              @if (showControlError('bookingStatus')) {
+                <small class="table-booking-detail__field-error"
+                  >Trạng thái booking không hợp lệ.</small
+                >
+              }
+            </label>
+          </article>
+
+          <article
+            class="table-booking-detail__card table-booking-detail__card--col-12 table-booking-detail__card--stone"
+            [class.table-booking-detail__card--locked]="isDepositSectionLocked()"
+          >
+            <h3 class="type-label-md table-booking-detail__card-title">
+              <span class="material-symbols-outlined">payments</span>
+              THANH TOÁN ĐẶT CỌC
+            </h3>
+            @if (isDepositSectionLocked()) {
+              <p class="table-booking-detail__lock-note">
+                Đơn đặt bàn đã có tiền cọc, không thể chỉnh sửa.
+              </p>
+            }
+            <div class="table-booking-detail__payment-info">
+              <label class="table-booking-detail__field">
+                <span class="type-label-sm">Tiền cọc</span>
+                <input
+                  class="table-booking-detail__input"
+                  type="number"
+                  min="0"
+                  step="1000"
+                  formControlName="depositAmount"
+                  [disabled]="isUpdating() || isDepositSectionLocked()"
+                />
+                @if (showControlError('depositAmount')) {
+                  <small class="table-booking-detail__field-error"
+                    >Tiền cọc phải lớn hơn hoặc bằng 0.</small
+                  >
+                }
+              </label>
+
+              <label class="table-booking-detail__field-switch">
+                <input
+                  type="checkbox"
+                  formControlName="depositPaid"
+                  [disabled]="isUpdating() || isDepositSectionLocked()"
+                />
+                <span>Đã nhận cọc</span>
+              </label>
+
+              <div
+                class="type-status table-booking-detail__payment-status"
+                [ngClass]="vm.paymentStatusClass"
+              >
+                <span class="material-symbols-outlined">{{ vm.paymentStatusIcon }}</span>
+                {{ vm.paymentStatusLabel }}
+              </div>
+            </div>
+          </article>
+
+          <article
+            class="table-booking-detail__card table-booking-detail__card--col-12 table-booking-detail__card--outline table-booking-detail__card--no-bg table-booking-detail__info-grid"
+          >
+            <div class="table-booking-detail__note-section">
+              <h3 class="type-label-sm table-booking-detail__card-title-sm">
+                <span class="material-symbols-outlined">notes</span>
+                Ghi chú khách hàng
+              </h3>
+              <textarea
+                class="table-booking-detail__textarea"
+                rows="4"
+                formControlName="note"
+                placeholder="Nhập ghi chú"
+                [disabled]="isUpdating()"
+              ></textarea>
+            </div>
+            <div class="table-booking-detail__creator-section">
+              <h3 class="type-label-sm table-booking-detail__card-title-sm">
+                <span class="material-symbols-outlined">edit_note</span>
+                Người tạo
+              </h3>
+              <div class="table-booking-detail__creator-profile">
+                <img
+                  class="table-booking-detail__creator-avatar"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQyq5vyc005BHs5r-FibSzFIgTOYIf_0Wo6Q1I1yG4WHi_JeIUXYFcUwUZOuG_DictoPUuAGrYuWX9PYRTW98MJePF8P39qpUS2IekDb7BgwbHrY0UOg0z0KpI2fOW5WaHuuVt0jM2lQ1VQDbZtXK2hVhb7Y653h9QLse69THrmwSdafNQedEOier2Q9xy5lDBYIQ2LP60dORHN3XkVGCxWn2n7BXZ1fhzfLOE9pc1Y_OYayK7d46OJBRZ6Q-MiqiXslzW1VFs6A"
+                  alt="Avatar"
+                />
+                <div>
+                  <p class="type-label-md table-booking-detail__creator-name">
+                    {{ vm.creatorName }}
+                  </p>
+                  <p class="type-body-sm table-booking-detail__creator-time">
+                    {{ vm.creatorTimeLabel }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        @if (updateError(); as updateErrorMessage) {
+          <p
+            class="table-booking-detail__message table-booking-detail__message--error"
+            role="alert"
+          >
+            {{ updateErrorMessage }}
+          </p>
+        }
+      </form>
+
+      <footer class="table-booking-detail__footer">
+        <button
+          type="button"
+          class="table-booking-detail__btn table-booking-detail__btn--ghost type-label-md"
+          (click)="close()"
+          [disabled]="isUpdating()"
+        >
+          <span class="material-symbols-outlined">close</span>
+          Đóng
+        </button>
+        <div class="table-booking-detail__footer-actions">
+          <button
+            type="button"
+            class="table-booking-detail__btn table-booking-detail__btn--ghost type-label-md"
+            (click)="retry()"
+            [disabled]="isUpdating()"
+          >
+            <span class="material-symbols-outlined">refresh</span>
+            Tải lại
+          </button>
+          <button
+            type="button"
+            class="table-booking-detail__btn table-booking-detail__btn--primary type-label-md"
+            (click)="submitUpdate()"
+            [disabled]="isUpdating()"
+          >
+            <span class="material-symbols-outlined">check_circle</span>
+            {{ isUpdating() ? 'Đang cập nhật...' : 'Xác nhận' }}
+          </button>
+        </div>
+      </footer>
+    } @else {
+      <div class="table-booking-detail__body">
+        <article class="table-booking-detail__card table-booking-detail__card--col-12">
+          <p class="type-body-md">Chưa có dữ liệu chi tiết đơn đặt bàn.</p>
+        </article>
+      </div>
+    }
+  }
+</section>

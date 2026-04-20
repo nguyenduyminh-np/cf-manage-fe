@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;family=Work+Sans:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed": "#a3f69c",
+                    "on-secondary-fixed-variant": "#005312",
+                    "surface-container": "#efeeea",
+                    "surface-dim": "#dbdad6",
+                    "on-error-container": "#93000a",
+                    "on-primary-container": "#c19c94",
+                    "surface-variant": "#e4e2de",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed": "#2c1600",
+                    "error-container": "#ffdad6",
+                    "surface-container-highest": "#e4e2de",
+                    "on-surface": "#1b1c1a",
+                    "tertiary-container": "#54330c",
+                    "surface-bright": "#fbf9f5",
+                    "inverse-on-surface": "#f2f0ed",
+                    "on-tertiary-fixed-variant": "#623f18",
+                    "outline": "#827471",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-container": "#cb9b6c",
+                    "on-secondary-container": "#217128",
+                    "inverse-primary": "#e5beb5",
+                    "tertiary": "#391e00",
+                    "on-background": "#1b1c1a",
+                    "on-primary-fixed-variant": "#5c403a",
+                    "secondary-fixed-dim": "#88d982",
+                    "background": "#fbf9f5",
+                    "surface-container-high": "#eae8e4",
+                    "surface": "#fbf9f5",
+                    "primary-container": "#4e342e",
+                    "on-surface-variant": "#504442",
+                    "on-primary": "#ffffff",
+                    "surface-container-low": "#f5f3ef",
+                    "primary-fixed": "#ffdad2",
+                    "inverse-surface": "#30312e",
+                    "primary": "#361f1a",
+                    "outline-variant": "#d4c3bf",
+                    "tertiary-fixed": "#ffdcbd",
+                    "secondary-container": "#a0f399",
+                    "on-primary-fixed": "#2b1611",
+                    "on-secondary-fixed": "#002204",
+                    "on-error": "#ffffff",
+                    "primary-fixed-dim": "#e5beb5",
+                    "tertiary-fixed-dim": "#f0bd8b",
+                    "surface-tint": "#755750",
+                    "secondary": "#1b6d24",
+                    "error": "#ba1a1a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Work Sans"],
+                    "label": ["Work Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Work Sans', sans-serif; }
+        h1, h2, h3, h4 { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- Shell Background Overlay (Dashboard Simulation) -->
+<div class="fixed inset-0 flex">
+<!-- SideNavBar Implementation from JSON -->
+<aside class="fixed left-0 top-0 h-full flex flex-col h-screen w-64 border-r border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-950 z-10">
+<div class="p-6">
+<h1 class="text-[#4E342E] dark:text-stone-100 font-manrope font-black text-xl">Artisan Roast</h1>
+<p class="text-stone-500 text-xs mt-1">Management Portal</p>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<div class="flex items-center gap-3 px-3 py-2 text-stone-600 dark:text-stone-400 font-worksans hover:bg-stone-100 dark:hover:bg-stone-900 transition-colors cursor-pointer">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-manrope font-bold text-lg tracking-tight">Dashboard</span>
+</div>
+<!-- Active Tab: Bookings -->
+<div class="flex items-center gap-3 px-3 py-2 bg-stone-200/50 dark:bg-stone-800/50 text-[#4E342E] dark:text-[#D4A373] font-semibold border-r-4 border-[#4E342E] hover:bg-stone-100 dark:hover:bg-stone-900 transition-colors cursor-pointer">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-manrope font-bold text-lg tracking-tight">Bookings</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-stone-600 dark:text-stone-400 font-worksans hover:bg-stone-100 dark:hover:bg-stone-900 transition-colors cursor-pointer">
+<span class="material-symbols-outlined" data-icon="table_bar">table_bar</span>
+<span class="font-manrope font-bold text-lg tracking-tight">Tables</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-stone-600 dark:text-stone-400 font-worksans hover:bg-stone-100 dark:hover:bg-stone-900 transition-colors cursor-pointer">
+<span class="material-symbols-outlined" data-icon="restaurant_menu">restaurant_menu</span>
+<span class="font-manrope font-bold text-lg tracking-tight">Menu</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-stone-600 dark:text-stone-400 font-worksans hover:bg-stone-100 dark:hover:bg-stone-900 transition-colors cursor-pointer">
+<span class="material-symbols-outlined" data-icon="badge">badge</span>
+<span class="font-manrope font-bold text-lg tracking-tight">Staff</span>
+</div>
+</nav>
+<div class="p-4 border-t border-stone-200">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary">AV</div>
+<div>
+<p class="text-sm font-bold">Admin User</p>
+<p class="text-xs text-stone-500">Manager</p>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 ml-64 min-h-screen relative">
+<!-- TopAppBar Implementation from JSON -->
+<header class="sticky top-0 z-40 flex justify-between items-center w-full px-6 py-3 bg-[#FDFBF7]/80 dark:bg-stone-950/80 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 shadow-sm">
+<div class="flex items-center gap-4">
+<span class="hidden md:block text-[#4E342E] dark:text-stone-100 font-manrope font-bold text-xl">Booking Details</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#2E7D32] cursor-pointer" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-[#2E7D32] cursor-pointer" data-icon="help_outline">help_outline</span>
+<div class="flex items-center gap-2 text-stone-600">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</div>
+</div>
+</header>
+<!-- Background Dashboard Content (Simulated) -->
+<div class="p-8 opacity-40 select-none">
+<div class="grid grid-cols-4 gap-6 mb-8">
+<div class="h-32 bg-surface-container rounded-xl"></div>
+<div class="h-32 bg-surface-container rounded-xl"></div>
+<div class="h-32 bg-surface-container rounded-xl"></div>
+<div class="h-32 bg-surface-container rounded-xl"></div>
+</div>
+<div class="h-96 bg-surface-container rounded-xl"></div>
+</div>
+<!-- MODAL DIALOG OVERLAY -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm">
+<!-- Dialog Container -->
+<div class="w-full max-w-4xl bg-surface-container-lowest rounded-xl shadow-2xl overflow-hidden flex flex-col border border-outline-variant">
+<!-- Dialog Header -->
+<div class="px-8 py-6 flex items-center justify-between border-b border-surface-container">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined" data-icon="receipt_long" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+</div>
+<div>
+<h2 class="text-2xl font-manrope font-extrabold text-primary tracking-tight">Chi tiết đơn đặt bàn</h2>
+<p class="text-sm text-on-surface-variant font-label">Mã đơn: #123</p>
+</div>
+</div>
+<div class="flex items-center gap-2 px-4 py-1.5 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-full text-sm font-bold border border-tertiary-fixed-dim">
+<span class="material-symbols-outlined text-sm" data-icon="pending">pending</span>
+                            Chờ xác nhận
+                        </div>
+</div>
+<!-- Dialog Content (Bento-style Grid) -->
+<div class="p-8 overflow-y-auto max-h-[716px]">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Table Info Section -->
+<div class="md:col-span-4 bg-surface-container-low p-6 rounded-xl border border-surface-container-high relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 opacity-10 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-8xl" data-icon="table_bar">table_bar</span>
+</div>
+<h3 class="text-sm font-manrope font-bold text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="info">info</span>
+                                    THÔNG TIN BÀN
+                                </h3>
+<div class="space-y-4">
+<div>
+<p class="text-xs text-on-surface-variant font-label uppercase tracking-widest">Tên bàn</p>
+<p class="text-lg font-headline font-extrabold text-primary">Ban 08</p>
+</div>
+<div>
+<p class="text-xs text-on-surface-variant font-label uppercase tracking-widest">Mã bàn</p>
+<div class="inline-block px-3 py-1 bg-primary-container text-on-primary rounded font-mono font-bold mt-1">T08</div>
+</div>
+</div>
+</div>
+<!-- Customer Info Section -->
+<div class="md:col-span-8 bg-surface-container-low p-6 rounded-xl border border-surface-container-high">
+<h3 class="text-sm font-manrope font-bold text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="person">person</span>
+                                    THÔNG TIN KHÁCH HÀNG
+                                </h3>
+<div class="grid grid-cols-2 gap-6">
+<div>
+<p class="text-xs text-on-surface-variant font-label uppercase tracking-widest">Tên khách hàng</p>
+<p class="text-lg font-headline font-bold text-primary">Nguyen Van A</p>
+</div>
+<div>
+<p class="text-xs text-on-surface-variant font-label uppercase tracking-widest">Số điện thoại</p>
+<p class="text-lg font-headline font-bold text-primary">0987654321</p>
+</div>
+<div class="col-span-2 p-3 bg-secondary-container/20 rounded-lg flex items-center gap-3 text-secondary border border-secondary-container">
+<span class="material-symbols-outlined" data-icon="verified">verified</span>
+<span class="text-sm font-label font-medium">Khách hàng thân thiết</span>
+</div>
+</div>
+</div>
+<!-- Time Info Section -->
+<div class="md:col-span-7 grid grid-cols-2 gap-4 bg-surface-container p-6 rounded-xl">
+<div class="col-span-2">
+<h3 class="text-sm font-manrope font-bold text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="schedule">schedule</span>
+                                        LỊCH TRÌNH DỰ KIẾN
+                                    </h3>
+</div>
+<div class="p-4 bg-surface-container-lowest rounded-lg border border-outline-variant/30">
+<p class="text-xs text-on-surface-variant font-label uppercase mb-1">Giờ đến</p>
+<p class="text-base font-headline font-bold text-primary">19:00</p>
+<p class="text-xs text-on-surface-variant">2026-04-10</p>
+</div>
+<div class="p-4 bg-surface-container-lowest rounded-lg border border-outline-variant/30">
+<p class="text-xs text-on-surface-variant font-label uppercase mb-1">Giờ đi</p>
+<p class="text-base font-headline font-bold text-primary">21:00</p>
+<p class="text-xs text-on-surface-variant">2026-04-10</p>
+</div>
+</div>
+<!-- Payment Info Section -->
+<div class="md:col-span-5 bg-stone-100 p-6 rounded-xl border border-stone-200">
+<h3 class="text-sm font-manrope font-bold text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="payments">payments</span>
+                                    THANH TOÁN ĐẶT CỌC
+                                </h3>
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<p class="text-xs text-on-surface-variant font-label uppercase">Tiền cọc</p>
+<p class="text-xl font-headline font-black text-primary">150.000đ</p>
+</div>
+<div class="pt-2">
+<div class="flex items-center gap-2 text-error font-bold text-sm bg-error-container/20 p-2 rounded justify-center border border-error-container/50">
+<span class="material-symbols-outlined text-lg" data-icon="error">error</span>
+                                            Chưa thanh toán
+                                        </div>
+</div>
+</div>
+</div>
+<!-- Additional Info Section (Wide) -->
+<div class="md:col-span-12 bg-surface-container-lowest p-6 rounded-xl border border-outline-variant grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="md:col-span-2">
+<h3 class="text-xs font-manrope font-bold text-on-surface-variant mb-2 flex items-center gap-2 uppercase tracking-tighter">
+<span class="material-symbols-outlined text-sm" data-icon="notes">notes</span>
+                                        Ghi chú khách hàng
+                                    </h3>
+<div class="bg-stone-50 p-4 rounded-lg border border-stone-100 min-h-[60px] text-primary italic">
+                                        "Bàn gần cửa sổ"
+                                    </div>
+</div>
+<div>
+<h3 class="text-xs font-manrope font-bold text-on-surface-variant mb-2 flex items-center gap-2 uppercase tracking-tighter">
+<span class="material-symbols-outlined text-sm" data-icon="edit_note">edit_note</span>
+                                        Người tạo
+                                    </h3>
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover border border-outline-variant" data-alt="professional headshot of a restaurant staff member in uniform with friendly expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQyq5vyc005BHs5r-FibSzFIgTOYIf_0Wo6Q1I1yG4WHi_JeIUXYFcUwUZOuG_DictoPUuAGrYuWX9PYRTW98MJePF8P39qpUS2IekDb7BgwbHrY0UOg0z0KpI2fOW5WaHuuVt0jM2lQ1VQDbZtXK2hVhb7Y653h9QLse69THrmwSdafNQedEOier2Q9xy5lDBYIQ2LP60dORHN3XkVGCxWn2n7BXZ1fhzfLOE9pc1Y_OYayK7d46OJBRZ6Q-MiqiXslzW1VFs6A"/>
+<div>
+<p class="text-sm font-bold text-primary leading-none">Nhân viên 1</p>
+<p class="text-[10px] text-on-surface-variant mt-1">2026-04-10 14:30</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Dialog Footer -->
+<div class="px-8 py-6 bg-surface-container-low border-t border-surface-container flex flex-wrap gap-4 items-center justify-between">
+<button class="px-6 py-2.5 rounded-xl border border-outline text-on-surface font-manrope font-bold hover:bg-surface-dim transition-all active:scale-95 flex items-center gap-2">
+<span class="material-symbols-outlined text-xl" data-icon="close">close</span>
+                            Đóng
+                        </button>
+<div class="flex gap-3">
+<button class="px-6 py-2.5 rounded-xl bg-error text-on-error font-manrope font-bold hover:opacity-90 transition-all active:scale-95 flex items-center gap-2">
+<span class="material-symbols-outlined text-xl" data-icon="cancel">cancel</span>
+                                Hủy đặt
+                            </button>
+<button class="px-8 py-2.5 rounded-xl bg-secondary text-on-secondary font-manrope font-bold hover:opacity-90 transition-all active:scale-95 flex items-center gap-2 shadow-lg shadow-secondary/20">
+<span class="material-symbols-outlined text-xl" data-icon="check_circle">check_circle</span>
+                                Xác nhận
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

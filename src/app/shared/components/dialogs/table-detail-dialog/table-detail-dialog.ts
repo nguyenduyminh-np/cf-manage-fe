@@ -4,8 +4,8 @@ import { TuiButton, TuiDialogContext } from '@taiga-ui/core';
 import { injectContext } from '@taiga-ui/polymorpheus';
 import { catchError, map, Observable, of, shareReplay, startWith, Subject, switchMap } from 'rxjs';
 
-import { TableDetail, TableStatus } from '../../../../core/models/table.model';
-import { TableService } from '../../../../core/services/table.service';
+import { TableDetail, TableStatus } from '../../../../core/models/table/table.model';
+import { TableService } from '../../../../core/services/table/table.service';
 
 type TableDetailDialogInput = number | { tableId: number };
 

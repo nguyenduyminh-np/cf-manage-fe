@@ -1,17 +1,21 @@
 import { provideEventPlugins } from "@taiga-ui/event-plugins";
 import { provideAnimations } from "@angular/platform-browser/animations";
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { globalErrorInterceptor } from './core/interceptors/global-error.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-        provideAnimations(),
-        provideBrowserGlobalErrorListeners(),
-        provideHttpClient(),
+    provideAnimations(),
+    provideBrowserGlobalErrorListeners(),
+    provideHttpClient(
+      withInterceptors([authInterceptor, globalErrorInterceptor]),
+    ),
     provideRouter(routes),
-        provideEventPlugins(),
-    ],
+    provideEventPlugins(),
+  ],
 };

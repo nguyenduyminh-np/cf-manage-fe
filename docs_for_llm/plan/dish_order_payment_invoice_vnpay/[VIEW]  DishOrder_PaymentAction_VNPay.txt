@@ -1,0 +1,2364 @@
+*********** VIEW CHÍNH
+@using CoffeeCRM.Data.Constants
+@{
+    Layout = "_Admin_Layout";
+}
+<style>
+    .gradient-bg {
+        background: linear-gradient(135deg, #663ffa, #8e74ff);
+        color: white;
+    }
+
+    .card-table {
+        transition: transform 0.2s;
+        z-index: 1;
+    }
+
+        .card-table:hover {
+            transform: scale(1.05);
+            z-index: 2;
+        }
+
+    .menu-mini .dropdown-menu {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .menuOption {
+        display: none;
+        position: absolute;
+        width: 200px;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+        overflow: hidden;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        transform: translateY(10px);
+        opacity: 0;
+    }
+
+    .menuOption.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+    .menuOption div {
+            padding: 12px;
+            border-bottom: 1px solid #eaeaea;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+    .menuOption div:hover {
+                background-color: #f1f1f1;
+            }
+
+    .menuOption div:last-child {
+                border-bottom: none;
+            }
+
+    #tableOrderHistory thead tr th:nth-child(1),
+    #tableOrderHistory tbody tr td:nth-child(1),
+    #tableOrderHistory tfoot tr th:nth-child(1) {
+        width: 50px !important;
+        max-width: 50px !important;
+    }
+
+    #tableOrderHistory thead tr th:nth-child(2),
+    #tableOrderHistory tbody tr td:nth-child(2),
+    #tableOrderHistory tfoot tr th:nth-child(2) {
+        width: 50px !important;
+        max-width: 50px !important;
+        padding-left: 20px !important;
+    }
+
+    #tableOrderHistory thead tr th:nth-child(3),
+    #tableOrderHistory tbody tr td:nth-child(3),
+    #tableOrderHistory tfoot tr th:nth-child(3) {
+        width: 50px !important;
+        max-width: 50px !important;
+        text-align: center !important;
+    }
+
+    #tableOrderHistory thead tr th:nth-child(4),
+    #tableOrderHistory tbody tr td:nth-child(4),
+    #tableOrderHistory tfoot tr th:nth-child(4) {
+        width: 50px !important;
+        max-width: 50px !important;
+        text-align: center !important;
+    }
+</style>
+
+<div class="container-fluid p-0">
+    <!-- Header Row -->
+    
+
+    <!-- Body Row -->
+    <div class="row m-0 p-0">
+        <!-- Left Column: Menu -->
+        <div class="col-md-2 p-3 pe-3 pt-0">
+            <div class="col-md-2 d-flex justify-content-start align-items-center">
+                <label for="floorSelect" class="pe-2 fw-semibold">Chọn tầng:</label>
+                <select id="floorSelect" class="form-select w-auto">
+                    <option value="1">Tầng 1</option>
+                    <option value="2">Tầng 2</option>
+                    <option value="3">Tầng 3</option>
+                </select>
+            </div>
+
+			<div class="menu-mini mt-3 ">
+                <!-- Table Status -->
+                <div class="status-table mb-4">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-info-circle me-2"></i> Trạng thái bàn</h5>
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-circle text-success me-3"></i> Bàn trống
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-circle text-warning me-3"></i> Đang sử dụng
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-circle text-danger me-3"></i> Đã đặt trước
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-circle text-primary me-3"></i> Đang chờ thanh toán
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="statistics">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-chart-bar me-2"></i> Thống kê</h5>
+                    <div class="dropdown mb-2">
+                        <button class="btn btn-outline-primary dropdown-toggle w-100 text-start" type="button" id="invoiceDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-file-invoice me-2"></i> Số hóa đơn
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="invoiceDropdown">
+                            <li><a class="dropdown-item" href="#">Bàn 1: 13</a></li>
+                            <li><a class="dropdown-item" href="#">Bàn 2: 24</a></li>
+                            <li><a class="dropdown-item" href="#">Bàn 3: 5</a></li>
+                        </ul>
+                    </div>
+                    <div class="dropdown mb-2">
+                        <button class="btn btn-outline-primary dropdown-toggle w-100 text-start" type="button" id="orderDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-shopping-cart me-2"></i> Số lượt đặt
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="orderDropdown">
+                            <li><a class="dropdown-item" href="#">Bàn 1: 5</a></li>
+                            <li><a class="dropdown-item" href="#">Bàn 2: 10</a></li>
+                            <li><a class="dropdown-item" href="#">Bàn 3: 2</a></li>
+                        </ul>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-primary dropdown-toggle w-100 text-start" type="button" id="revenueDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-money-bill-wave me-2"></i> Doanh thu ngày
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="revenueDropdown">
+                            <li><a class="dropdown-item" href="#">Bàn 1: 200,000 VND</a></li>
+                            <li><a class="dropdown-item" href="#">Bàn 2: 450,000 VND</a></li>
+                            <li><a class="dropdown-item" href="#">Bàn 3: 100,000 VND</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Table List -->
+        <div class="col-md-10">
+            <div id="tableOrganization" class="row g-3"></div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-id">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="d-flex align-items-center">
+                    <div class="btn btn-icon btn-sm btn-active-light-primary ms-2 me-2" id="model-back-btn" onclick="startModel($('#tableBooking-id').val())">
+                        <i class="la la-backspace fs-1 text-warning"><span class="path1"></span><span class="path2"></span></i>
+                    </div>
+                    <h3 class="modal-title">Đặt món</h3>
+                </div>
+                <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="ki-duotone ki-cross fs-1 text-danger"><span class="path1"></span><span class="path2"></span></i>
+                </div>
+            </div>
+            <div class="modal-body">
+                <form action="#">
+                    <div class="row">
+
+                        <div class="col-xl" id="tableOrderHistory">
+                            <div class="d-flex justify-content-between mb-5">
+                                <h5 class="d-flex text-dark fw-bold fs-5 flex-column justify-content-center">
+                                    Danh sách lịch sử đặt món
+                                </h5>
+                                <button type="button" class="btn btn-primary ms-2" data-bs-toggle="tooltip" id="addWarehouseEntryRequest" title="Tạo mới" onclick="newOrder()">
+                                    <i class="ki-duotone ki-plus fs-2"></i>
+                                    Đặt món
+                                </button>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="card">
+                                    <div class="card-block table-border-style">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover display" id="tableDishOrderHistory">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="column-name">Người đặt</th>
+                                                        <th class="column-quantity">Trạng thái</th>
+                                                        <th class="column-price">Thời gian đặt</th>
+                                                        <th class="column-action-2">Thao tác</th>
+                                                    </tr>
+                                                </thead>
+                                                <thead id="rowSearch" class="d-none">
+                                                    <tr>
+                                                        <td><input type='text' class='form-control tableHeaderFilter' /></td>
+                                                        <td><input type='text' class='form-control tableHeaderFilter' /></td>
+                                                        <td><input type='text' class='form-control tableHeaderFilter' /></td>
+                                                        <td><input type='text' class='form-control tableHeaderFilter' /></td>
+
+                                                        <td class="text-center">
+                                                            <button id="btnTableSearch" class="btn btn-primary custom-btn-table me-1" title="Tìm kiếm">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                            <button id="btnTableResetSearch" class="btn btn-secondary custom-btn-table" title="Reset">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                                <tfoot>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <!-- Table end -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl d-none" id="tableOrderDetail">
+                            <div>
+                                <div class="d-flex flex-row justify-content-between">
+                                    <h5 class="d-flex text-dark fw-bold fs-5 flex-column justify-content-center" style="margin-bottom: 15px;">
+                                        Danh sách món ăn
+                                    </h5>
+                                    <div class="col-sm-6 d-flex flex-row align-items-center" style="gap:8px;" data-select2-id="select2-data-168-k47t">
+                                        <span class="required" style="white-space:nowrap;">Sản phẩm</span>
+                                        <select class="form-select dataSelect" id="productSearchForOrder" data-control="select2" data-dropdown-parent="#modal-id">
+                                        </select>
+                                        <input type="text" id="tableBooking-id" class="form-control d-none" />
+                                        <input type="text" id="dishOrder-id" class="form-control d-none" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="card">
+                                    <div class="card-block table-border-style">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover display" id="tableDataProduct">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="column-name">Tên sản phẩm</th>
+                                                        <th class="column-price">Giá</th>
+                                                        <th class="column-quantity">Số lượng</th>
+                                                        <th class="column-price">Thành tiền</th>
+                                                        <th class="column-action-2">Thao tác</th>
+                                                    </tr>
+                                                </thead>
+                                                <thead id="rowSearch" class="d-none">
+                                                    <tr>
+                                                        <td><input type='text' class='form-control tableHeaderFilter' /></td>
+                                                        <td><input type='text' class='form-control tableHeaderFilter' /></td>
+                                                        <td><input type='text' class='form-control tableHeaderFilter' /></td>
+                                                        <td><input type='text' class='form-control tableHeaderFilter' /></td>
+
+                                                        <td class="text-center">
+                                                            <button id="btnTableSearch" class="btn btn-primary custom-btn-table me-1" title="Tìm kiếm">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                            <button id="btnTableResetSearch" class="btn btn-secondary custom-btn-table" title="Reset">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                                <tfoot>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <!-- Table end -->
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                        data-bs-dismiss="modal">
+                    Đóng
+                </button>
+                <button type="button" class="btn btn-primary d-none" id="btnConfirmOrder">
+                    <span class="indicator-label">
+                        Đặt món
+                    </span>
+                    <span class="indicator-progress">
+                        Đang tải... <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- start booking table -->
+<div class="modal fade" id="bookingModal" tabindex="-1" role="dialog" aria-labelledby="bookingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="d-flex align-items-center">
+                    <div class="btn btn-icon btn-sm btn-active-light-primary ms-2 me-2 d-none" id="booking-model-back-btn" onclick="hideBookingForm()">
+                        <i class="la la-backspace fs-1 text-warning"><span class="path1"></span><span class="path2"></span></i>
+                    </div>
+                    <h3 class="modal-title">Đặt món</h3>
+                </div>
+                <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="ki-duotone ki-cross fs-1 text-danger"><span class="path1"></span><span class="path2"></span></i>
+                </div>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-xl" id="tableBookingHistory">
+                    <div class="d-flex justify-content-between mb-5">
+                        <h5 class="d-flex text-dark fw-bold fs-5 flex-column justify-content-center">
+                            Danh sách lịch sử đặt bàn
+                        </h5>
+
+                        <button type="button" class="btn btn-primary ms-2" data-bs-toggle="tooltip" id="btnAddTableBooking" title="Tạo mới" onclick="showBookingForm()">
+                            <i class="ki-duotone ki-plus fs-2"></i>
+                            Đặt bàn
+                        </button>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="card">
+                            <div class="card-block table-border-style">
+                                <div class="table-responsive">
+                                    <table class="table table-hover display" id="tableTableBookingHistory">
+                                        <thead>
+                                            <tr class="fw-bold fs-6 text-gray-800">
+                                                <th>STT</th>
+                                                <th>Thời gian đặt</th>
+                                                <th>Liên hệ</th>
+                                                <th>Ghi chú</th>
+                                                <th>Trạng thái</th>
+                                                <th>Người đặt</th>
+                                                <th>Ngày tạo</th>
+                                                <th>Thao tác</th>
+                                            </tr>
+                                        </thead>
+                                        <thead id="rowSearch" class="d-none">
+                                            <tr>
+                                                <td><input type='text' class='form-control tableHeaderFilter' /></td>
+                                                <td><input type='text' class='form-control tableHeaderFilter' /></td>
+                                                <td><input type='text' class='form-control tableHeaderFilter' /></td>
+                                                <td><input type='text' class='form-control tableHeaderFilter' /></td>
+
+                                                <td class="text-center">
+                                                    <button id="btnTableTableBookingSearch" class="btn btn-primary custom-btn-table me-1" title="Tìm kiếm">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                    <button id="btnTableTableBookingResetSearch" class="btn btn-secondary custom-btn-table" title="Reset">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                        <tfoot>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- Table end -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl d-none" id="addNewBookingForm">
+                    <form id="tableBookingForm">
+                        <div class="row g-4">
+                            <!-- Chọn ngày giờ -->
+                            <div class="col-md-6">
+                                <label for="bookingDate" class="form-label">Ngày đặt</label>
+                                <input type="date" class="form-control" id="bookingDate" />
+                                <span class="error-message" style="color: #E60000; display: none;"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="bookingTime" class="form-label">Giờ đặt</label>
+                                <input type="time" class="form-control" id="bookingTime" />
+                                <span class="error-message" style="color: #E60000; display: none;"></span>
+                            </div>
+                            <!-- Thông tin liên hệ -->
+                            <div class="col-md-12">
+                                <label for="contactInfo" class="form-label">Thông tin liên hệ</label>
+                                <input type="text" class="form-control" id="contactInfo" placeholder="Họ tên, Số điện thoại..." />
+                                <span class="error-message" style="color: #E60000; display: none;"></span>
+                            </div>
+                            <!-- Ghi chú -->
+                            <div class="col-md-12">
+                                <label for="notes" class="form-label">Ghi chú</label>
+                                <textarea class="form-control" id="notes" rows="3" placeholder="Ghi chú thêm (nếu có)..."></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>                   
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-bs-dismiss="modal">Đóng</button>
+                <button type="submit" form="tableBookingForm" class="btn btn-primary">
+                    <span class="indicator-label">Xác nhận đặt bàn</span>
+                    <span class="indicator-progress d-none">
+                        Đang xử lý... <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+                    </span>
+                </button>
+            </div>    
+        </div>
+    </div>
+</div>
+<!-- End booking table -->
+<!-- Start booking payment-->
+<div class="modal fade" id="modal-payment">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="d-flex align-items-center">
+                    <h3 class="modal-title">Thanh toán</h3>
+                </div>
+                <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="ki-duotone ki-cross fs-1 text-danger"><span class="path1"></span><span class="path2"></span></i>
+                </div>
+            </div>
+            <div class="modal-body">
+                <form action="#">
+                    <div class="row">
+                        <div class="col-xl ">
+                            <div class="col-xl" id="tablePayment">
+                                <div style="text-align: center;">
+                                    <h2>Hóa Đơn Thanh Toán</h2>
+
+                                </div>
+                                <!-- Thông tin hóa đơn -->
+                                <div class="mb-4 " >
+                                    <div class="col-sm-6 d-none">
+                                        <div class="form-group">
+                                            <div class="input-group input-group-solid mb-5">
+                                                <label class="input-group-text  " id="basic-addon-invoiceCode"><strong>Mã hóa đơn:</strong></label>
+                                                <input type="text" disabled autocomplete="off" class="form-control input-invoiceCode" id="invoice-invoiceCode" aria-label="invoiceCode" aria-describedby="basic-addon-invoiceCode" />
+                                            </div>
+                                        </div>   
+                                     </div>
+                                    
+                                     <div class="col-sm-6">                           
+                                        <div class='form-group'>
+                                            <div class="input-group input-group-solid mb-5">
+                                                <label class="input-group-text" id="basic-addon-createdTime">Ngày tạo</label>
+                                                <div class='form-control date datetimepicker  input-createdTime' id='invoice-createdTimeDiv' style='padding:0px;'>
+                                                    <input type='text' autocomplete="off" id="invoice-createdTime" required class="form-control datepicker" aria-label="createdTime" aria-describedby="basic-addon-createdTime" disabled />
+                                                    <span class="input-group-addon">
+                                                        <span class="glyphicon glyphicon-calendar"></span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-none col-sm-6">
+                                        <div class="form-group">
+                                            <div class="input-group input-group-solid mb-5">
+                                                <label class="input-group-text" id="basic-addon-id">Mã table</label>
+                                                <input readonly type="number" autocomplete="off" class="form-control input-id" id="tableId" aria-label="id" aria-describedby="basic-addon-id" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                     <div class="col-sm-6">                   
+                                        <div class="form-group">
+                                            <div class="input-group input-group-solid mb-5">
+                                                <label class="input-group-text  " id="basic-addon-invoiceCode"><strong>Tên bàn:</strong></label>
+                                                <input type="text" autocomplete="off" class="form-control input-invoiceCode" id="invoice-tableId" aria-label="invoiceCode" aria-describedby="basic-addon-invoiceCode" disabled />
+                                            </div>
+                                        </div>   
+                                     </div>
+                                    <div class="d-none col-sm-6">
+                                        <div class="form-group">
+                                            <div class="input-group input-group-solid mb-5">
+                                                <label class="input-group-text" id="basic-addon-id">Mã</label>
+                                                <input readonly type="number" autocomplete="off" class="form-control input-id" id="accoutId" aria-label="id" aria-describedby="basic-addon-id" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                     <div class="col-sm-6">                   
+                                        <div class="form-group">
+                                            <div class="input-group input-group-solid mb-5">
+                                                <label class="input-group-text  " id="basic-addon-accoutId"><strong>Nhân viên phụ trách:</strong></label>
+                                                <input type="text" autocomplete="off" class="form-control input-invoiceCode" id="invoice-accoutId" aria-label="invoiceCode" aria-describedby="basic-addon-invoiceCode" disabled />
+                                            </div>
+                                        </div>   
+                                     </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="card">
+                                    <div class="card-block table-border-style">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover display" id="tableInvoiceDetail">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="column-name">Tên sản phẩm</th>
+                                                        <th class="column-price">Giá</th>
+                                                        <th class="column-quantity">Số lượng</th>
+                                                        <th class="column-price">Thành tiền</th>
+
+                                                    </tr>
+                                                </thead>                                               
+                                                <tbody>
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td colspan="4" class="text-end">
+                                                            <strong style="margin-right: 10px;">Tổng dịch vụ:</strong>
+                                                            <input disabled type="text" id="invoicedetail-totalPriceNotVAT" class="column-price form-control d-inline-block" style="width: 150px;" />
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="4" class="text-end">
+                                                            <strong style="margin-right: 10px;">Tổng thanh toán (10% VAT):</strong>
+                                                            <input disabled type="text" id="invoicedetail-totalPrice" class="form-control d-inline-block" style="width: 150px;" />
+                                                        </td>
+                                                    </tr>
+                                                </tfoot>
+                                             </table>                                            
+                                        </div>
+                                    </div>
+                                    <!-- Table end -->
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Phương thức thanh toán -->
+                        <div class="mb-3">
+                            <label for="paymentMethod" class="form-label"><strong>Phương thức thanh toán:</strong></label>
+                            <select id="payment-paymentId" class="form-select">
+                            </select>
+                            <script>
+                                var paymentData = [];
+                                async function loadDataSelectPayment() {
+                                    await $.ajax({
+                                        url: systemURL + 'paymentmethod/api/list',
+                                        type: 'GET',
+                                        async: 'true',
+                                        contentType: 'application/json',
+                                        success: function (responseData) {
+                                            // console.log(new Date().getSeconds() + ':' + new Date().getMilliseconds() + ' - loaded category created');
+                                            // debugger;
+                                            //console.log(responseData);
+                                            var data = responseData.data;
+                                            paymentData = data;
+                                            //console.log(roleData);
+                                        },
+                                        error: function (e) {
+                                            //console.log(e.message);
+                                        }
+                                    });
+                                }
+                                //console.log(roleData);
+                                $(document).ready(function () {
+                                    loadDataSelectPayment();
+                                    $.when(loadDataSelectPayment()).done(function () {
+                                        paymentData.forEach(function (item) {
+                                            $('#payment-paymentId').append(new Option(item.paymentMethodName, item.id, false, false)).trigger('change');
+                                        })
+                                    });
+                                });
+                            </script>
+                        </div>
+                        <!-- Nút hành động -->
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary " id="confirmPayment">
+                    <span class="indicator-label">
+                        Xác nhận thanh toán
+                    </span>
+                    <span class="indicator-progress">
+                        Đang tải... <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+                    </span>
+                </button>
+                <button type="button" class="btn btn-default"
+                        data-bs-dismiss="modal">
+                    Đóng
+                </button>
+               
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    //var data = await httpService.getAsync("warehouse/api/detail/" + id);
+    const submitButton = document.getElementById('btnConfirmOrder');
+    const submitButtonPayment = document.getElementById('confirmPayment');
+    $(document).ready(async function () {
+        loadTableList();
+        loadProductList();
+        // Hàm này khi chọn sản phẩm cho vào danh sách để đặt món
+        $("#productSearchForOrder").on("select2:select", function () {
+            if ($("#productSearchForOrder").val()) {
+                let dish = getProductById($("#productSearchForOrder").val());
+                if (isExistProductInTable(dish.id)) {
+                    swal.fire({
+                        icon: 'warning',
+                        title: 'Đặt món',
+                        html: 'Sản phẩm đã có trong đơn.'
+                    });
+                } else {
+                    tableProduct.row.add({
+                        "id": 0,
+                        "dishId": dish.id,
+                        "dishName": dish.dishName,
+                        "dishOrderStatusId": @DishOrderStatudConst.PROCESSING,
+                        "price": dish.price,
+                        "finalPrice": dish.price,
+                        "quantity": 1,
+                        "isEdit": false,
+                    }).draw();
+                }
+            }
+            //trigger change lại product
+            $("#productSearchForOrder").val("").trigger("change");
+            //Tính toán lại giá tiền cho toàn bộ bảng
+            //calculateAllPrice();
+            // }
+
+        });
+    });
+</script>
+
+<script>
+        let allTables = [];
+            function loadTableList() {
+                $.ajax({
+                    url: systemURL + "Table/api/Listdto",
+                    method: "GET",
+                    success: function (response) {
+                        if (response.status === "200") {
+                            allTables = response.data;
+                            renderTables(allTables);
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error("Lỗi gọi API:", xhr);
+                    }
+                });
+            }
+                        
+            $("#floorSelect").on("change", function () {
+                renderTables(allTables);
+            });
+
+                function renderTables(tables) {
+        const selectedFloor = $("#floorSelect").val();
+        const container = $("#tableOrganization");
+        container.empty();
+
+        const filteredTables = tables.filter(table => {
+            const match = table.tableCode.match(/TB-(\d{3})-(\d+)/);
+            if (!match) return false;
+            const floor = parseInt(match[1].charAt(0));
+            return floor == selectedFloor;
+        });
+
+        if (filteredTables.length === 0) {
+            container.html('<div class="col-12 text-center text-muted">Không có bàn nào.</div>');
+            return;
+        }
+
+        filteredTables.forEach(table => {
+            const color = getStatusColor(table.tableStatus);
+            const card = getTableCard(color, table.tableName, table.id, table.tableCode, table.totalBooking, table.lastBookingTime);
+            container.append(card);
+        });
+    }
+
+    function getStatusColor(status) {
+        switch (status) {
+        case "available": return "linear-gradient(45deg, #34eb83, #6cfac4)"; // Gradient xanh lá tươi sáng
+        case "occupied": return "linear-gradient(45deg, #ff6666, #ff9999)"; // Gradient đỏ nhạt tươi sáng
+        case "booked": return "linear-gradient(45deg, #ffcc33, #fff066)"; // Gradient vàng tươi sáng
+        default: return "linear-gradient(45deg, #a3bffa, #d6deff)"; // Gradient xanh dương nhạt
+        }
+    }
+
+    function getTableCard(color, tableName, id, tableCode, totalBooking, lastBookingTime) {
+        const idTbMenu = "menu" + id;
+        // Lấy số lượng người từ chữ số cuối của tableCode
+        const match = tableCode.match(/TB-\d{3}-(\d+)/);
+        const maxPeople = match ? match[1] : 4; // Mặc định 4 nếu không khớp
+
+        // Xử lý totalBooking
+        const orderCount = totalBooking !== undefined ? totalBooking : 0;
+
+        // Xử lý bookingTime
+            let timeText = "";
+    if (lastBookingTime != null) {
+        const absMinutes = Math.abs(lastBookingTime);
+        const isPast = lastBookingTime < 0;
+
+        if (absMinutes >= 60) {
+            const hours = Math.floor(absMinutes / 60);
+            const minutes = absMinutes % 60;
+            timeText = `${isPast ? "Trễ " : "Còn "}${hours}h${minutes} phút`;
+        } else {
+            timeText = `${isPast ? "Trễ " : "Còn "}${absMinutes} phút`;
+        }
+    } else {
+        timeText = "Chưa có lịch";
+    }
+
+
+        return `
+                <div class="col-md-4">
+            <div class="card card-table p-0 m-0 shadow-sm guestTable" onclick="showMenu(event, ${id})">
+                <div class="card-header gradient-bg text-center fw-bold pt-2 fs-4 text-white">${tableName}</div>
+                <div class="card-body p-2 py-6 d-flex flex-column align-items-center justify-content-center gap-3">
+                    <i class="fas fa-mug-hot fa-5x fs-3" style="color: ${color};"></i>
+                    <div class="d-flex align-items-center gap-2 fs-3 p-2">
+                        <span class="badge rounded-pill text-white p-3 px-4 fs-4" style="background: ${color};">
+                            <i class="fas fa-${getStatusIcon(color)} fa-lg me-1 text-primary"></i>${getStatusText(color)}
+                        </span>
+                        <span class="badge bg-info rounded-pill text-white p-3 px-4 fs-4">
+                            <i class="fas fa-users fa-lg me-1 text-primary"></i>${maxPeople} người
+                        </span>
+                    </div>
+                    <div class="d-flex align-items-center gap-3 text-muted pt-2 pb-2 fs-5">
+                        <span><i class="fas fa-shopping-basket me-1 text-primary"></i>Đã đặt: ${orderCount}</span>
+                        <span><i class="fas fa-hourglass-half me-1 text-primary"></i>${timeText}</span>
+                    </div>
+                </div>
+                <div class="card-footer p-0">
+                    <div class="menuOption position-absolute hidden bg-white shadow rounded p-2 mt-1 z-100" data-tableBooking-id="${id}" id="${idTbMenu}">
+                        <div onclick="menuAction(this, ${id}, 'order')" class="p-2 hover-bg-light"><i class="fas fa-utensils me-2 text-primary"></i> Đặt món</div>
+                        <div onclick="menuAction(this, ${id}, 'booking')" class="p-2 hover-bg-light"><i class="fas fa-calendar-check me-2 text-primary"></i> Đặt bàn</div>
+                        <div onclick="menuAction(this, ${id}, 'occupied')" class="p-2 hover-bg-light"><i class="fas fa-chair me-2 text-primary"></i> Chọn bàn</div>
+                        <div onclick="menuAction(this, ${id}, 'available')" class="p-2 hover-bg-light"><i class="fas fa-trash me-2 text-primary"></i> Làm trống</div>
+                        <div onclick="menuAction(this, ${id}, 'payment')" class="p-2 hover-bg-light"><i class="fas fa-credit-card me-2 text-primary"></i> Thanh toán</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+    }
+
+    // Hàm phụ để ánh xạ màu trạng thái sang badge và text
+        function getBadgeColor(color) {
+        return "transparent"; // Không cần badge màu vì đã dùng gradient trực tiếp
+    }
+
+    function getStatusText(color) {
+        if (color.includes("#34eb83")) return "Trống";
+        if (color.includes("#ff6666")) return "Đã dùng";
+        if (color.includes("#ffcc33")) return "Đã đặt";
+        return "Không xác định";
+    }
+
+    function getStatusIcon(color) {
+        if (color.includes("#34eb83")) return "check";
+        if (color.includes("#ff6666")) return "user";
+        if (color.includes("#ffcc33")) return "calendar";
+        return "question";
+    }
+
+</script>
+
+<!-- #region Ẩn hiện menu khi click vào bàn và modal đặt đồ ăn-->
+<script>
+    $(window).on('click', function (e) {
+        // Kiểm tra xem click có phải vào guestTable hoặc menu không
+        if (!$(e.target).closest('.guestTable').length && !$(e.target).closest('.menuOption').length) {
+            $('.menuOption').removeClass('active');  // Đóng menu nếu click ra ngoài
+        }
+    });
+    function ModalBooking() {
+        $("#modal-id").modal('show');
+    }
+    function makePayment() {
+        $("#modal-payment").modal('show');
+    }
+    function showMenu(event, menuId) {
+        event.stopPropagation();
+        // Ẩn tất cả các menu trước khi hiển thị menu tương ứng
+        $('.menuOption').removeClass('active');
+        // Lấy phần tử menu cần hiển thị từ menuId
+        const $menu = $("#menu" + menuId);
+        // Lấy phần tử guestTable
+        const $guestTable = $(event.currentTarget);
+        // Tính toán vị trí của guestTable để đặt vị trí cho menu
+        const rect = $guestTable[0].getBoundingClientRect();
+        $menu.css({
+            top: 45 + '%',  // Điều chỉnh khoảng cách từ trên
+            left: 50 + '%'  // Điều chỉnh khoảng cách từ bên phải
+        }).addClass('active');  // Thêm lớp active để hiển thị menu
+        // Ngừng truyền sự kiện để tránh việc đóng menu ngay sau khi mở
+        event.stopPropagation();
+    }
+    async function menuAction(element, menuId, actionName) {
+        $('.menuOption').removeClass('active');
+        $("#tableBooking-id").val($(element).closest('.menuOption').data('tablebooking-id'))
+
+        // Nếu hành động là order - đặt bàn thì mở modal.
+        if (actionName == 'order') {
+            await startModel(menuId);
+            ModalBooking();
+        }
+
+        // Hành động booking - đặt bàn
+        else if(actionName ==  'booking') {
+            openBookingModal(menuId);
+        }
+
+        // Chọn bàn (occupied)
+        else if(actionName == 'occupied') {
+            await selectTable(menuId);
+        }
+
+        // Làm trống bàn (available)
+        else if(actionName == 'available') {
+            await makeAvailable(menuId);
+        }
+        else if(actionName == 'payment') {
+            await startInvoice(menuId);
+            await makePayment();
+        }
+        // Code của các hành động tiếp theo thì viết dưới đây
+    }
+    async function startModel(tableId) {
+        tableDishOrderHistory.clear().draw();
+        $('#model-back-btn').addClass('d-none');
+        $('#btnConfirmOrder').addClass('d-none');
+        $('#tableOrderHistory').fadeIn(10);
+        $('#tableOrderDetail').addClass('d-none');
+        $('#btnConfirmOrder').addClass('d-none');
+        var data = await httpService.getAsync("dishorder/api/DetailByTableId/" + tableId);
+        if (data.status == "200") {
+            data.data[0].forEach((item) => {    
+                tableDishOrderHistory.row.add({
+                    "id": item.id,
+                    "ordererName": item.ordererName,
+                    "dishOrderStatusId": item.dishOrderStatusId,
+                    "dishOrderStatusName": item.dishOrderStatusName,
+                    "createdTime": item.createdTime,
+                }).draw();
+            })
+        } else {
+            swal.fire({
+                icon: 'error',
+                title: 'Đặt món',
+                html: 'Đã xảy ra lỗi, vui lòng thử lại sau'
+            });
+        }
+    }
+    async function startInvoice(tableId) {
+        tableInvoiceDetail.clear().draw();
+        // $('#model-back-btn').addClass('d-none');
+        // $('#btnConfirmOrder').addClass('d-none');
+        // $('#tableInvoiceDetail').fadeIn(10);
+        // // $('#tableOrderDetail').addClass('d-none');
+        // $('#btnConfirmOrder').addClass('d-none');
+        // Gán vào input người phụ trách
+        setAcountName()
+        generateInvoiceCode();
+        setTableName(tableId);
+        $("#invoice-createdTime").val(moment(new Date()).format("DD/MM/YYYY HH:mm:ss"));
+        var data = await httpService.getAsync("dishorderdetail/api/DishDetailByTableId/" + tableId);
+        var sumPrice = 0;
+        if (data.status == "200") {
+            data.data[0].forEach((item) => {
+                tableInvoiceDetail.row.add({
+                    "dishId": item.dishId,
+                    "dishName": item.dishName,
+                    "quantity": item.quantity,
+                    "price": item.price,
+                    "totalPrice": item.totalPrice,
+                }).draw();
+                sumPrice += item.price * item.quantity;
+            })
+            $("#invoicedetail-totalPriceNotVAT").val(sumPrice);
+            sumPrice += sumPrice * 0.1;
+            $("#invoicedetail-totalPrice").val(sumPrice);
+        } else {    
+            swal.fire({
+                icon: 'error',
+                title: 'Thanh toán',
+                html: 'Đã xảy ra lỗi, vui lòng thử lại sau'
+            });
+        }
+    }
+    // Hàm định dạng ngày hiện tại: YYYYMMDD
+    function getCurrentDateFormatted() {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
+        const dd = String(today.getDate()).padStart(2, '0');
+        return `${yyyy}${mm}${dd}`;
+    }
+
+    async function setAcountName() {
+        let userData = localStorage.getItem('profile');
+        let user = JSON.parse(userData);
+        $("#accoutId").val(user.id);
+        let accountName = await getFullName(user.id);
+        $("#invoice-accoutId").val(accountName);
+    }
+    // Hàm tạo mã hóa đơn
+    async function generateInvoiceCode() {
+
+        const response = await $.ajax({
+            url: systemURL + "invoice/api/Count", // API trả về thông tin bàn
+            type: 'GET',
+            dataType: 'json'
+        });
+        let count;
+        if(response == 0){
+            count = 1;
+        }else{
+            count++;
+        }
+        const currentDate = getCurrentDateFormatted();
+        // Gán mã hóa đơn vào input
+        $("#invoice-invoiceCode").val("HD-" + currentDate +"-" + (count + 1).toString().padStart(4, "0"));
+    }
+    async function setTableName(tableId) {
+        $("#tableId").val(tableId);
+        const response = await $.ajax({
+            url: `https://localhost:7185/api/Table/${tableId}`, // API trả về thông tin bàn
+            type: 'GET',
+            dataType: 'json'
+        });
+        const tableName = response.name || "Bàn chưa chọn";
+        $("#invoice-tableId").val(tableName);
+    }
+
+    function newOrder() {
+        $("#dishOrder-id").val(0);
+        tableProduct.clear().draw();
+        showOrderDetail();
+    }
+    function showOrderDetail() {
+        $('#tableOrderHistory').fadeOut(300, function () {
+            $('#tableOrderDetail').removeClass('d-none');
+            $('#tableOrderDetail').fadeIn(300);
+        });
+        $('#model-back-btn').removeClass('d-none');
+        $('#btnConfirmOrder').removeClass('d-none');
+    }
+    async function editOrder(DishOrderId, DishOrderStatusId) {
+        showOrderDetail();
+        if (!(DishOrderStatusId == @DishOrderStatudConst.PROCESSING)) {
+            $('#btnConfirmOrder').addClass('d-none');
+        }
+        $("#dishOrder-id").val(DishOrderId);
+        tableProduct.clear().draw();
+        var data = await httpService.getAsync("dishorderdetail/api/ListByOrderId/" + DishOrderId);
+        if (data.status == "200") {
+            data.data.forEach((item) => {
+                tableProduct.row.add({
+                    "id": item.id,
+                    "dishId": item.dishId,
+                    "dishName": item.dishName,
+                    "dishOrderStatusId": DishOrderStatusId,
+                    "price": item.price,
+                    "finalPrice": item.price * item.quantity,
+                    "quantity": item.quantity,
+                    "isEdit": false,
+                }).draw();
+            })
+        } else {
+            swal.fire({
+                icon: 'error',
+                title: 'Đặt món',
+                html: 'Đã xảy ra lỗi, vui lòng thử lại sau'
+            });
+        }
+    }
+</script>
+<!-- #endregion -->
+<script>
+    InitDishOrderHistory();
+    var tableDishOrderHistory;
+    function InitDishOrderHistory() {
+        tableDishOrderHistory = $("#tableDishOrderHistory").DataTable({
+            order: [[0, 'desc']],
+            ordering: false,
+            columns: [
+                {
+                    data: "ordererName",
+                    render: function (data, type, row, meta) {
+                        return `<strong><span style=' color: #044688;' class='fs-14' >${data}</span></strong>`;
+                    },
+                },
+                {
+                    data: "dishOrderStatusName",
+                    render: function (data, type, row, meta) {
+                        return `<strong><span style='' class='fs-14 ${(row.dishOrderStatusId == @DishOrderStatudConst.PROCESSING) ? "text-primary" : ""}${row.dishOrderStatusId == @DishOrderStatudConst.DONE ? "text-success" : ""}${row.dishOrderStatusId == @DishOrderStatudConst.CANCEL ? "text-danger" : ""}' >${data}</span></strong>`;
+                    },
+                },
+                {
+                    data: "createdTime",
+                    render: function (data) {
+                        var tempDate = new Date(data);
+                        var displayValue = timeAgo(moment(data).format("DD/MM/YYYY HH:mm:ss"));
+                        //return displayValue;
+                        return `<span class="badge py-3 px-4" style="color:#04b440; background-color:#e6f8ec; font-size: 13px">${displayValue}<span></span></span>`;
+                        
+                    }
+                },
+                {
+                    data: 'id',
+                    render: function (data, type, row, meta) {
+
+                        return `
+                                        <div class='overlay-edit-custom'>
+                                                            <button title="Sửa" type='button' onclick='editOrder(${row.id},${row.dishOrderStatusId})' class='btn btn-icon btn-admin-primary'><i class="ki-duotone ki-notepad-edit fs-2x text-primary"><span class="path1"> </span><span class="path2"></span></i></button>
+                                                    <button title="Hủy" type='button' onclick='cancelOrder(${data})' class='btn btn-icon btn-admin-danger ${row.dishOrderStatusId == @DishOrderStatudConst.PROCESSING ? "" : "d-none"}'><i class="ki-duotone ki-trash-square fs-2x text-danger "><span class="path1"></span><span class="path2"> </span><span class="path3"></span><span class="path4"> </span></i></button>
+                                        </div>
+                                    `;
+                    }
+                },
+            ],
+            createdRow: function (row, data, dataIndex) {
+                $(row).attr('data-productId', data.productId);
+                $(row).attr('data-id', data.id);
+            },
+            columnDefs: [
+                { targets: "no-sort", orderable: false },
+                { targets: "no-search", searchable: false },
+                { orderable: false, targets: [-1, 0] },
+            ],
+            aLengthMenu: [
+                [10, 25, 50, 100],
+                [10, 25, 50, 100]
+            ],
+            columnDefs: [
+                // {
+                //     targets: 2,
+                //     createdCell: function (td, cellData, rowData, row, col) {
+                //         $(td).attr("data-attr", "quantity");
+                //     }
+                // },
+            ],
+            drawCallback: function () {
+                $('#tableDishOrderHistory tfoot').html("");
+                $("#tableDishOrderHistory thead:nth-child(1) tr").clone(true).appendTo("#tableDishOrderHistory tfoot");
+                $('#tableDishOrderHistory tfoot tr').addClass("border-top");
+            },
+            "oLanguage": {
+                "sUrl": "/js/Vietnamese.json"
+            },
+        })
+    }
+
+</script>
+
+<!-- #region Các hành động Table liên quan đến Order món, thêm món -->
+<script>
+    InitTableProduct();
+    var tableProduct;
+    function InitTableProduct() {
+        tableProduct = $("#tableDataProduct").DataTable({
+            order: [[0, 'desc']],
+            ordering:false,
+            columns: [
+                {
+                    data: "dishName",
+                    render: function (data, type, row, meta) {
+                        return "<span id='row" + row.id + "-column-id'>" + data + "<span>";
+                    },
+                },
+                {
+                    data: "price",
+                    render: function (data, type, row, meta) {
+                        return "<span id='row" + row.id + "-column-id'>" + formatNumberCurrency(data.toString()) + "<span>";
+                    },
+                },
+                {
+                    data: "quantity",
+                    render: function (data, type, row, meta) {
+                        return `
+                                            <span class="">` + (data) + `</span>
+                                            <input type="number" min="0" class="text-start form-control d-none quantity-change" onchange="onChangeQuantity(this)" value="` + data + `" />`;
+                    },
+                },
+                {
+                    data: "finalPrice",
+                    render: function (data, type, row, meta) {
+                        return "<span class='bold' id='row" + row.id + "-column-id'>" + formatNumberCurrency(data.toString()) + "<span>";
+                    },
+                },
+                {
+                    data: 'id',
+                    render: function (data, type, row, meta) {
+
+                        return `
+                                            <div class='overlay-edit-custom ${!(row.dishOrderStatusId == @DishOrderStatudConst.PROCESSING) ? "d-none" : ""}'>
+                                            <button title="Sửa" type='button' onclick='editOrderDetail(this)' class='btn btn-icon btn-admin-primary ${row.isEdit == false ? '' : 'd-none'}'><i class="ki-duotone ki-notepad-edit fs-2x text-primary"><span class="path1"> </span><span class="path2"></span></i></button>
+                                        <button title="Sửa hoàn tất" type='button' onclick='editDoneOrderDetail(this)' class='btn btn-icon btn-admin-primary ${row.isEdit == true ? '' : 'd-none'}'><i class="fas fa-check" style="color: #007BFF; font-size: 16px;"></i></button>
+                                            <button title="Xoá" type='button' onclick='deleteOrderDetail(this)' class='btn btn-icon btn-admin-danger'><i class="ki-duotone ki-trash-square fs-2x text-danger"><span class="path1"></span><span class="path2"> </span><span class="path3"></span><span class="path4"> </span></i></button>
+                                    </div>
+                                `;
+                    }
+                },
+            ],
+            createdRow: function (row, data, dataIndex) {
+                $(row).attr('data-productId', data.productId);
+                $(row).attr('data-id', data.id);
+            },
+            columnDefs: [
+                { targets: "no-sort", orderable: false },
+                { targets: "no-search", searchable: false },
+                { orderable: false, targets: [-1, 0] },
+            ],
+            aLengthMenu: [
+                [10, 25, 50, 100],
+                [10, 25, 50, 100]
+            ],
+            columnDefs: [
+                {// Số lượng
+                    targets: 2,
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        $(td).attr("data-attr", "quantity");
+                    }
+                },
+            ],
+            drawCallback: function () {
+                $('#tableDataProduct tfoot').html("");
+                $("#tableDataProduct thead:nth-child(1) tr").clone(true).appendTo("#tableDataProduct tfoot");
+                $('#tableDataProduct tfoot tr').addClass("border-top");
+            },
+            "oLanguage": {
+                "sUrl": "/js/Vietnamese.json"
+            },
+        })
+    }
+
+    var DishData = [];
+    function loadProductList() {
+        $('#productSearchForOrder').select2({
+            language: 'vi',
+            dropdownCssClass: 'bigdrop',
+            minimumInputLength: 1,
+            ajax: {
+                url: systemURL + 'Dish/api/Search',
+                type: "POST",
+                contentType: "application/json",
+                data: function (params) {
+                    return JSON.stringify({
+                        searchString: params.term,
+                    });
+                },
+                processResults: function (res) {
+                    var data = res.data;
+                    DishData = data
+                    return {
+                        results: data
+                    };
+                }
+            },
+            escapeMarkup: function (markup) { return markup; },
+            templateResult: formatProductResult,
+            templateSelection: formatProductSelection
+        });
+    }
+    function formatProductResult(data) {
+        var price = "";
+        if (data.loading != true) {
+            price = data.price.toString();
+        }
+        var price = data.price ? formatNumberCurrency(data.price.toString()) + ' vnđ' : 'N/A';
+        var productName = data.dishName ? data.dishName : 'Không xác định';
+        return `
+                                    <div class="d-flex justify-content-between p-1">
+                                            <span style="min-width: 120px; display: inline-block; padding-left: 0; color: #044688; ">
+                                        <strong>${productName}</strong>
+                                    </span>
+                                </div>
+                                <div class="p-1">
+                                        <span style="min-width: 120px; display: inline-block; padding-left: 0; color: #044688; ;">
+                                                ${price}
+                                    </span>
+                                </div>
+                                    <div style="border-bottom: 1px solid #ced4da; margin-left: 0;"></div>
+                        `;
+    }
+    function formatProductSelection(data) {
+        return `<div class=""><span>` + data.name + `</span></div>`;
+    }
+    // Hàm sửa OrderDetail
+    function editOrderDetail(element) {
+        let $row = $(element).parents("tr")
+        let data = tableProduct.row($row).data();
+
+        data.isEdit = true;
+        // tableProduct.row($row).data(data).draw();
+
+        $.when(
+            tableProduct.row($row).data(data).draw()
+        ).done(function () {
+            $row.find('td[data-attr="quantity"] span').addClass("d-none");
+            $row.find('td[data-attr="quantity"] input').removeClass("d-none");
+        });
+    }
+    function editDoneOrderDetail(element) {
+        let $row = $(element).parents("tr")
+        let data = tableProduct.row($row).data();
+
+        data.isEdit = false;
+        tableProduct.row($row).data(data).draw();
+    }
+    function calculateAllPrice() {
+        let totalPrice = 0;
+        tableProduct.rows().every(function (rowIdx, tableLoop, rowLoop) {
+            totalPrice += this.data().finalPrice;
+        });
+        totalPrice += parseInt($("#order-TotalShipMoney").text().replaceAll('.', ''));
+        $("#order-TotalMoney").text(formatNumberCurrency(totalPrice.toString()));
+    };
+    function getProductById(id) {
+        const dish = DishData.find(d => parseInt(d.id) == parseInt(id));
+        return dish;
+    }
+    function isExistProductInTable(dishId) {
+        let isExist = false;
+        tableProduct.rows().every(function () {
+            if (this.data().dishId == dishId) isExist = true;
+        });
+        return isExist;
+    }
+    function deleteOrderDetail(element) {
+        let $row = $(element).parents("tr")
+        let data = tableProduct.row($row).data();
+        tableProduct.row($row).remove().draw();
+        // Xoá xong phải tính lại tiền tổng đơn
+    }
+    // Hàm thay đổi số lượng trong bảng
+    function onChangeQuantity(element) {
+        let $row = $(element).parents("tr")
+        let data = tableProduct.row($row).data();
+        let oldQuantity = parseInt(data.quantity);
+        let newQuantity = $(element).val().replace(/\D/g, '') ? parseInt($(element).val().replace(/\D/g, '')) : oldQuantity;
+        data.quantity = newQuantity;
+        data.finalPrice = newQuantity * data.price;
+    }
+    submitButton.addEventListener('click', function (e) {
+        e.preventDefault();
+        let dishList = [];
+        tableProduct.rows().every(function () {
+            let data = this.data();
+
+            let obj = {
+                id: data.id,
+                quantity: data.quantity,
+                dishId: data.dishId,
+                dishOrderId: $("#dishOrder-id").val(),
+            }
+            dishList.push(obj);
+        });
+        if (dishList.length == 0) {
+            Swal.fire(
+                'Đặt món không thành công',
+                'Vui lòng chọn ít nhất một món ăn!',
+                'warning'
+            );
+            submitButton.setAttribute('data-kt-indicator', 'off');
+            submitButton.disabled = false;
+            return;
+        }
+        Swal.fire({
+            title: 'Đặt món',
+            text: "Xác nhận thay đổi?",
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#443',
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Huỷ'
+        }).then((result) => {
+            if (result.value) { 
+                submitButton.setAttribute('data-kt-indicator', 'on');
+                submitButton.disabled = true;
+                
+                let UpdateObj = {
+                    "id": $("#dishOrder-id").val(),
+                    "tableId": $("#tableBooking-id").val(),
+                    "accountId": 0,
+                    "dishOrderStatusId": 0,
+                    "dishOrderDetails": dishList
+                }
+                $.ajax({
+                    url: systemURL + "dishorder/api/AddOrUpdate",
+                    type: "POST",
+                    contentType: "application/json",
+                    beforeSend: function (xhr) {
+                        if (localStorage.token) {
+                            xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token);
+                        }
+                    },
+                    data: JSON.stringify(UpdateObj),
+                    success: function (responseData) {
+                        // debugger;
+                        if (responseData.status == "200" && responseData.message === "SUCCESS") {
+                            Swal.fire(
+                                'Thành công!',
+                                'Đặt món thành công',
+                                'success'
+                            );
+                            submitButton.setAttribute('data-kt-indicator', 'off');
+                            submitButton.disabled = false;
+                            startModel(UpdateObj.tableId)
+                        }
+                    },
+                    error: function (e) {
+                        //console.log(e.message);
+                        Swal.fire(
+                            'Lỗi!',
+                            'Đã xảy ra lỗi, vui lòng thử lại',
+                            'error'
+                        );
+                        submitButton.setAttribute('data-kt-indicator', 'off');
+                        submitButton.disabled = false;
+                    }
+                });
+            }
+        });
+        
+        
+    });
+    function cancelOrder(id) {
+        Swal.fire({
+            title: 'Hủy đặt món',
+            text: "Xác nhận thay đổi?",
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#443',
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Huỷ'
+        }).then((result) => {
+            if (result.value) {
+                let UpdateObj = {
+                    "id": id,
+                    "tableId": parseInt($("#tableBooking-id").val()),
+                    "accountId": 0,
+                    "dishOrderStatusId": @DishOrderStatudConst.CANCEL
+                    }
+                $.ajax({
+                    url: systemURL + "dishorder/api/Update",
+                    type: "POST",
+                    contentType: "application/json",
+                    beforeSend: function (xhr) {
+                        if (localStorage.token) {
+                            xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token);
+                        }
+                    },
+                    data: JSON.stringify(UpdateObj),
+                    success: function (responseData) {
+                        // debugger;
+                        if (responseData.status == "200" && responseData.message === "SUCCESS") {
+                            Swal.fire(
+                                'Thành công!',
+                                'Hủy món thành công',
+                                'success'
+                            );
+                            startModel(UpdateObj.tableId)
+                        }
+                    },
+                    error: function (e) {
+                        //console.log(e.message);
+                        Swal.fire(
+                            'Lỗi!',
+                            'Đã xảy ra lỗi, vui lòng thử lại',
+                            'error'
+                        );
+
+                    }
+                });
+            }
+        })
+
+                
+    }
+</script>
+<!-- #region Các hành động Table liên quan đến Đặt bàn -->
+<script>
+    const apiURL = 'https://localhost:7185/api/';
+    let table;
+    var currentBookingId = 0;
+
+    // Đóng form đặt bàn, hiển thị lịch sử đặt bàn
+    function hideBookingForm(){
+        $('#booking-model-back-btn').addClass('d-none');
+        $('#addNewBookingForm').addClass('d-none');
+        $('#tableBookingHistory').removeClass('d-none');
+        currentBookingId = 0;
+    }
+
+    // Hiển thị form đặt bàn, đóng lịch sử đặt bàn
+    function showBookingForm() {
+        $('#tableBookingHistory').addClass('d-none');
+        $('#addNewBookingForm').removeClass('d-none');
+        $('#booking-model-back-btn').removeClass('d-none');
+    }
+
+    async function renderDataBooking(tableId) {
+        $('#tableTableBookingHistory').DataTable().destroy();
+            table = $('#tableTableBookingHistory').DataTable({
+            processing: true,
+            serverSide: true,
+            paging: true,
+            searching: { regex: true },
+            order: [1, 'desc'],
+            "oLanguage": {
+                "sUrl": "/js/Vietnamese.json"
+            },
+            ajax: {
+                url: `${apiURL}TableBooking/listTableBooking/${tableId}`,
+                type: "POST",
+                contentType: "application/json",
+                dataType: "json",
+                data: function (d) {
+                    d.searchAll = "";
+                    return JSON.stringify(d);
+                }
+            },
+            columns: [
+                {
+                    data: 'id',
+                    render: function (data, type, row, meta) {
+                        var info = table.page.info();
+                        var stt = meta.row + 1 + info.page * info.length;
+                        return stt;
+                    }
+                },
+                {
+                data: "checkinTime",
+                render: function (data) {
+                    // Định dạng thời gian checkin theo kiểu: 11:45 02/12/2024
+                    return moment(data).format("HH:mm DD/MM/YYYY");
+                },
+                className: "fw-bold",
+                style: "color: #044688;" // Màu chữ theo yêu cầu
+            },
+            {
+                data: "contactInfor",
+                render: function (data) {
+                    return data; // Liên hệ
+                }
+            },
+            {
+                data: "note",
+                render: function (data) {
+                    return data || "Không có ghi chú"; // Hiển thị ghi chú hoặc thông báo nếu không có
+                }
+            },
+            {
+                data: "bookingStatus",
+                render: function (data) {
+                    // Hiển thị trạng thái theo mã
+                    let statusText = "";
+                    let statusClass = "";
+                    switch (data) {
+                        case 0:
+                            statusText = "Đã xác nhận";
+                            statusClass = "fw-bold" // Chữ in đậm
+                            style = "color: green;"; // Màu xanh
+                            break;
+                        case 1:
+                            statusText = "Đã huỷ";
+                            statusClass = "fw-bold" // Chữ in đậm 
+                            style = "color: red;"; // Màu đỏ
+                            break;
+                        case 2:
+                            statusText = "Đã hoàn thành";
+                            statusClass = "fw-bold" // Chữ in đậm
+                            style = "color: blue;"; // Màu xanh dương
+                            break;
+                        case 3:
+                            statusText = "Đã nhận bàn";
+                            statusClass = "fw-bold" // Chữ in đậm
+                            style = "color: blue;"; // Màu xanh dương
+                            break;
+                        default:
+                            statusText = "Không xác định";
+                            statusClass = "fw-bold";
+                            style = "color: gray;";
+                            break;
+                    }
+                    return `<span class="${statusClass}" style="${style}">${statusText}</span>`;
+                }
+            },
+            {
+                data: "accountId",
+                render: function (accountId, type, row, meta) {
+                    if (!accountId || isNaN(accountId)) {
+                        return "Không có tên"; // Trả về khi không có accountId
+                    }
+
+                    // Giá trị hiển thị tạm thời
+                    return "Đang tải...";
+                },
+                createdCell: async function (td, cellData, rowData, row, col) {
+                    if (cellData && !isNaN(cellData)) {
+                        // Gọi API và cập nhật giá trị sau khi có dữ liệu
+                        let accountName = await getFullName(cellData);
+
+                        // Cập nhật giá trị trong ô
+                        $(td).html(accountName);
+                    }
+                }
+            },
+            {
+                data: "createdTime",
+                render: function (data) {
+                    // Định dạng ngày tạo theo kiểu: 02/12/2024 15:30:00
+                    return moment(data).format("DD/MM/YYYY HH:mm:ss");
+                }
+            }
+                ,
+                {
+                    data: 'id',
+                    render: function (data, type, row, meta) {
+                        if(row.bookingStatus == 0) {
+                            return `
+                                    <div class='d-flex justify-content-center gap-2'>
+                                        <a title='Cập nhật' onclick='editBooking(${row.id})' class='me-2 btn_manage'>
+                                            <span class='svg-icon-success svg-icon svg-icon-1 svg_teh009'>
+                                                <span class='svg-icon-primary svg-icon svg-icon-1'>
+                                                    <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                                                        <path opacity='0.3' fill-rule='evenodd' clip-rule='evenodd' d='M2 4.63158C2 3.1782 3.1782 2 4.63158 2H13.47C14.0155 2 14.278 2.66919 13.8778 3.04006L12.4556 4.35821C11.9009 4.87228 11.1726 5.15789 10.4163 5.15789H7.1579C6.05333 5.15789 5.15789 6.05333 5.15789 7.1579V16.8421C5.15789 17.9467 6.05333 18.8421 7.1579 18.8421H16.8421C17.9467 18.8421 18.8421 17.9467 18.8421 16.8421V13.7518C18.8421 12.927 19.1817 12.1387 19.7809 11.572L20.9878 10.4308C21.3703 10.0691 22 10.3403 22 10.8668V19.3684C22 20.8218 20.8218 22 19.3684 22H4.63158C3.1782 22 2 20.8218 2 19.3684V4.63158Z' fill='currentColor'></path>
+                                                        <path d='M10.9256 11.1882C10.5351 10.7977 10.5351 10.1645 10.9256 9.77397L18.0669 2.6327C18.8479 1.85165 20.1143 1.85165 20.8953 2.6327L21.3665 3.10391C22.1476 3.88496 22.1476 5.15129 21.3665 5.93234L14.2252 13.0736C13.8347 13.4641 13.2016 13.4641 12.811 13.0736L10.9256 11.1882Z' fill='currentColor'></path>
+                                                        <path d='M8.82343 12.0064L8.08852 14.3348C7.8655 15.0414 8.46151 15.7366 9.19388 15.6242L11.8974 15.2092C12.4642 15.1222 12.6916 14.4278 12.2861 14.0223L9.98595 11.7221C9.61452 11.3507 8.98154 11.5055 8.82343 12.0064Z' fill='currentColor'></path>
+                                                    </svg>
+                                                </span>
+                                            </span>
+                                        </a>
+                                        <a title='Huỷ đặt' onclick='updateStatus(${row.id}, 1)' class='me-2 btn_manage'>
+                                            <span class='svg-icon-danger svg-icon svg-icon-1'>
+                                                <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                                                    <path d='M5 9C5 8.44772 5.44772 8 6 8H18C18.5523 8 19 8.44772 19 9V18C19 19.6569 17.6569 21 16 21H8C6.34315 21 5 19.6569 5 18V9Z' fill='currentColor'></path>
+                                                    <path opacity='0.5' d='M5 5C5 4.44772 5.44772 4 6 4H18C18.5523 4 19 4.44772 19 5V5C19 5.55228 18.5523 6 18 6H6C5.44772 6 5 5.55228 5 5V5Z' fill='currentColor'></path>
+                                                    <path opacity='0.5' d='M9 4C9 3.44772 9.44772 3 10 3H14C14.5523 3 15 3.44772 15 4V4H9V4Z' fill='currentColor'></path>
+                                                </svg>
+                                            </span>
+                                        </a>
+                                                                <a title='Xác nhận' onclick='updateStatus(${row.id}, 3)' class='me-2 btn_manage'>
+                                                        <span class='svg-icon-success svg-icon svg-icon-1 svg_teh009'>
+                                                        <i class="far fa-check-circle"></i></span>
+                                                    </a>
+                                    </div>
+                                `;
+                        }
+                        return '';
+                    }
+                }
+            ],
+            columnDefs: [
+                { targets: "no-sort", orderable: false },
+                { targets: "no-search", searchable: false },
+                { orderable: false, targets: [-1, 0] }
+            ],
+            aLengthMenu: [
+                [10, 25, 50, 100],
+                [10, 25, 50, 100]
+            ],
+            drawCallback: function () {
+                $('#tableTableBookingHistory tfoot').html("");
+                //$("#tableTableBookingHistory thead tr").clone(true).appendTo("#tableTableBookingHistory tfoot");
+                $('#tableTableBookingHistory tfoot tr').addClass("border-top");
+
+                
+            }
+        });
+    }
+
+    // Hàm async để gọi API và lấy fullName
+    async function getFullName(accountId) {
+        try {
+            let response = await $.ajax({
+                url: `${apiURL}account/${accountId}`,
+                type: 'GET',
+                dataType: 'json'
+            });
+
+            if (response && response.fullName) {
+                return response.fullName;
+            } else {
+                return "Không có tên";
+            }
+        } catch (error) {
+            console.error("Error fetching account info:", error);
+            return "Lỗi tải thông tin";
+        }
+    }
+
+
+    async function openBookingModal(tableId) {
+         
+        renderDataBooking(tableId);
+         // Reset trạng thái modal khi đóng
+        $('#bookingModal').on('hidden.bs.modal', function () {
+            // Đặt lại trạng thái mặc định
+            $('#booking-model-back-btn').addClass('d-none'); // Ẩn nút quay lại
+            $('#addNewBookingForm').addClass('d-none'); // Ẩn form đặt bàn
+            $('#tableBookingHistory').removeClass('d-none'); // Hiển thị lịch sử đặt bàn
+
+            // Đặt lại giá trị các trường trong form
+            $("#bookingDate").val("");
+            $("#bookingTime").val("");
+            $("#contactInfo").val("");
+            $("#notes").val("");
+
+            currentBookingId = 0;
+
+            // Ẩn thông báo lỗi (nếu có)
+            $('#tableBookingForm .error-message').hide();
+        });
+
+        $('#tableBookingForm .form-control').on('blur', function () {
+        const $input = $(this); // Lấy trường hiện tại
+        const $errorMessage = $input.siblings('.error-message'); // Lấy span thông báo lỗi tương ứng
+
+        // Kiểm tra giá trị của trường
+        if ($input.val().trim() === '') {
+            // Nếu trống, hiển thị thông báo lỗi
+            let fieldName = $input.attr('id'); // Lấy id của trường
+            let errorText = '';
+
+            switch (fieldName) {
+                case 'bookingDate':
+                    errorText = 'Vui lòng chọn ngày đặt.';
+                    break;
+                case 'bookingTime':
+                    errorText = 'Vui lòng chọn giờ đặt.';
+                    break;
+                case 'contactInfo':
+                    errorText = 'Vui lòng nhập thông tin liên hệ.';
+                    break;
+                default:
+                    errorText = 'Trường này là bắt buộc.';
+            }
+
+            $errorMessage.text(errorText).show();
+        } else {
+            // Nếu không trống, ẩn thông báo lỗi
+            $errorMessage.hide();
+        }
+        });      
+
+        // Hiển thị modal chọn ngày giờ
+        $('#bookingModal').modal('show'); 
+
+        // Đặt giá trị ban đầu cho các trường trong modal
+        $("#bookingDate").val("");
+        $("#bookingTime").val("");
+        $("#contactInfo").val("");
+        $("#notes").val("");
+
+        // Mở modal
+        $('#bookingModal').modal('show');
+
+        // Xử lý sự kiện submit form
+        $('#tableBookingForm').off('submit').on('submit', async function (e) {
+            e.preventDefault(); // Ngăn hành vi submit mặc định
+
+            // Thu thập dữ liệu từ form
+            let bookingDate = $("#bookingDate").val();
+            let bookingTime = $("#bookingTime").val();
+            let contactInfo = $("#contactInfo").val();
+            let notes = $("#notes").val();
+
+            let checkinTimeInput = `${bookingDate}T${bookingTime}:00.000Z`;
+
+            // Kiểm tra nếu thiếu thông tin bắt buộc
+            if (!bookingDate || !bookingTime || !contactInfo) {
+                Swal.fire(
+                    'Thông báo',
+                    'Vui lòng điền đầy đủ thông tin ngày, giờ và liên hệ.',
+                    'warning'
+                );
+                return;
+            }
+            
+            const tableBookings = await getTableBookingsByDateAndTable(bookingDate, tableId);
+
+            if (tableBookings) {
+                // Kiểm tra từng booking xem có trùng với thời gian đã chọn hay không
+                    for (let booking of tableBookings) {
+        let bookingCheckinTime = new Date(booking.checkinTime);
+
+        // Tách giờ và phút của booking
+        let bookingHours = bookingCheckinTime.getHours();
+        let bookingMinutes = bookingCheckinTime.getMinutes();
+
+        // Tách giờ và phút của thời gian người dùng nhập vào
+        let userCheckinTime = new Date(checkinTimeInput);
+        let userHours = userCheckinTime.getUTCHours();
+        let userMinutes = userCheckinTime.getUTCMinutes();
+
+        // Tính thời gian tính bằng phút để kiểm tra khoảng cách thời gian
+        let bookingTimeInMinutes = bookingHours * 60 + bookingMinutes; // Booking time in minutes
+        let userTimeInMinutes = userHours * 60 + userMinutes; // User input time in minutes
+
+        // Kiểm tra nếu thời gian người dùng nhập vào cách thời gian booking trong khoảng 15 phút trước hoặc 120 phút sau
+        if (userTimeInMinutes >= bookingTimeInMinutes - 15 && userTimeInMinutes <= bookingTimeInMinutes + 120) {
+            Swal.fire(
+                'Thông báo',
+                'Thời gian đặt bàn trùng với thời gian đã có bàn đặt, vui lòng chọn thời gian khác.',
+                'warning'
+            );
+            return; // Ngừng thực hiện submit nếu trùng thời gian
+        }
+    }
+
+            }
+
+            // Tạo đối tượng JSON để gửi tới API
+            let requestObj = {
+                id: currentBookingId,
+                bookingTime: new Date().toISOString(), // Thời gian hiện tại
+                checkinTime: `${bookingDate}T${bookingTime}:00.000Z`, // Kết hợp ngày và giờ từ form
+                contactInfor: contactInfo,
+                note: notes || "Không",
+                bookingStatus: 0,
+                createdTime: new Date().toISOString(), // Thời gian hiện tại
+                active: true,
+                accountId: 0,
+                tableId: tableId,
+                account: {},
+                table: {}
+            };
+
+            // Kiểm tra nếu id != 0, dùng PUT để cập nhật
+            let url = systemURL + "tableBooking/api/addOrUpdate";
+            let method = "POST"; // Mặc định là POST
+            if (requestObj.id !== 0) {
+                url = systemURL + "tableBooking/api/updateTableBooking/" + requestObj.id; // URL của PUT API
+                method = "PUT"; // Chuyển sang PUT
+            }
+
+            // Gửi yêu cầu POST/PUT tới API
+            $.ajax({
+                url: url,
+                type: method,
+                contentType: "application/json",
+                beforeSend: function (xhr) {
+                        if (localStorage.token) {
+                            xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token);
+                        }
+                    },
+                data: JSON.stringify(requestObj),
+                success: function (response) {
+                    // Kiểm tra phản hồi từ server
+                    if (response && response.status === "success") {
+                        Swal.fire(
+                            'Thành công',
+                            'Đặt bàn thành công!',
+                            'success'
+                        ).then(() => {
+                            $('#bookingModal').modal('hide'); // Đóng modal
+                            // Có thể thêm logic làm mới bảng đặt bàn nếu cần
+                        });
+                        $('#tableTableBookingHistory').DataTable().ajax.reload();
+                    } else {
+                        Swal.fire(
+                            'Lỗi',
+                            response.message || 'Đã xảy ra lỗi khi đặt bàn.',
+                            'error'
+                        );
+                    }
+                },
+                error: function (error) {
+                    Swal.fire(
+                        'Lỗi',
+                        'Không thể kết nối tới máy chủ. Vui lòng thử lại.',
+                        'error'
+                    );
+                }
+            });
+        });
+    }
+
+    // Hàm hiển thị form và điền dữ liệu vào form từ đối tượng tableBooking
+    async function editBooking(id) {
+        // Ẩn lịch sử đặt bàn và hiển thị form thêm mới
+        showBookingForm();
+
+        currentBookingId = id;
+
+        // Gọi API để lấy dữ liệu từ server
+        const tableBooking = await getTableBookingData(id);
+
+        // Nếu có dữ liệu, điền vào form
+        if (tableBooking) {
+            const checkinTime = new Date(tableBooking.checkinTime);
+
+            // Định dạng lại ngày (dd/MM/yyyy => yyyy-MM-dd)
+            const formattedDate = checkinTime.toISOString().split('T')[0]; // Chuyển đổi sang yyyy-MM-dd
+            $('#bookingDate').val(formattedDate); // Điền vào trường input ngày
+
+            // Định dạng lại giờ (12-hour -> 24-hour)
+            let hours = checkinTime.getHours();
+            let minutes = checkinTime.getMinutes();
+            hours = hours < 10 ? '0' + hours : hours; // Đảm bảo giờ có 2 chữ số
+            minutes = minutes < 10 ? '0' + minutes : minutes; // Đảm bảo phút có 2 chữ số
+            const formattedTime = hours + ':' + minutes; // Định dạng theo HH:mm
+            $('#bookingTime').val(formattedTime); // Điền vào trường input giờ
+
+            $('#contactInfo').val(tableBooking.contactInfor);
+            $('#notes').val(tableBooking.note);
+        }
+    }
+
+    async function updateStatus(id, newStatus) {
+         const tableBooking = await getTableBookingData(id);
+         if (!tableBooking) {
+                Swal.fire(
+                    'Lỗi',
+                    'Không tìm thấy thông tin đặt bàn.',
+                    'error'
+                );
+                return;
+         }
+
+         tableBooking.bookingStatus = newStatus;
+         const requestObj = tableBooking;
+
+         // Gửi yêu cầu POST/PUT tới API
+            $.ajax({
+                url: `${systemURL}tableBooking/api/updateTableBooking/${id}`,
+                type: "PUT",
+                contentType: "application/json",
+                beforeSend: function (xhr) {
+                        if (localStorage.token) {
+                            xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token);
+                        }
+                    },
+                data: JSON.stringify(requestObj),
+                success: function (response) {
+                    // Kiểm tra phản hồi từ server
+                    if (response && response.status === "success") {
+                        Swal.fire(
+                            'Thành công',
+                            'Đặt bàn thành công!',
+                            'success'
+                        ).then(() => {
+                            $('#bookingModal').modal('hide'); // Đóng modal
+                            // Có thể thêm logic làm mới bảng đặt bàn nếu cần
+                        });
+                        $('#tableTableBookingHistory').DataTable().ajax.reload();
+                    } else {
+                        Swal.fire(
+                            'Lỗi',
+                            response.message || 'Đã xảy ra lỗi khi đặt bàn.',
+                            'error'
+                        );
+                    }
+                },
+                error: function (error) {
+                    Swal.fire(
+                        'Lỗi',
+                        'Không thể kết nối tới máy chủ. Vui lòng thử lại.',
+                        'error'
+                    );
+                }
+            });
+    }
+
+    // Hàm gọi API để lấy dữ liệu từ server
+    async function getTableBookingData(id) {
+        try {
+            const response = await $.ajax({
+                url: `${apiURL}TableBooking/${id}`,
+                type: "GET",
+                beforeSend: function (xhr) {
+                    if (localStorage.token) {
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token);
+                    }
+                }
+            });
+
+            if (response) {
+                // Trả về dữ liệu booking nếu thành công
+                return response;
+            } else {
+                // Nếu có lỗi khi nhận dữ liệu
+                Swal.fire('Lỗi', 'Không thể lấy thông tin đặt bàn.', 'error');
+                return null;
+            }
+        } catch (error) {
+            Swal.fire('Lỗi', 'Có lỗi xảy ra khi kết nối tới máy chủ.', 'error');
+            return null;
+        }
+    }
+
+    // Hàm gọi API để lấy thời gian khả dụng
+    async function fetchAvailableTimes(selectedDate, tableId) {
+        try {
+            const response = await $.ajax({
+                url: `${apiURL}TableBooking/getAvailableTimes?selectedDate=${selectedDate}&tableId=${tableId}`,
+                type: 'GET',
+                beforeSend: function (xhr) {
+                    if (localStorage.token) {
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token);
+                    }
+                }
+            });
+
+            if (response && response.availableTimes) {
+                // Lọc danh sách giờ có sẵn và chỉ cho phép hiển thị những giờ này
+                const availableTimes = response.availableTimes.map(time => {
+                    return time.split('T')[1]; // Tách phần giờ ra
+                });
+
+                // Cập nhật các giờ khả dụng vào trường input
+                updateBookingTimeOptions(availableTimes);
+            }
+        } catch (error) {
+            console.error('Error fetching available times:', error);
+            Swal.fire('Lỗi', 'Không thể tải danh sách giờ khả dụng.', 'error');
+        }
+    }
+
+    // Hàm cập nhật các lựa chọn giờ khả dụng vào input time
+    function updateBookingTimeOptions(availableTimes) {
+        const bookingTimeInput = $('#bookingTime');
+
+        // Xóa hết các lựa chọn cũ trong input time
+        bookingTimeInput.empty();
+
+        // Thêm từng giờ khả dụng vào input time
+        availableTimes.forEach(time => {
+            bookingTimeInput.append(new Option(time, time));
+        });
+
+        // Thêm option mặc định nếu cần
+        bookingTimeInput.append(new Option('Chọn giờ', '', true, true));
+    }
+</script>
+<script>
+
+    // Hàm gọi API lấy booking theo ngày và bàn
+    async function getTableBookingsByDateAndTable(date, tableIdGet) {
+        try {
+            const response = await $.ajax({
+                url: `${apiURL}TableBooking/getByDate?selectedDate=${date}&tableId=${tableIdGet}`,
+                type: "GET",
+                beforeSend: function (xhr) {
+                    if (localStorage.token) {
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token);
+                    }
+                }
+            });
+
+            // Kiểm tra nếu có dữ liệu trả về
+            if (response) {
+                // Lọc các booking có trạng thái là 0
+                return response;
+            }
+            return null; // Trả về null nếu không có dữ liệu
+        } catch (error) {
+            console.error('Lỗi khi lấy dữ liệu TableBooking:', error);
+            return null;
+        }
+    }
+
+    // Hàm kiểm tra và cập nhật trạng thái nếu cần
+        // Hàm kiểm tra và cập nhật trạng thái nếu cần
+    async function autoUpdateBookingStatus() {
+        const currentTime = new Date(); // Lấy thời gian hiện tại
+        const selectedDate = currentTime.toISOString().split('T')[0]; // Lấy ngày hiện tại (yyyy-mm-dd)
+
+        try {
+            // Lấy tất cả các bàn từ API
+            const tableResponse = await $.ajax({
+                url: `${apiURL}Table`,
+                type: "GET",
+                beforeSend: function (xhr) {
+                    if (localStorage.token) {
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token);
+                    }
+                }
+            });
+
+            // Duyệt qua tất cả các bàn và kiểm tra booking
+            if (tableResponse && tableResponse.length > 0) {
+                for (const table of tableResponse) {
+                    // Lấy tất cả các tableBooking cho bàn này
+                    const bookingResponse = await $.ajax({
+                        url: `${apiURL}TableBooking/getByDate?selectedDate=${selectedDate}&tableId=${table.id}`,
+                        type: "GET",
+                        beforeSend: function (xhr) {
+                            if (localStorage.token) {
+                                xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token);
+                            }
+                        }
+                    });
+
+                    // Duyệt qua tất cả các booking của bàn
+                    if (bookingResponse && bookingResponse.data) {
+                        for (const booking of bookingResponse.data) {
+                            const checkinTime = new Date(booking.checkinTime); // Lấy thời gian check-in
+                            const fifteenMinutesAgo = new Date(currentTime.getTime() - 15 * 60000); // Lấy thời gian 15 phút trước
+
+                            // Kiểm tra nếu thời gian hiện tại đã vượt quá thời gian check-in + 15 phút
+                            if (checkinTime < fifteenMinutesAgo && booking.bookingStatus === 0) {
+                                // Gọi hàm updateStatus để cập nhật trạng thái bookingStatus thành 3 (Huỷ)
+                                await updateStatus(booking.id, 3);
+                            }
+                        }
+                    }
+                }
+            } else {
+                console.log("Không có bàn nào.");
+            }
+        } catch (error) {
+            console.error("Lỗi khi lấy dữ liệu hoặc cập nhật trạng thái:", error);
+        }
+    }
+
+    // Gọi setInterval trong document.ready()
+    setInterval(autoUpdateBookingStatus, 300000); // 300000 ms = 5 phút
+</script>
+<script>
+    // Hàm chọn bàn (occupied)
+    async function selectTable(menuId) {
+        try {
+            const response = await fetch(`${apiURL}Table/${menuId}`);
+            const table = await response.json();
+
+            if (table.tableStatus === 1) {
+                // Chuyển trạng thái bàn thành đã chiếm (tableStatus = 0)
+                table.tableStatus = 0;
+
+                // Gọi API PUT để cập nhật bàn
+                const updateResponse = await fetch(`${apiURL}Table/${table.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(table),
+                });
+
+                if (updateResponse.ok) {
+                    // Cập nhật màu viền bàn sau khi đặt
+                    updateTableBorder(menuId, 'occupied');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Bàn đã được chọn',
+                        text: `Bàn ${table.tableCode} đã được đặt thành công!`,
+                        confirmButtonText: 'Đóng'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi cập nhật trạng thái bàn',
+                        text: 'Có lỗi khi cập nhật trạng thái bàn.',
+                        confirmButtonText: 'Đóng'
+                    });
+                }
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Bàn không trống',
+                    text: 'Bàn này không trống và không thể chọn.',
+                    confirmButtonText: 'Đóng'
+                });
+            }
+        } catch (error) {
+            console.error('Có lỗi xảy ra:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: 'Có lỗi xảy ra khi thực hiện thao tác.',
+                confirmButtonText: 'Đóng'
+            });
+        }
+    }
+
+    // Hàm làm trống bàn (available)
+    async function makeAvailable(menuId) {
+        try {
+            const response = await fetch(`${apiURL}Table/${menuId}`);
+            const table = await response.json();
+
+            if (table.tableStatus === 0) {
+                // Chuyển trạng thái bàn thành trống (tableStatus = 1)
+                table.tableStatus = 1;
+
+                // Gọi API PUT để cập nhật bàn
+                const updateResponse = await fetch(`${apiURL}Table/${table.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(table),
+                });
+
+                if (updateResponse.ok) {
+                    // Cập nhật màu viền bàn sau khi làm trống
+                    updateTableBorder(menuId, 'available');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Bàn đã được làm trống',
+                        text: `Bàn ${table.tableCode} đã được làm trống thành công!`,
+                        confirmButtonText: 'Đóng'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi cập nhật trạng thái bàn',
+                        text: 'Có lỗi khi cập nhật trạng thái bàn.',
+                        confirmButtonText: 'Đóng'
+                    });
+                }
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Bàn đã trống',
+                    text: 'Bàn này đã trống và không cần làm trống.',
+                    confirmButtonText: 'Đóng'
+                });
+            }
+        } catch (error) {
+            console.error('Có lỗi xảy ra:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: 'Có lỗi xảy ra khi thực hiện thao tác.',
+                confirmButtonText: 'Đóng'
+            });
+        }
+    }
+
+    function updateTableBorder(menuId, action) {
+    const tableElement = $(`#menu${menuId}`).prev('.guestTable');  // Lấy thẻ guestTable ngay trước .menu
+
+    if (tableElement.length > 0) { // Kiểm tra thẻ guestTable có tồn tại hay không
+        if (action === 'occupied') {
+            tableElement.css('border', '2px solid red'); // Đổi màu viền thành xanh khi bàn được chọn
+        } else if (action === 'available') {
+            tableElement.css('border', '2px solid green'); // Đổi màu viền thành đỏ khi bàn làm trống
+        }
+    } else {
+        console.error('Không tìm thấy thẻ .guestTable');
+    }
+}
+
+
+
+</script>
+<!-- #endregion -->
+<!-- Các hành động liên quan đến thanh toán-->
+<script>
+    InitInvoiceTable();
+    var tableInvoiceDetail;
+    function InitInvoiceTable() {
+        tableInvoiceDetail = $("#tableInvoiceDetail").DataTable({
+            order: [[0, 'desc']],
+            paging: false,
+            info: false,
+            ordering: false,
+            columns: [
+                {
+                    data: "dishName",
+                    render: function (data, type, row, meta) {
+                        return `<strong><span style=' color: #044688;' class='fs-14' >${data}</span></strong>`;
+                    },
+                },
+                {
+                    data: "price",
+                    render: function (data, type, row, meta) {
+                        return `<strong><span style=' color: #044688;' class='fs-14' >${data}</span></strong>`;
+                    },
+                },
+                {
+                    data: "quantity",
+                    render: function (data, type, row, meta) {
+                        return `<strong><span style=' color: #044688;' class='fs-14' >${data}</span></strong>`;
+                    },
+                },
+                {
+                    data: "totalPrice",
+                    render: function (data, type, row, meta) {
+                        return "<span class='bold' id='row" + row.id + "-column-id'>" + formatNumberCurrency(data.toString()) + "<span>";
+                    },
+                },
+            ],
+            "oLanguage": {
+                "sUrl": "/js/Vietnamese.json"
+            },
+        })
+    }
+    submitButtonPayment.addEventListener('click', function (e) {
+        e.preventDefault();
+        let dishList = [];
+        let tableList = [];
+        tableInvoiceDetail.rows().every(function () {
+            let data = this.data();
+            let obj = {
+                dishId: data.dishId,
+                quantity: data.quantity,
+                unitPrice: data.price,
+                // invoiceDetailCode: $("#invoice-invoiceCode").val(),
+                totalMoney: data.totalPrice,
+
+            }
+            dishList.push(obj);
+        });
+        let  tojb = {
+            tableId : $("#tableId").val(),
+        }
+        tableList.push(tojb);
+        if (dishList.length == 0) {
+            Swal.fire(
+                'Tạo hóa đơn không thành công',  
+                'warning'
+            );
+            submitButtonPayment.setAttribute('data-kt-indicator', 'off');
+            submitButtonPayment.disabled = false;
+            return;
+        }
+        Swal.fire({
+            title: 'Tạo hóa đơn',
+            text: "Xác nhận tạo?",
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#443',
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Huỷ'
+        }).then((result) => {
+            if (result.value) {
+                submitButtonPayment.setAttribute('data-kt-indicator', 'on');
+                submitButtonPayment.disabled = true;
+
+                let UpdateObj = {
+                    // "invoiceCode": $("#invoice-invoiceCode").val(),
+                    "accountId": $("#accoutId").val(),
+                    "paymentMethodId": $('#payment-paymentId').val(),
+                    "totalMoney": $("#invoicedetail-totalPrice").val(),
+                    // "active": true,
+                    // "createdTime": formatDatetimeUpdate($("#invoice-createdTime").val()),
+                    "invoiceDetails": dishList,
+                    "tableInvoices": tableList,
+                }
+                $.ajax({
+                    url: systemURL + "invoice/api/AddByVM",
+                    type: "POST",
+                    contentType: "application/json",
+                    beforeSend: function (xhr) {
+                        if (localStorage.token) {
+                            xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token);
+                        }
+                    },
+                    data: JSON.stringify(UpdateObj),
+                    success:async function (responseData) {
+                        // debugger;
+                        if (responseData.status == "200" && responseData.message === "SUCCESS") {
+                            let invoiceId = responseData.data[0].invoiceDetails[0].invoice.id;
+                            let data = (await httpService.getAsync("invoice/api/InvoiceDetailVM?invoiceId=" + invoiceId)).data[0]
+                            var detailHtml = '';
+                            var totalService = 0;
+                            data.invoiceDetails.forEach((item) => { 
+                                detailHtml += `<tr>
+                                            <td>${item.dishName}</td>
+                                            <td>${item.quantity}</td>
+                                            <td>${item.unitPrice}</td>
+                                            <td>${item.quantity * item.unitPrice}</td>
+                                         </tr>`;
+                                totalService += item.quantity * item.unitPrice;
+                            })
+                            var html = `<div class="container d-flex">
+                                            <div class="row">
+                                              <div class="col-12">
+                                                <h1>COFFEE HUYKHOI</h1>
+                                                <p>Trịnh Văn Bô, Q.Nam Từ Liêm.</p>
+                                                <p>0889987688</p>
+                                              </div>
+                                              <div class="col-12">
+                                                <p><b>HÓA ĐƠN THANH TOÁN</b></p>
+                                                <p>Giờ thanh toán: ${moment(data.createdTime).format('HH:mm DD/MM/YYYY')}</p>
+                                                <p>Mã hóa đơn: ${data.invoiceCode}</p>
+                                                <p>Thu ngân: ${data.cashierName}</p>
+                                              </div>
+                                              <table class="table">
+                                                <thead>
+                                                  <tr>
+                                                    <th>Món ăn</th>
+                                                    <th>SL</th>
+                                                    <th>Giá</th>
+                                                    <th>Tổng</th>
+                                                  </tr>
+                                                </thead>
+                                                <tbody>
+                                                    ${detailHtml}
+                                                  </tbody>
+                                              </table>
+                                              <div class="col-12">
+                                                            <p><b>Tổng dịch vụ: ${formatNumberCurrency(totalService)}  VNĐ</b></p>
+                                                            <p><b>Thanh toán (10% VAT): ${formatNumberCurrency(data.totalMoney)} VNĐ</b></p>
+                                              </div>
+      
+                                            </div>
+                                          </div>`
+                            
+                            loadDataSelectNoti();
+                            
+                            $("#modal-payment").modal('hide')
+                            submitButton.setAttribute('data-kt-indicator', 'off');
+                            submitButton.disabled = false;
+                            submitButtonPayment.setAttribute('data-kt-indicator', 'off');
+                            submitButtonPayment.disabled = false;
+                            startModel(UpdateObj.tableId)
+                            Swal.fire(
+                                'Thành công!',
+                                html,
+                                'success'
+                            );
+                            $(".swal2-container .swal2-html-container").css("max-height", "500px");
+                        }
+                    },
+                    error: function (e) {
+                        //console.log(e.message);
+                        Swal.fire(
+                            'Lỗi!',
+                            'Đã xảy ra lỗi, vui lòng thử lại',
+                            'error'
+                        );
+                        submitButton.setAttribute('data-kt-indicator', 'off');
+                        submitButton.disabled = false;
+                    }
+                });
+            }
+        });
+
+
+    });
+</script>
+
+******

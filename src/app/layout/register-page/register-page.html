@@ -1,0 +1,117 @@
+<div class="register-page">
+  <header class="register-page__header" aria-label="Thương hiệu Caffe Harmony">
+    <div class="register-brand">
+      <span class="material-symbols-outlined" aria-hidden="true">coffee</span>
+      <span class="type-title-lg">Caffe Harmony</span>
+    </div>
+  </header>
+
+  <main class="register-page__main">
+    <section class="register-card" aria-label="Form đăng ký tài khoản admin">
+      <div class="register-card__head">
+        <h1 class="type-headline-lg">Artisan Roast Admin</h1>
+        <p class="type-body-md text-measure">Bắt đầu quản lý không gian cafe của bạn</p>
+      </div>
+
+      @if (serverError()) {
+        <div class="register-alert register-alert--error" role="alert">
+          <span class="material-symbols-outlined" aria-hidden="true">error</span>
+          <span class="type-body-sm">{{ serverError() }}</span>
+        </div>
+      }
+
+      <form class="register-form" [formGroup]="registerForm" (ngSubmit)="submit()" novalidate>
+        <div class="register-field" [class.register-field--invalid]="showFieldError('fullName')">
+          <label class="type-label-md" for="register-fullname">Họ và tên</label>
+          <div class="register-control">
+            <span class="material-symbols-outlined" aria-hidden="true">badge</span>
+            <input
+              id="register-fullname"
+              type="text"
+              formControlName="fullName"
+              placeholder="Nguyễn Văn A"
+              autocomplete="name"
+            />
+          </div>
+          @if (showFieldError('fullName')) {
+            <p class="type-label-sm register-field__error">Vui lòng nhập tên của bạn.</p>
+          }
+        </div>
+
+        <div class="register-field" [class.register-field--invalid]="showFieldError('username')">
+          <label class="type-label-md" for="register-username">Tên đăng nhập</label>
+          <div class="register-control">
+            <span class="material-symbols-outlined" aria-hidden="true">person</span>
+            <input
+              id="register-username"
+              type="text"
+              formControlName="username"
+              placeholder="roastmaster_01"
+              autocomplete="username"
+            />
+          </div>
+          @if (showFieldError('username')) {
+            <p class="type-label-sm register-field__error">
+              Tên đăng nhập gồm 4-30 ký tự, chỉ chứa chữ, số hoặc dấu gạch dưới.
+            </p>
+          }
+        </div>
+
+        <div class="register-field" [class.register-field--invalid]="showFieldError('password')">
+          <label class="type-label-md" for="register-password">Mật khẩu</label>
+          <div class="register-control">
+            <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+            <input
+              id="register-password"
+              type="password"
+              formControlName="password"
+              placeholder="••••••••"
+              autocomplete="new-password"
+            />
+          </div>
+          @if (showFieldError('password')) {
+            <p class="type-label-sm register-field__error">Mật khẩu cần tối thiểu 8 ký tự.</p>
+          }
+        </div>
+
+        <button
+          tuiButton
+          type="submit"
+          class="register-submit type-label-md"
+          [disabled]="isSubmitDisabled()"
+          [attr.aria-disabled]="isSubmitDisabled() ? 'true' : null"
+        >
+          @if (isLoading()) {
+            <span class="register-spinner" aria-hidden="true"></span>
+            <span>Đang đăng ký...</span>
+          } @else {
+            <span>Đăng ký</span>
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          }
+        </button>
+      </form>
+
+      <p class="register-card__login type-body-md">
+        Bạn đã có tài khoản?
+        <a routerLink="/login">Đăng nhập!</a>
+      </p>
+    </section>
+  </main>
+
+  <footer class="register-page__footer" aria-label="Thông tin bản quyền">
+    <div class="type-title-md register-page__footer-brand">Caffe Harmony</div>
+
+    <nav class="register-page__footer-nav type-body-sm" aria-label="Liên kết hỗ trợ">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+      <a href="#">Contact Us</a>
+    </nav>
+
+    <p class="type-body-sm register-page__footer-copy">
+      © 2024 Caffe Harmony. All rights reserved.
+    </p>
+  </footer>
+
+  <div class="register-page__blur register-page__blur--left" aria-hidden="true"></div>
+  <div class="register-page__blur register-page__blur--right" aria-hidden="true"></div>
+</div>

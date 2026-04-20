@@ -1,0 +1,36 @@
+<section class="dialog-catalog">
+  <header class="dialog-catalog__header">
+    <h1>Dialog Catalog</h1>
+    <p>Danh sách toàn bộ dialog hiện có trong project.</p>
+  </header>
+
+  <div class="dialog-catalog__layout">
+    <nav class="dialog-catalog__nav" aria-label="Danh sách dialog">
+      @for (item of dialogItems; track item.key) {
+        <a
+          [routerLink]="item.route"
+          class="dialog-catalog__nav-item"
+          [ngClass]="{ 'dialog-catalog__nav-item--active': activeDialog().key === item.key }"
+        >
+          <span class="dialog-catalog__nav-title">{{ item.name }}</span>
+          <span class="dialog-catalog__nav-summary">{{ item.summary }}</span>
+        </a>
+      }
+    </nav>
+
+    <article class="dialog-catalog__detail">
+      <h2>{{ activeDialog().name }}</h2>
+      <p>{{ activeDialog().summary }}</p>
+
+      @if (activeDialog().supportsPreview) {
+        <button tuiButton type="button" class="preview-btn" (click)="previewDialog()">
+          Mở thử dialog
+        </button>
+      } @else {
+        <p class="dialog-catalog__note">
+          Dialog này đã được link trong menu nhưng chưa có logic preview hoàn chỉnh.
+        </p>
+      }
+    </article>
+  </div>
+</section>

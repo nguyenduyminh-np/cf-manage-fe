@@ -1,13 +1,17 @@
 <div class="booking-page">
   <section class="booking-page__breadcrumb">
-    <span>Trang chủ</span>
+    <span class="type-body-sm">Trang chủ</span>
     <span class="booking-page__breadcrumb-separator">›</span>
-    <strong>Đặt bàn</strong>
+    <strong class="type-label-md">Đặt bàn</strong>
+  </section>
+
+  <section class="booking-page__header">
+    <h1 class="type-headline-lg">Quản lý đặt bàn</h1>
   </section>
 
   <form class="booking-filters" [formGroup]="searchForm" (ngSubmit)="search()">
     <div class="booking-field booking-field--keyword">
-      <label for="booking-keyword">Từ khóa</label>
+      <label class="type-label-md" for="booking-keyword">Từ khóa</label>
       <div class="booking-searchbox">
         <span class="material-symbols-outlined booking-searchbox__icon">search</span>
         <input
@@ -20,7 +24,7 @@
     </div>
 
     <div class="booking-field">
-      <label for="booking-seats">Số chỗ</label>
+      <label class="type-label-md" for="booking-seats">Số chỗ</label>
       <select id="booking-seats" formControlName="seats">
         @for (option of seatOptions; track option.value) {
           <option [ngValue]="option.value">{{ option.label }}</option>
@@ -29,7 +33,7 @@
     </div>
 
     <div class="booking-field">
-      <label for="booking-status">Trạng thái</label>
+      <label class="type-label-md" for="booking-status">Trạng thái</label>
       <select id="booking-status" formControlName="status">
         @for (option of statusOptions; track option.value) {
           <option [ngValue]="option.value">{{ option.label }}</option>
@@ -38,7 +42,7 @@
     </div>
 
     <div class="booking-field">
-      <label for="booking-floor">Tầng</label>
+      <label class="type-label-md" for="booking-floor">Tầng</label>
       <select id="booking-floor" formControlName="floor">
         @for (option of floorOptions; track option.value) {
           <option [ngValue]="option.value">{{ option.label }}</option>
@@ -49,7 +53,7 @@
     <button
       tuiButton
       type="submit"
-      class="booking-button booking-button--search"
+      class="booking-button booking-button--search type-label-md"
       [disabled]="isLoading"
     >
       Tìm kiếm
@@ -62,7 +66,7 @@
         <button
           tuiButton
           type="button"
-          class="booking-button booking-button--floor"
+          class="booking-button booking-button--floor type-label-md"
           [class.booking-button--active]="selectedFloor === floor.value"
           (click)="setFloorTab(floor.value)"
           [attr.aria-pressed]="selectedFloor === floor.value"
@@ -72,28 +76,40 @@
       }
     </div>
 
-    <button tuiButton type="button" class="booking-button booking-button--create">
+    <button
+      tuiButton
+      type="button"
+      class="booking-button booking-button--create type-label-md"
+      (click)="openPosTableBookingDialog()"
+    >
       <span class="booking-button__icon">+</span>
       <span>Đặt bàn mới</span>
     </button>
   </section>
 
+  @if (tableActionError(); as tableActionErrorMessage) {
+    <section class="booking-inline-message booking-inline-message--error" role="alert">
+      {{ tableActionErrorMessage }}
+    </section>
+  }
+
   @if (isLoading) {
     <section class="booking-empty">
-      <h3>Đang tải dữ liệu bàn</h3>
-      <p>Vui lòng chờ trong giây lát.</p>
+      <h3 class="type-title-md">Đang tải dữ liệu bàn</h3>
+      <p class="type-body-md text-measure">Vui lòng chờ trong giây lát.</p>
     </section>
   } @else if (loadError) {
     <section class="booking-empty booking-empty--error">
-      <h3>{{ loadError }}</h3>
-      <p>Kiểm tra kết nối hoặc thử tải lại danh sách bàn.</p>
+      <h3 class="type-title-md">{{ loadError }}</h3>
+      <p class="type-body-md text-measure">Kiểm tra kết nối hoặc thử tải lại danh sách bàn.</p>
       <button
         tuiButton
         type="button"
-        class="booking-button booking-button--search"
+        class="booking-button booking-button--search type-label-md"
         (click)="search()"
       >
-        Tải lại
+        <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+        <span>Tải lại danh sách</span>
       </button>
     </section>
   } @else if (pagedTables.length) {
@@ -101,23 +117,34 @@
       @for (table of pagedTables; track table.tableId) {
         <article
           class="booking-card"
-          title="Nhấp đúp để xem chi tiết"
-          (dblclick)="openTableDetail(table.tableId)"
+          title="Nhấp để xem lịch sử đặt bàn. Nhấp đúp để xem chi tiết bàn"
+          (click)="onTableCardClick($event, table)"
+          (dblclick)="onTableCardDoubleClick($event, table)"
+          (contextmenu)="openTableMenu($event, table)"
         >
           <div class="booking-card__header">
             <div>
-              <h3>{{ table.tableName }}</h3>
-              <p class="booking-card__code">{{ table.tableCode }}</p>
+              <h3 class="type-title-lg">{{ table.tableName }}</h3>
+              <p class="booking-card__code type-label-sm">{{ table.tableCode }}</p>
             </div>
-            <div class="booking-card__capacity">
-              <span>{{ table.slot }}</span>
-              <span class="material-symbols-outlined">
-                {{ table.slot >= 6 ? 'group' : 'person' }}
-              </span>
-            </div>
+
+            @if (table.tableStatus === 'BOOKED') {
+              <button
+                tuiButton
+                type="button"
+                class="booking-button booking-button--check-in type-label-md"
+                [disabled]="isCheckingInTable(table.tableId)"
+                (click)="onCheckInClick($event, table)"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">login</span>
+                <span>
+                  {{ isCheckingInTable(table.tableId) ? 'Đang check-in...' : 'Check-in' }}
+                </span>
+              </button>
+            }
           </div>
 
-          <div class="booking-card__badge" [ngClass]="badgeClass(table.tableStatus)">
+          <div class="booking-card__badge type-status" [ngClass]="badgeClass(table.tableStatus)">
             {{ table.tableStatusName }}
           </div>
 
@@ -132,15 +159,41 @@
         </article>
       }
     </section>
+
+    @if (contextMenuState().isOpen && contextMenuState().table; as activeTable) {
+      <div
+        class="profile-dropdown booking-context-menu"
+        [style.left.px]="contextMenuState().x"
+        [style.top.px]="contextMenuState().y"
+        role="menu"
+        [attr.aria-label]="'Thao tác cho ' + activeTable.tableName"
+        (click)="$event.stopPropagation()"
+      >
+        @for (option of tableMenuOptions; track option.key) {
+          <button
+            type="button"
+            class="menu-item"
+            role="menuitem"
+            [disabled]="option.key === 'empty' && isEmptyingTable()"
+            (click)="onMenuAction(option.key)"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">{{ option.icon }}</span>
+            <span>
+              {{ option.key === 'empty' && isEmptyingTable() ? 'Đang làm trống...' : option.label }}
+            </span>
+          </button>
+        }
+      </div>
+    }
   } @else {
     <section class="booking-empty">
-      <h3>Không tìm thấy bàn phù hợp</h3>
-      <p>Hãy thử đổi từ khóa hoặc bộ lọc để xem kết quả khác.</p>
+      <h3 class="type-title-md">Không tìm thấy bàn phù hợp</h3>
+      <p class="type-body-md text-measure">Hãy thử đổi từ khóa hoặc bộ lọc để xem kết quả khác.</p>
     </section>
   }
 
   <footer class="booking-footer">
-    <p>
+    <p class="type-body-sm">
       Hiển thị <strong>{{ countStart === 0 ? 0 : visibleCount }}</strong> trên
       <strong>{{ totalCount }}</strong> bàn
     </p>
@@ -149,7 +202,7 @@
       <button
         tuiButton
         type="button"
-        class="booking-pagination__button"
+        class="booking-pagination__button type-label-md"
         [disabled]="currentPageWithinRange === 1"
         (click)="goToPreviousPage()"
         aria-label="Trang trước"
@@ -161,7 +214,7 @@
         <button
           tuiButton
           type="button"
-          class="booking-pagination__button"
+          class="booking-pagination__button type-label-md"
           [class.booking-pagination__button--active]="currentPageWithinRange === page"
           (click)="goToPage(page)"
           [attr.aria-current]="currentPageWithinRange === page ? 'page' : null"
@@ -173,7 +226,7 @@
       <button
         tuiButton
         type="button"
-        class="booking-pagination__button"
+        class="booking-pagination__button type-label-md"
         [disabled]="currentPageWithinRange === totalPages"
         (click)="goToNextPage()"
         aria-label="Trang sau"

@@ -1,0 +1,3853 @@
+*********** CONTROLLER / SERVICE / DTO / REPO
+******* Module 1: Tải danh sách món
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CoffeeCRM.Data.Model;
+using CoffeeCRM.Core.Repository;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using CoffeeCRM.Core.Util;
+using CoffeeCRM.Data.Constants;
+using CoffeeCRM.Core.Service;
+using CoffeeCRM.Core.Util.Parameters;
+using CfCRM.View.Models.ViewModels;
+using CoffeeCRM.Data.DTO;
+
+namespace CfCRM.DATN.Controllers
+{
+    [Route("[controller]")]
+    [ApiController]
+    public class DishController : ControllerBase
+    {
+        IDishService service;
+        public DishController(IDishService _service)
+        {
+            service = _service;
+        }
+
+        [HttpGet]
+        [Route("api/List")]
+        public async Task<IActionResult> List()
+        {
+            try
+            {
+                var dataList = await service.List();
+                if (dataList == null || dataList.Count == 0)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList());
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        [Route("api/Detail/{Id}")]
+        public async Task<IActionResult> Detail(int? Id)
+        {
+            if (Id == null)
+            {
+                return BadRequest();
+            }
+            try
+            {
+                var dataList = await service.Detail(Id);
+                if (dataList == null)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList);
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        [Route("api/getDishStatistics")]
+        public async Task<IActionResult> GetDishStatistics()
+        {
+            try
+            {
+                var dataList = await service.GetDishStatisticsAsync();
+                if (dataList == null)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList);
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        [Route("api/ListPaging")]
+        public async Task<IActionResult> ListPaging(int pageIndex, int pageSize)
+        {
+            if (pageIndex < 0 || pageSize < 0) return BadRequest();
+            try
+            {
+                var dataList = await service.ListPaging(pageIndex, pageSize);
+
+                if (dataList == null || dataList.Count == 0)
+                {
+                    return NotFound();
+                }
+
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList());
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+        [HttpPost]
+        [Route("api/Add")]
+        public async Task<IActionResult> Add([FromBody] Dish model)
+        {
+            if (ModelState.IsValid)
+            {
+                //1. business logic
+
+                //data validation
+                if (model.Active == false)
+                {
+                    return BadRequest();
+                }
+                //2. add new object
+                try
+                {
+                    await service.Add(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.CREATED(model);
+                    return Created("", coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+
+        [HttpPost]
+        [Route("api/addOrUpdate")]
+        public async Task<IActionResult> AddOrUpdate([FromForm] DishDto model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    //1. business logic
+                    //2. add new object
+                    await service.AddOrUpdateDto(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                    return Ok(coffeemanagementResponse);
+                }
+                catch(BadRequestException ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    if (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException")
+                    {
+                        return NotFound();
+                    }
+                    return StatusCode(500, ex.Message);
+                }
+            }
+            return BadRequest();
+        }
+
+        [HttpGet("api/popular")]
+        public async Task<IActionResult> GetPopularDishes(
+            [FromQuery] int count = 5,
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null)
+        {
+            try
+            {
+                var dishes = await service.GetTopPopularDishesAsync(count, startDate, endDate);
+
+                var res = CoffeeManagementResponse.SUCCESS(dishes);
+
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(CoffeeManagementResponse.BAD_REQUEST(ex.Message));
+            }
+        }
+
+        [HttpPost("api/list-popular-server-side")]
+        public async Task<IActionResult> ListPopularServerSide([FromBody] DishDTParameters parameters)
+        {
+            try
+            {
+                var result = await service.ListPopularServerSide(parameters);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                var mess = ex.Message;
+                if (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException")
+                {
+                    return NotFound();
+                }
+                return BadRequest(CoffeeManagementResponse.BAD_REQUEST(ex.Message));
+            }
+        }
+
+
+        [HttpPost]
+        [Route("api/Update")]
+        public async Task<IActionResult> Update([FromBody] Dish model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    //1. business logic 
+                    //2. update object
+                    await service.Update(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                    return Ok(coffeemanagementResponse);
+                }
+                catch (Exception ex)
+                {
+                    if (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException")
+                    {
+                        return NotFound();
+                    }
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+        [HttpPost]
+        [Route("api/Delete")]
+        public async Task<IActionResult> Delete([FromBody] Dish model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    //1. business logic
+                    await service.Delete(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                    return Ok(coffeemanagementResponse);
+                }
+                catch (Exception ex)
+                {
+                    if (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException")
+                    {
+                        return NotFound();
+                    }
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+        [HttpPost]
+        [Route("api/DeletePermanently")]
+        public async Task<IActionResult> DeletePermanently([FromBody] Dish model)
+        {
+            var result = 0;
+            if (!(model.Id > 0))
+            {
+                return BadRequest();
+            }
+            try
+            {
+                //physically delete object
+                result = (int)await service.DeletePermanently(model.Id);
+                if (result == 0)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpPost]
+        [Route("api/Search")]
+        public async Task<IActionResult> Search(Select2VM search)
+        {
+            try
+            {
+                var dataList = await service.Search(search);
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList());
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+
+        [HttpGet]
+        [Route("api/Count")]
+        public int CountDish()
+        {
+            int result = service.Count();
+            return result;
+        }
+        [HttpPost]
+        [Route("api/list-server-side")]
+        public async Task<IActionResult> ListServerSide([FromBody] DishDTParameters parameters)
+        {
+            try
+            {
+                var data = await service.ListServerSide(parameters);
+                return Ok(data);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+    }
+}
+namespace CfCRM.View.Models.ViewModels
+{
+    public class Select2VM
+    {
+        public string searchString { get; set; }
+    }
+}
+using CoffeeCRM.Data.Model;
+using CoffeeCRM.Core.Util;using CoffeeCRM.Data;
+using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Data.ViewModels;
+using System.Threading.Tasks;
+using CfCRM.View.Models.ViewModels;
+using CoffeeCRM.Data.DTO;
+namespace CoffeeCRM.Core.Service
+{
+    public interface IDishService : IBaseService<Dish>
+    {
+        Task<DTResult<DishViewModel>> ListServerSide(DishDTParameters parameters);
+        Task<List<Dish>> Search(Select2VM selectVM);
+        Task<DishStaticDto> GetDishStatisticsAsync();
+        Task AddOrUpdateDto(DishDto dto);
+        Task<List<PopularDishModel>> GetTopPopularDishesAsync(int count, DateTime? startDate = null, DateTime? endDate = null);
+        Task<DTResult<PopularDishModel>> ListPopularServerSide(DishDTParameters parameters);
+    }
+}
+using CoffeeCRM.Data.Model;
+using CoffeeCRM.Core.Repository;
+using CoffeeCRM.Core.Util;using CoffeeCRM.Data;
+using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Data.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using CfCRM.View.Models.ViewModels;
+using Google.Apis.Logging;
+using Microsoft.Extensions.Logging;
+using CoffeeCRM.Data.DTO;
+using CoffeeCRM.Core.Helper;
+using Microsoft.Extensions.Caching.Memory;
+using NuGet.Protocol.Core.Types;
+
+namespace CoffeeCRM.Core.Service
+{
+    public class DishService : IDishService
+    {
+        IDishRepository dishRepository;
+        private readonly ILogger<DishService> _logger;
+        private readonly IMemoryCache _cache;
+
+        public DishService(
+            IDishRepository _dishRepository
+            , ILogger<DishService> logger,
+            IMemoryCache cache
+            )
+        {
+            dishRepository = _dishRepository;
+            _logger = logger;
+            _cache = cache;
+        }
+        public async Task Add(Dish obj)
+        {
+            obj.Active = true;
+            obj.CreatedTime = DateTime.Now;
+            await dishRepository.Add(obj);
+        }
+
+        public async Task AddOrUpdateDto(DishDto dto)
+        {
+            dto.DishCode = CodeConnvert.ConvertToCode(dto.DishName);
+            var dishExit = await dishRepository.GetDishByCode(dto.DishCode);
+            if( dishExit != null && dto.DishCode != dishExit.DishCode)
+            {
+                _logger.LogError("Món ăn đã tồn tại");
+                throw new BadRequestException("Món ăn đã tồn tại");
+            }
+
+            bool isNew = dto.Id == 0;
+            if (isNew && dto.Image == null)
+            {
+                dto.Photo = "images/coffeedefault.jpg";
+            }
+            dto.Photo = dto.Image != null ? await FileHelper.SaveImageAsync(dto.Image, "images/dish") : dto.Photo;
+
+            if(isNew)
+            {
+                var dish = new Dish()
+                {
+                    DishCode = CodeConnvert.ConvertToCode(dto.DishName),
+                    DishName = dto.DishName,
+                    Price = dto.Price,
+                    Photo = dto.Photo,
+                    CreatedTime = DateTime.Now,
+                    Active = true,
+                    DishCategoryId = dto.DishCategoryId
+                };
+                await dishRepository.Add(dish);
+            }else
+            {
+                var dish = await dishRepository.Detail(dto.Id);
+                if (dish == null)
+                {
+                    _logger.LogError("Món ăn không tồn tại");
+                    throw new BadRequestException("Món ăn không tồn tại");
+                }
+                dish.DishName = dto.DishName;
+                dish.DishCode = CodeConnvert.ConvertToCode(dto.DishName);
+                dish.Price = dto.Price;
+                dish.Photo = string.IsNullOrEmpty(dto.Photo) ? dish.Photo : dto.Photo;
+                dish.DishCategoryId = dto.DishCategoryId;
+                await dishRepository.Update(dish);
+            }
+        }
+
+        public async Task<List<PopularDishModel>> GetTopPopularDishesAsync(int count, DateTime? startDate = null, DateTime? endDate = null)
+        {
+            try
+            {
+                // Tạo cache key dựa trên tham số
+                string cacheKey = $"TopPopularDishes_{count}_{startDate}_{endDate}";
+
+                // Kiểm tra cache
+                if (_cache.TryGetValue(cacheKey, out List<PopularDishModel> cachedData))
+                {
+                    return cachedData;
+                }
+
+                // Lấy dữ liệu từ repository
+                var result = await dishRepository.GetTopPopularDishesAsync(count, startDate, endDate);
+
+                // Lưu vào cache trong 10 phút
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+
+                _cache.Set(cacheKey, result, cacheOptions);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting top popular dishes");
+                throw;
+            }
+        }
+
+        public async Task<DTResult<PopularDishModel>> ListPopularServerSide(DishDTParameters parameters)
+        {
+            try
+            {
+                // Không cache kết quả DataTables vì mỗi request có thể khác nhau
+                return await dishRepository.ListPopularServerSide(parameters);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting dishes list server side");
+                throw;
+            }
+        }
+        public int Count()
+        {
+            var result = dishRepository.Count();
+            return result;
+        }
+
+        public async Task Delete(Dish obj)
+        {
+            obj.Active = false;
+            await dishRepository.Delete(obj);
+        }
+
+        public async Task<long> DeletePermanently(long? id)
+        {
+            return await dishRepository.DeletePermanently(id);
+        }
+
+        public async Task<Dish> Detail(long? id)
+        {
+            return await dishRepository.Detail(id);
+        }
+
+        public async Task<List<Dish>> List()
+        {
+            return await dishRepository.List();
+        }
+
+        public async Task<List<Dish>> ListPaging(int pageIndex, int pageSize)
+        {
+            return await dishRepository.ListPaging(pageIndex, pageSize);
+        }
+
+        public async Task<DTResult<DishViewModel>> ListServerSide(DishDTParameters parameters)
+        {
+            return await dishRepository.ListServerSide(parameters);
+        }
+
+        public async Task<List<Dish>> Search(Select2VM selectVM)
+        {
+            return await dishRepository.Search(selectVM);
+        }
+
+        public async Task Update(Dish obj)
+        {
+            await dishRepository.Update(obj);
+        }
+
+        public async Task<DishStaticDto> GetDishStatisticsAsync()
+        {
+            return await dishRepository.GetDishStatisticsAsync();
+        }
+    }
+}
+
+
+using CoffeeCRM.Data.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CoffeeCRM.Core.Util;
+using CoffeeCRM.Data;
+using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Data.ViewModels;
+using CfCRM.View.Models.ViewModels;
+using CoffeeCRM.Data.DTO;
+
+
+namespace CoffeeCRM.Core.Repository
+{
+    public interface IDishRepository
+    {
+        Task<List<Dish>> List();
+
+        Task<List<Dish>> Search(Select2VM selectVM);
+
+        Task<List<Dish>> ListPaging(int pageIndex, int pageSize);
+
+        Task<Dish> Detail(long? postId);
+
+        Task<Dish> Add(Dish Dish);
+
+        Task Update(Dish Dish);
+
+        Task Delete(Dish Dish);
+
+        Task<long> DeletePermanently(long? DishId);
+        Task<Dish> GetDishByCode(string dishCode);
+        int Count();
+
+        Task<DTResult<DishViewModel>> ListServerSide(DishDTParameters parameters);
+        Task<List<PopularDishModel>> GetTopPopularDishesAsync(int count, DateTime? startDate = null, DateTime? endDate = null);
+        Task<DTResult<PopularDishModel>> ListPopularServerSide(DishDTParameters parameters);
+        Task<DishStaticDto> GetDishStatisticsAsync();
+    }
+}
+
+using CoffeeCRM.Data.Model;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CoffeeCRM.Core.Util;using CoffeeCRM.Data;
+using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Data.ViewModels;
+using System.Globalization;
+using CfCRM.View.Models.ViewModels;
+using CoffeeCRM.Data.DTO;
+using CoffeeCRM.Core.Helper;
+
+namespace CoffeeCRM.Core.Repository
+{
+    public class DishRepository : IDishRepository
+    {
+        SysDbContext db;
+
+        public DishRepository(SysDbContext _db)
+        {
+            db = _db;
+        }
+
+
+        public async Task<List<Dish>> List()
+        {
+            if (db != null)
+            {
+                return await (
+                    from row in db.Dishes
+                    where (row.Active)
+                    orderby row.Id descending
+                    select row
+                ).ToListAsync();
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Search by dish name
+        /// </summary>
+        /// <param name="selectVM"></param>
+        /// <returns></returns>
+        public async Task<List<Dish>> Search(Select2VM selectVM)
+        {
+            if (db != null)
+            {
+                return await (
+                    from row in db.Dishes
+                    where (row.Active == true && 
+                    (EF.Functions.Collate(row.DishName.ToLower(), SQLParams.Latin_General).
+                    Contains(EF.Functions.Collate(selectVM.searchString, SQLParams.Latin_General))))
+                    orderby row.Id descending
+                    select row
+                ).ToListAsync();
+            }
+            return null;
+        }
+
+
+        public async Task<List<Dish>> ListPaging(int pageIndex, int pageSize)
+        {
+            int offSet = 0;
+            offSet = (pageIndex - 1) * pageSize;
+            if (db != null)
+            {
+                return await (
+                    from row in db.Dishes
+                    where (row.Active)
+                    orderby row.Id descending
+                    select row
+                ).Skip(offSet).Take(pageSize).ToListAsync();
+            }
+            return null;
+        }
+
+
+        public async Task<Dish> Detail(long? id)
+        {
+            if (db != null)
+            {
+                return await db.Dishes.FirstOrDefaultAsync(row => row.Active && row.Id == id);
+            }
+            return null;
+        }
+
+
+        public async Task<Dish> Add(Dish obj)
+        {
+            if (db != null)
+            {
+                await db.Dishes.AddAsync(obj);
+                await db.SaveChangesAsync();
+                return obj;
+            }
+            return null;
+        }
+
+        public async Task<Dish> GetDishByCode(string dishCode)
+        {
+            if (db != null)
+            {
+                return await db.Dishes.FirstOrDefaultAsync(row => row.Active && row.DishCode == dishCode);
+            }
+            return null;
+        }
+
+        public async Task Update(Dish obj)
+        {
+            if (db != null)
+            {
+                //Update that object
+                db.Dishes.Attach(obj);
+                db.Entry(obj).Property(x => x.DishCode).IsModified = true;
+                db.Entry(obj).Property(x => x.DishName).IsModified = true;
+                db.Entry(obj).Property(x => x.Price).IsModified = true;
+                db.Entry(obj).Property(x => x.Photo).IsModified = true;
+                db.Entry(obj).Property(x => x.Active).IsModified = true;
+                db.Entry(obj).Property(x => x.DishCategoryId).IsModified = true;
+
+                //Commit the transaction
+                await db.SaveChangesAsync();
+            }
+        }
+
+
+        public async Task Delete(Dish obj)
+        {
+            if (db != null)
+            {
+                //Update that obj
+                db.Dishes.Attach(obj);
+                db.Entry(obj).Property(x => x.Active).IsModified = true;
+
+                //Commit the transaction
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public async Task<long> DeletePermanently(long? objId)
+        {
+            int result = 0;
+
+            if (db != null)
+            {
+                //Find the obj for specific obj id
+                var obj = await db.Dishes.FirstOrDefaultAsync(x => x.Id == objId);
+
+                if (obj != null)
+                {
+                    //Delete that obj
+                    db.Dishes.Remove(obj);
+
+                    //Commit the transaction
+                    result = await db.SaveChangesAsync();
+                }
+                return result;
+            }
+
+            return result;
+        }
+
+
+        public int Count()
+        {
+            int result = 0;
+
+            if (db != null)
+            {
+                //Find the obj for specific obj id
+                result = (
+                    from row in db.Dishes
+                    where row.Active
+                    select row
+                            ).Count();
+            }
+
+            return result;
+        }
+        public async Task<DTResult<DishViewModel>> ListServerSide(DishDTParameters parameters)
+        {
+            string searchAll = parameters.SearchAll.Trim();
+            string orderCriteria = "Id";
+            int recordTotal, recordFiltered;
+            bool orderDirectionASC = true;
+            if (parameters.Order != null)
+            {
+                orderCriteria = parameters.Columns[parameters.Order[0].Column].Data;
+                orderDirectionASC = parameters.Order[0].Dir == DTOrderDir.ASC;
+            }
+
+            var query = from row in db.Dishes
+                        join category in db.DishCategories on row.DishCategoryId equals category.Id
+                        where row.Active == true
+                        select new
+                        {
+                            row,
+                            category,
+                        };
+
+            recordTotal = await query.CountAsync();
+
+            if (parameters.DishCategoryId.HasValue && parameters.DishCategoryId.Value > 0)
+            {
+                query = query.Where(c => c.row.DishCategoryId == parameters.DishCategoryId.Value);
+            }   
+
+            if (!String.IsNullOrEmpty(searchAll))
+            {
+                searchAll = searchAll.ToLower();
+                query = query.Where(c =>
+EF.Functions.Collate(c.row.DishCode.ToLower(), SQLParams.Latin_General).Contains(EF.Functions.Collate(searchAll, SQLParams.Latin_General)) ||
+EF.Functions.Collate(c.row.DishName.ToLower(), SQLParams.Latin_General).Contains(EF.Functions.Collate(searchAll, SQLParams.Latin_General)) ||
+                EF.Functions.Collate(c.category.DishCateogryName.ToLower(), SQLParams.Latin_General).Contains(EF.Functions.Collate(searchAll, SQLParams.Latin_General))
+                );
+            }
+
+            foreach (var item in parameters.Columns)
+            {
+                var filter = item.Search.Value.Trim();
+
+                var fillter = item.Search.Value.Trim();
+                if (fillter.Length > 0)
+                {
+                    switch (item.Data)
+                    {
+                        case "id":
+                            query = query.Where(c => c.row.Id.ToString().Trim().Contains(filter));
+                            break;
+                        case "dishCode":
+                            query = query.Where(c => (c.row.DishCode ?? "").Contains(filter));
+                            break;
+                        case "dishName":
+                            query = query.Where(c => (c.row.DishName ?? "").Contains(filter));
+                            break;
+                        case "price":
+                            if (decimal.TryParse(filter, out var price))
+                            {
+                                query = query.Where(c => c.row.Price == price);
+                            }
+                            break;
+                        case "photo":
+                            query = query.Where(c => (c.row.Photo ?? "").Contains(filter));
+                            break;
+                        case "createdTime":
+                            if (filter.Contains(" - "))
+                            {
+                                var dates = filter.Split(" - ");
+                                var startDate = DateTime.ParseExact(dates[0], "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                                var endDate = DateTime.ParseExact(dates[1], "dd/MM/yyyy", CultureInfo.InvariantCulture).AddDays(1).AddSeconds(-1);
+                                query = query.Where(c => c.row.CreatedTime >= startDate && c.row.CreatedTime <= endDate);
+                            }
+                            else
+                            {
+                                var date = DateTime.ParseExact(filter, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                                query = query.Where(c => c.row.CreatedTime.Date == date.Date);
+                            }
+                            break;
+                        case "active":
+                            query = query.Where(c => c.row.Active.ToString().Trim().Contains(filter));
+                            break;
+                        case "dishCateogryName":
+                            query = query.Where(c => (c.category.DishCateogryName ?? "").Contains(filter));
+                            break;
+                    }
+                }
+            }
+
+            var query2 = query.Select(c => new DishViewModel()
+            {
+                Id = c.row.Id,
+                DishCode = c.row.DishCode,
+                DishName = c.row.DishName,
+                Price = c.row.Price,
+                Photo = c.row.Photo,
+                CreatedTime = c.row.CreatedTime,
+                Active = c.row.Active,
+                DishCategoryId = c.row.DishCategoryId,
+                DishCateogryName = c.category.DishCateogryName,
+            });
+
+            query2 = query2.OrderByDynamic<DishViewModel>(orderCriteria, orderDirectionASC ? LinqExtensions.Order.Asc : LinqExtensions.Order.Desc);
+            recordFiltered = query2.Count();
+
+            return new DTResult<DishViewModel>()
+            {
+                data = await query2.Skip(parameters.Start).Take(parameters.Length).ToListAsync(),
+                draw = parameters.Draw,
+                recordsFiltered = recordFiltered,
+                recordsTotal = recordTotal
+            };
+        }
+
+        public async Task<List<PopularDishModel>> GetTopPopularDishesAsync(int count, DateTime? startDate = null, DateTime? endDate = null)
+        {
+            // Mặc định lấy dữ liệu trong tháng hiện tại nếu không có ngày được chỉ định
+            startDate ??= new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            endDate ??= DateTime.Now;
+
+            // Sử dụng LINQ để lấy top món ăn bán chạy
+            var query = from invoiceDetail in db.InvoiceDetails
+                        join invoice in db.Invoices on invoiceDetail.InvoiceId equals invoice.Id
+                        join dish in db.Dishes on invoiceDetail.DishId equals dish.Id
+                        join category in db.DishCategories on dish.DishCategoryId equals category.Id
+                        where invoice.CreatedTime >= startDate && invoice.CreatedTime <= endDate
+                        && dish.Active == true
+                        group new { invoiceDetail, dish, category } by new { dish.Id, dish.DishCode, dish.DishName, dish.Price, dish.Photo, dish.CreatedTime, dish.Active, category.DishCateogryName } into g
+                        select new PopularDishModel
+                        {
+                            Id = g.Key.Id,
+                            DishCode = g.Key.DishCode,
+                            DishName = g.Key.DishName,
+                            Price = g.Key.Price,
+                            Photo = g.Key.Photo,
+                            CategoryName = g.Key.DishCateogryName,
+                            SalesCount = g.Sum(x => x.invoiceDetail.Quantity),
+                            CreatedTime = g.Key.CreatedTime,
+                            Active = g.Key.Active
+                        };
+
+            // Sắp xếp theo số lượng bán ra giảm dần và lấy top {count} món
+            return await query.OrderByDescending(d => d.SalesCount)
+                             .Take(count)
+                             .ToListAsync();
+        }
+
+        public async Task<DTResult<PopularDishModel>> ListPopularServerSide(DishDTParameters parameters)
+        {
+            string searchAll = parameters.SearchAll.Trim();
+            string orderCriteria = "Id";
+            bool orderDirectionASC = true;
+
+            if (parameters.Order != null)
+            {
+                orderCriteria = parameters.Columns[parameters.Order[0].Column].Data;
+                orderDirectionASC = parameters.Order[0].Dir == DTOrderDir.ASC;
+            }
+
+            // Lấy tất cả món ăn và số lượng bán ra
+            var baseQuery = from dish in db.Dishes
+                            join category in db.DishCategories on dish.DishCategoryId equals category.Id
+                            where dish.Active == true
+                            select new
+                            {
+                                dish.Id,
+                                dish.DishCode,
+                                dish.DishName,
+                                dish.Price,
+                                dish.Photo,
+                                dish.CreatedTime,
+                                dish.Active,
+                                CategoryName = category.DishCateogryName
+                            };
+
+            int recordsTotal = await baseQuery.CountAsync();
+
+            // Áp dụng tìm kiếm tổng quát
+            if (!string.IsNullOrEmpty(searchAll))
+            {
+                searchAll = searchAll.ToLower();
+                baseQuery = baseQuery.Where(c =>
+                    c.DishCode.ToLower().Contains(searchAll) ||
+                    c.DishName.ToLower().Contains(searchAll) ||
+                    c.CategoryName.ToLower().Contains(searchAll)
+                );
+            }
+
+            // Áp dụng tìm kiếm theo cột
+            foreach (var column in parameters.Columns)
+            {
+                var filter = column.Search?.Value?.Trim() ?? "";
+                if (!string.IsNullOrEmpty(filter))
+                {
+                    switch (column.Data.ToLower())
+                    {
+                        case "dishcode":
+                            baseQuery = baseQuery.Where(c => c.DishCode.Contains(filter));
+                            break;
+                        case "dishname":
+                            baseQuery = baseQuery.Where(c => c.DishName.Contains(filter));
+                            break;
+                        case "price":
+                            if (decimal.TryParse(filter, out var price))
+                            {
+                                baseQuery = baseQuery.Where(c => c.Price == price);
+                            }
+                            break;
+                        case "categoryname":
+                            baseQuery = baseQuery.Where(c => c.CategoryName.Contains(filter));
+                            break;
+                    }
+                }
+            }
+
+            // Lấy số lượng bán ra cho mỗi món ăn
+            var salesQuery = from invoiceDetail in db.InvoiceDetails
+                             join invoice in db.Invoices on invoiceDetail.InvoiceId equals invoice.Id
+                             group invoiceDetail by invoiceDetail.DishId into g
+                             select new
+                             {
+                                 DishId = g.Key,
+                                 SalesCount = g.Sum(x => x.Quantity)
+                             };
+
+            // Thực hiện truy vấn cơ sở trước
+            var filteredBaseQuery = baseQuery;
+            int recordsFiltered = await filteredBaseQuery.CountAsync();
+
+            // Áp dụng sắp xếp cho truy vấn cơ sở
+            IQueryable<dynamic> orderedBaseQuery;
+            switch (orderCriteria.ToLower())
+            {
+                case "id":
+                    orderedBaseQuery = orderDirectionASC ? filteredBaseQuery.OrderBy(x => x.Id) : filteredBaseQuery.OrderByDescending(x => x.Id);
+                    break;
+                case "dishcode":
+                    orderedBaseQuery = orderDirectionASC ? filteredBaseQuery.OrderBy(x => x.DishCode) : filteredBaseQuery.OrderByDescending(x => x.DishCode);
+                    break;
+                case "dishname":
+                    orderedBaseQuery = orderDirectionASC ? filteredBaseQuery.OrderBy(x => x.DishName) : filteredBaseQuery.OrderByDescending(x => x.DishName);
+                    break;
+                case "price":
+                    orderedBaseQuery = orderDirectionASC ? filteredBaseQuery.OrderBy(x => x.Price) : filteredBaseQuery.OrderByDescending(x => x.Price);
+                    break;
+                case "categoryname":
+                    orderedBaseQuery = orderDirectionASC ? filteredBaseQuery.OrderBy(x => x.CategoryName) : filteredBaseQuery.OrderByDescending(x => x.CategoryName);
+                    break;
+                case "createdtime":
+                    orderedBaseQuery = orderDirectionASC ? filteredBaseQuery.OrderBy(x => x.CreatedTime) : filteredBaseQuery.OrderByDescending(x => x.CreatedTime);
+                    break;
+                default:
+                    orderedBaseQuery = orderDirectionASC ? filteredBaseQuery.OrderBy(x => x.Id) : filteredBaseQuery.OrderByDescending(x => x.Id);
+                    break;
+            }
+
+            // Phân trang và lấy dữ liệu
+            var pagedBaseData = await orderedBaseQuery
+                .Skip(parameters.Start)
+                .Take(parameters.Length)
+                .ToListAsync();
+
+            // Lấy tất cả ID của món ăn đã phân trang
+            var dishIds = pagedBaseData.Select(x => x.Id).ToList();
+
+            // Lấy số lượng bán ra chỉ cho các món ăn đã phân trang
+            var salesData = await salesQuery
+                .Where(s => dishIds.Contains(s.DishId))
+                .ToDictionaryAsync(s => s.DishId, s => s.SalesCount);
+
+            // Kết hợp dữ liệu
+            var result = pagedBaseData.Select(item => new PopularDishModel
+            {
+                Id = item.Id,
+                DishCode = item.DishCode,
+                DishName = item.DishName,
+                Price = item.Price,
+                Photo = item.Photo,
+                CategoryName = item.CategoryName,
+                SalesCount = salesData.ContainsKey(item.Id) ? salesData[item.Id] : 0,
+                CreatedTime = item.CreatedTime,
+                Active = item.Active
+            }).ToList();
+
+            // Nếu sắp xếp theo SalesCount, cần sắp xếp lại sau khi đã kết hợp dữ liệu
+            if (orderCriteria.ToLower() == "salescount")
+            {
+                result = orderDirectionASC
+                    ? result.OrderBy(x => x.SalesCount).ToList()
+                    : result.OrderByDescending(x => x.SalesCount).ToList();
+            }
+
+            return new DTResult<PopularDishModel>
+            {
+                draw = parameters.Draw,
+                recordsTotal = recordsTotal,
+                recordsFiltered = recordsFiltered,
+                data = result
+            };
+        }
+
+        public async Task<DishStaticDto> GetDishStatisticsAsync()
+        {
+            var totalDishCate = await db.DishCategories.CountAsync();
+            var totalDish = await db.Dishes.CountAsync();
+
+            int avgDishPrice = 0;
+            if (await db.Dishes.AnyAsync())
+            {
+                var avg = await db.Dishes.AverageAsync(d => d.Price); // avg là decimal
+                avgDishPrice = (int)Math.Round(avg / 1000m, MidpointRounding.AwayFromZero) * 1000;
+            }
+
+            return new DishStaticDto
+            {
+                TotalDishCate = totalDishCate,
+                TotalDish = totalDish,
+                AvgDishPrice = avgDishPrice
+            };
+        }
+
+    }
+}
+
+
+********** Module 2: Xác nhận đơn đặt món
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CoffeeCRM.Data.Model;
+using CoffeeCRM.Core.Repository;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using CoffeeCRM.Core.Util;
+using CoffeeCRM.Data.Constants;
+using CoffeeCRM.Core.Service;
+using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Core.Helper;
+using CoffeeCRM.Data.ViewModels;
+
+namespace CfCRM.DATN.Controllers
+{
+    [Route("[controller]")]
+    [ApiController]
+    public class DishOrderController : ControllerBase
+    {
+        IDishOrderService service;
+        INotificationService notificationService;
+        public DishOrderController(IDishOrderService _service, 
+            INotificationService notificationService)
+        {
+            service = _service;
+            this.notificationService = notificationService;
+        }
+
+        [HttpGet]
+        [Route("api/ListQueue")]
+        public async Task<IActionResult> ListQueue(int pageIndex, int pageSize)
+        {
+            try
+            {
+                var accountId = this.GetLoggedInUserId();
+                var roleId = this.GetLoggedInRoleId();
+                if (roleId == RoleConst.BARTENDER)
+                {
+                    var dataList = await service.ListDishOrderNotification();
+                    if (dataList == null || dataList.Count == 0)
+                    {
+                        return Ok(CoffeeManagementResponse.SUCCESS(new List<DishOrderViewModel>()));
+                    }
+                    return Ok(CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList()));
+                }
+                else
+                {
+
+                    var dataList = await notificationService.ListPaging(accountId, pageIndex, pageSize);
+                    //if (dataList == null || dataList.Count == 0)
+                    //{
+                    //    return Ok(CoffeeManagementResponse.SUCCESS(new List<DishOrderViewModel>()));
+                    //}
+                    return Ok(CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList()));
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("api/List")]
+        public async Task<IActionResult> List()
+        {
+            try
+            {
+                var dataList = await service.List();
+                if (dataList == null || dataList.Count == 0)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList());
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        [Route("api/Detail/{Id}")]
+        public async Task<IActionResult> Detail(int? Id)
+        {
+            if (Id == null)
+            {
+                return BadRequest();
+            }
+            try
+            {
+                var dataList = await service.Detail(Id);
+                if (dataList == null)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList);
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        [Route("api/DetailByTableId/{Id}")]
+        public async Task<IActionResult> DetailByTableId(int Id)
+        {
+            try
+            {
+                var dataList = await service.DishOrderDetailByTableId(Id);
+                if (dataList == null)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList);
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        [Route("api/DishDetailByTableId/{Id}")]
+        public async Task<IActionResult> DishDetailByTableId(int Id)
+        {
+            try
+            {
+                var dataList = await service.ListDishOrderInvoice(Id);
+                if (dataList == null)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList);
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        [Route("api/ListPaging")]
+        public async Task<IActionResult> ListPaging(int pageIndex, int pageSize)
+        {
+            if (pageIndex < 0 || pageSize < 0) return BadRequest();
+            try
+            {
+                var dataList = await service.ListPaging(pageIndex, pageSize);
+
+                if (dataList == null || dataList.Count == 0)
+                {
+                    return NotFound();
+                }
+
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList());
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+        [HttpPost]
+        [Route("api/Add")]
+        public async Task<IActionResult> Add([FromBody] DishOrder model)
+        {
+            if (ModelState.IsValid)
+            {
+                //1. business logic
+
+                //data validation
+                if (model.Active == false)
+                {
+                    return BadRequest();
+                }
+                //2. add new object
+                try
+                {
+                    await service.Add(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.CREATED(model);
+                    return Created("", coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+
+        [HttpPost]
+        [Route("api/AddOrUpdate")]
+        public async Task<IActionResult> AddOrUpdate([FromBody] DishOrderViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var userId = this.GetLoggedInUserId();
+                    model.AccountId = userId;
+                    if (!(await service.AddOrUpdateByVm(model)))
+                    {
+                        return BadRequest();
+                    }
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                    return Created("", coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+        [HttpPost]
+        [Route("api/Update")]
+        public async Task<IActionResult> Update([FromBody] DishOrder model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    //1. business logic 
+                    //2. update object
+                    await service.Update(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                    return Ok(coffeemanagementResponse);
+                }
+                catch (Exception ex)
+                {
+                    if (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException")
+                    {
+                        return NotFound();
+                    }
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+        [HttpPost]
+        [Route("api/Delete")]
+        public async Task<IActionResult> Delete([FromBody] DishOrder model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    //1. business logic
+                    await service.Delete(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                    return Ok(coffeemanagementResponse);
+                }
+                catch (Exception ex)
+                {
+                    if (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException")
+                    {
+                        return NotFound();
+                    }
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+        [HttpPost]
+        [Route("api/DeletePermanently")]
+        public async Task<IActionResult> DeletePermanently([FromBody] DishOrder model)
+        {
+            var result = 0;
+            if (!(model.Id > 0))
+            {
+                return BadRequest();
+            }
+            try
+            {
+                //physically delete object
+                result = (int)await service.DeletePermanently(model.Id);
+                if (result == 0)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+
+        [HttpGet]
+        [Route("api/Count")]
+        public int CountDishOrder()
+        {
+            int result = service.Count();
+            return result;
+        }
+        [HttpPost]
+        [Route("api/list-server-side")]
+        public async Task<IActionResult> ListServerSide([FromBody] DishOrderDTParameters parameters)
+        {
+            try
+            {
+                var data = await service.ListServerSide(parameters);
+                return Ok(data);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+    }
+}
+using CoffeeCRM.Data.Model;
+
+namespace CoffeeCRM.Data.ViewModels
+{
+    public class DishOrderViewModel
+    {
+        public int Id { get; set; }
+        public int TableId { get; set; }
+        public int AccountId { get; set; }
+        public string? OrdererName { get; set; }
+        public string? TableName { get; set; }
+        public string? Description { get; set; }
+        public int DishOrderStatusId { get; set; }
+        public string? DishOrderStatusName { get; set; }
+        public DateTime CreatedTime { get; set; }
+        public List<DishOrderDetailVM>? DishOrderDetails { get; set; }
+    }
+    public partial class DishOrderDetailVM
+    {
+        public int Id { get; set; }
+        public int DishOrderId { get; set; }
+        public int DishId { get; set; }
+        public string? DishName { get; set; }
+        public string? Note { get; set; }
+        public int Quantity { get; set; }
+        public bool Active { get; set; }
+    }
+}
+
+
+using CoffeeCRM.Data.Model;
+using CoffeeCRM.Core.Util;using CoffeeCRM.Data;
+using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Data.ViewModels;
+using System.Threading.Tasks;
+
+namespace CoffeeCRM.Core.Service
+{
+    public interface IDishOrderService : IBaseService<DishOrder>
+    {
+        Task<DTResult<DishOrder>> ListServerSide(DishOrderDTParameters parameters);
+        Task<List<DishOrderViewModel>> DishOrderDetailByTableId(int tableId);
+        Task<bool> AddOrUpdateByVm(DishOrderViewModel model);
+        Task<List<DishOrderViewModel>> ListDishOrderNotification();
+        Task<List<DishOrderViewModel>> ListDishOrderInvoice(int tableId);
+    }
+}
+using CoffeeCRM.Data.Model;
+using CoffeeCRM.Core.Repository;
+using CoffeeCRM.Core.Util;using CoffeeCRM.Data;
+using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Data.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
+using CoffeeCRM.Data.Constants;
+using Google.Apis.Logging;
+using Microsoft.Extensions.Logging;
+namespace CoffeeCRM.Core.Service
+{
+    public class DishOrderService : IDishOrderService
+    {
+        IDishOrderRepository dishOrderRepository;
+        IDishOrderDetailRepository dishOrderDetailRepository;
+        INotificationRepository notificationRepository;
+        IHubContext<NotificationHub, INotificationHub> notificationHub;
+        ITableRepository tableRepository;
+        ILogger<DishOrderService> _logger;
+
+        public DishOrderService(IDishOrderRepository dishOrderRepository, 
+            IDishOrderDetailRepository dishOrderDetailRepository, 
+            INotificationRepository notificationRepository, 
+            IHubContext<NotificationHub, 
+            INotificationHub> notificationHub, 
+            ITableRepository tableRepository,
+            ILogger<DishOrderService> logger)
+        {
+            this.dishOrderRepository = dishOrderRepository;
+            this.dishOrderDetailRepository = dishOrderDetailRepository;
+            this.notificationRepository = notificationRepository;
+            this.notificationHub = notificationHub;
+            this.tableRepository = tableRepository;
+            _logger = logger;
+        }
+
+        public async Task Add(DishOrder obj)
+        {
+            obj.Active = true;
+            obj.CreatedTime = DateTime.Now;
+            await dishOrderRepository.Add(obj);
+        }
+
+        public int Count()
+        {
+            var result = dishOrderRepository.Count();
+            return result;
+        }
+
+        public async Task Delete(DishOrder obj)
+        {
+            obj.Active = false;
+            await dishOrderRepository.Delete(obj);
+        }
+
+        public async Task<long> DeletePermanently(long? id)
+        {
+            return await dishOrderRepository.DeletePermanently(id);
+        }
+
+        public async Task<DishOrder> Detail(long? id)
+        {
+            return await dishOrderRepository.Detail(id);
+        }
+        public async Task<List<DishOrderViewModel>> DishOrderDetailByTableId(int tableId)
+        {
+            return await dishOrderRepository.DishOrderDetailByTableId(tableId);
+        }
+        public async Task<List<DishOrderViewModel>> ListDishOrderNotification()
+        {
+            return await dishOrderRepository.ListDishOrderNotification();
+        }
+        public async Task<List<DishOrderViewModel>> ListDishOrderInvoice(int tableId)
+        {
+            return await dishOrderRepository.ListDishOrderInvoice(tableId);
+        }
+        public async Task<List<DishOrder>> List()
+        {
+            return await dishOrderRepository.List();
+        }
+
+        public async Task<List<DishOrder>> ListPaging(int pageIndex, int pageSize)
+        {
+            return await dishOrderRepository.ListPaging(pageIndex, pageSize);
+        }
+
+        public async Task<DTResult<DishOrder>> ListServerSide(DishOrderDTParameters parameters)
+        {
+            return await dishOrderRepository.ListServerSide(parameters);
+        }
+
+        //public async Task<List<DishOrder>> Search(string keyword)
+        //{
+        //    return await dishOrderRepository.Search(keyword);
+        //}
+
+        public async Task Update(DishOrder obj)
+        {
+            var detail = await dishOrderRepository.Detail(obj.Id);
+            detail.DishOrderStatusId = obj.DishOrderStatusId;
+            if (await dishOrderRepository.Update(detail))
+            {
+                if (obj.DishOrderStatusId == DishOrderStatudConst.DONE)
+                {
+                    var table = await tableRepository.Detail(detail.TableId);
+                    var notifi = new Notification
+                    {
+                        Active = true,
+                        AccountId = obj.AccountId,
+                        NotificationStatusId = NotificationStatusId.Unread,
+                        Name = "Đơn đặt món " + table.TableName.ToLower() + " đã hoàn thành",
+                        SenderId = RoleConst.BARTENDER,
+                        Description = "Done",
+                        CreatedTime = DateTime.Now,
+                        ApproveTime = null,
+                        Url = ""
+                    };
+                    await notificationRepository.Add(notifi);
+                    await notificationHub.Clients.All.ReceiveNotification(notifi);
+                }
+            }
+
+        }
+        public async Task<bool> AddOrUpdateByVm(DishOrderViewModel model)
+        {
+            using (var transaction = dishOrderRepository.GetDatabase().BeginTransaction())
+            {
+                try
+                {
+                    var dishOrderId = model.Id;
+                    if (model.Id == 0)
+                    {
+                        var newDishOrder = new DishOrder();
+                        newDishOrder.TableId = model.TableId;
+                        newDishOrder.AccountId = model.AccountId;
+                        newDishOrder.Note = model.Description;
+                        newDishOrder.DishOrderStatusId = DishOrderStatudConst.PROCESSING;
+                        newDishOrder.Active = true;
+                        newDishOrder.CreatedTime = DateTime.Now;
+                        await dishOrderRepository.Add(newDishOrder);
+                        if (newDishOrder.Id <= 0)
+                        {
+                            _logger.LogError("AddOrUpdateByVm: Add new DishOrder failed");
+                            await transaction.RollbackAsync();
+                            return false;
+                        }
+                        dishOrderId = newDishOrder.Id;
+                        _logger.LogInformation("AddOrUpdateByVm: Add new DishOrder success with id " + dishOrderId);
+                    }
+                    else if (model.Id > 0)
+                    { // nếu id > 0 thì update
+                        var updateDishOrder = new DishOrder();
+                        updateDishOrder.Id = dishOrderId;
+                        updateDishOrder.TableId = model.TableId;
+                        updateDishOrder.AccountId = model.AccountId;
+                        updateDishOrder.Note = model.Description;
+                        updateDishOrder.DishOrderStatusId = DishOrderStatudConst.PROCESSING;
+                        updateDishOrder.CreatedTime = DateTime.Now;
+                        updateDishOrder.Active = true;
+                        if (!(await dishOrderRepository.Update(updateDishOrder)))
+                        {
+                            _logger.LogError("AddOrUpdateByVm: Update DishOrder failed");
+                            await transaction.RollbackAsync();
+                            return false;
+                        }
+                        _logger.LogInformation("AddOrUpdateByVm: Update DishOrder success with id " + dishOrderId);
+                    }
+
+
+                    var listDishOrderDetail = model.DishOrderDetails;
+                    var listCrrDishOrderDetail = await dishOrderDetailRepository.ListByOrderId(dishOrderId);
+                    if (listDishOrderDetail == null || listDishOrderDetail.Count == 0)
+                    {
+                        _logger.LogError("AddOrUpdateByVm: ListDishOrderDetail is null or empty");
+                        await transaction.RollbackAsync();
+                        return false;
+                    }
+                    foreach (var item in listDishOrderDetail)
+                    {
+                        if (item.Id == 0)
+                        {
+                            var newDishOrderDetail = new DishOrderDetail();
+                            newDishOrderDetail.DishId = item.DishId;
+                            newDishOrderDetail.Quantity = item.Quantity;
+                            newDishOrderDetail.Note = item.Note;
+                            newDishOrderDetail.DishOrderId = dishOrderId;
+                            newDishOrderDetail.Active = true;
+                            newDishOrderDetail.CreatedTime = DateTime.Now;
+                            await dishOrderDetailRepository.Add(newDishOrderDetail);
+                            if (newDishOrderDetail.Id <= 0)
+                            {
+                                _logger.LogError("AddOrUpdateByVm: Add new DishOrderDetail failed");
+                                await transaction.RollbackAsync();
+                                return false;
+                            }
+                            _logger.LogInformation("AddOrUpdateByVm: Add new DishOrderDetail success with id " + newDishOrderDetail.Id);
+                        }
+                        else if (item.Id > 0)
+                        {
+                            var updateDishOrderDetail = new DishOrderDetail();
+                            updateDishOrderDetail.Id = item.Id;
+                            updateDishOrderDetail.DishId = item.DishId;
+                            updateDishOrderDetail.DishOrderId = item.DishOrderId;
+                            updateDishOrderDetail.Quantity = item.Quantity;
+                            updateDishOrderDetail.Note = item.Note;
+                            updateDishOrderDetail.Active = true;
+                            if (!(await dishOrderDetailRepository.Update(updateDishOrderDetail)))
+                            {
+                                _logger.LogError("AddOrUpdateByVm: Update DishOrderDetail failed");
+                                await transaction.RollbackAsync();
+                                return false;
+                            }
+                            _logger.LogInformation("AddOrUpdateByVm: Update DishOrderDetail success with id " + updateDishOrderDetail.Id);
+                        }
+                    }
+                    bool isExist;
+                    foreach (var item in listCrrDishOrderDetail)
+                    {
+                        isExist = false;
+                        foreach (var i in listDishOrderDetail)
+                        {
+                            if (item.Id == i.Id) isExist = true;
+                        }
+                        if (!isExist)
+                        {
+                            var od = new DishOrderDetail();
+                            od.Id = item.Id;
+                            od.Active = false;
+                            await dishOrderDetailRepository.Delete(od);
+                        }
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError("AddOrUpdateByVm: Fail while add or update DishOrder " + ex.Message);
+                    await transaction.RollbackAsync();
+                    return false;
+                }
+
+                var table = await tableRepository.Detail(model.TableId);
+                if (table == null)
+                {
+                    await transaction.RollbackAsync();
+                    return false;
+                }
+                table.TableStatus = TableConst.OCCUPIED;
+                await tableRepository.Update(table);
+
+                var notifi = new Notification
+                {
+                    Active = true,
+                    AccountId = model.AccountId, // 
+                    NotificationStatusId = NotificationStatusId.Unread,
+                    Name = "Đơn đặt món mới",
+                    SenderId = RoleConst.WAITER,
+                    Description = "Add review",
+                    CreatedTime = DateTime.Now,
+                    ApproveTime = null,
+                    Url = ""
+                };
+                //await notificationRepository.Add(notifi);
+                await notificationHub.Clients.All.ReceiveNotification(notifi);
+                await transaction.CommitAsync();
+                return true;
+            }
+        }
+    }
+}
+
+using CoffeeCRM.Data.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CoffeeCRM.Core.Util;using CoffeeCRM.Data;
+using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Data.ViewModels;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+
+
+namespace CoffeeCRM.Core.Repository
+{
+    public interface IDishOrderRepository
+    {
+        Task<List<DishOrder>> List();
+
+        //Task <List< DishOrder>> Search(string keyword);
+
+        Task<List<DishOrder>> ListPaging(int pageIndex, int pageSize);
+
+        Task<DishOrder> Detail(long? postId);
+
+        Task<DishOrder> Add(DishOrder DishOrder);
+
+        Task<bool> Update(DishOrder DishOrder);
+
+        Task Delete(DishOrder DishOrder);
+        DatabaseFacade GetDatabase();
+        Task<long> DeletePermanently(long? DishOrderId);
+        Task<List<DishOrder>> ListUnPaid(int tableId);
+        Task<List<DishOrderViewModel>> DishOrderDetailByTableId(int tableId);
+        Task<List<DishOrderViewModel>> DishOrderDetailList(int tableId);
+        Task<List<DishOrderViewModel>> ListDishOrderNotification();
+        Task<List<DishOrderViewModel>> ListDishOrderInvoice(int tableId);
+
+        int Count();
+
+        Task<DTResult<DishOrder>> ListServerSide(DishOrderDTParameters parameters);
+    }
+}
+
+
+using CoffeeCRM.Data.Model;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CoffeeCRM.Core.Util;using CoffeeCRM.Data;
+using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Data.ViewModels;
+using System.Globalization;
+using CoffeeCRM.Data.Constants;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+
+namespace CoffeeCRM.Core.Repository
+{
+    public class DishOrderRepository : IDishOrderRepository
+    {
+        SysDbContext db;
+        public DishOrderRepository(SysDbContext _db)
+        {
+            db = _db;
+        }
+
+        public async Task<List<DishOrderViewModel>> ListDishOrderNotification()
+        {
+            if (db != null)
+            {
+                var result = await (
+                        from row in db.DishOrders
+                        where row.Active && row.DishOrderStatusId == DishOrderStatudConst.PROCESSING
+                        orderby row.Id ascending
+                        select new DishOrderViewModel()
+                        {
+                            Id = row.Id,
+                            TableId = row.TableId,
+                            AccountId = row.AccountId,
+                            OrdererName = (from a in db.Accounts where a.Id == row.AccountId select a.FullName.ToString()).FirstOrDefault(),
+                            TableName = (from t in db.Tables where t.Id == row.TableId select t.TableName.ToString()).FirstOrDefault(),
+                            Description = row.Note,
+                            DishOrderStatusId = row.DishOrderStatusId,
+                            DishOrderStatusName = ((from s in db.DishOrderStatuses where s.Id == row.DishOrderStatusId select s.DishOrderStatusName.ToString()).FirstOrDefault()),
+                            CreatedTime = row.CreatedTime,
+                            DishOrderDetails = (from dod in db.DishOrderDetails
+                                                where row.Id == dod.DishOrderId && dod.Active
+                                                select new DishOrderDetailVM()
+                                                {
+                                                    Id = dod.Id,
+                                                    DishOrderId = dod.DishOrderId,
+                                                    DishId = dod.DishId,
+                                                    Quantity = dod.Quantity,
+                                                    DishName = (from d in db.Dishes where d.Active && d.Id == dod.DishId select d.DishName.ToString()).FirstOrDefault(),
+                                                    Note = dod.Note
+                                                }).ToList()
+                        }
+                        ).ToListAsync();
+                return result;
+            }
+            return null;
+        }
+
+        public async Task<List<DishOrderViewModel>> ListDishOrderInvoice(int tableId)
+        {
+            if (db != null)
+            {
+                var validStatuses = new[] { DishOrderStatudConst.PROCESSING, DishOrderStatudConst.DONE };
+
+                var result = await (
+                    from row in db.DishOrders
+                    join detail in db.DishOrderDetails on row.Id equals detail.DishOrderId
+                    where row.TableId == tableId
+                          && row.Active
+                          && validStatuses.Contains(row.DishOrderStatusId)
+                    select new DishOrderViewModel()
+                    {
+                        Id = row.Id,
+                        TableId = row.TableId,
+                        AccountId = row.AccountId,
+                        OrdererName = (from a in db.Accounts where a.Id == row.AccountId select a.FullName.ToString()).FirstOrDefault(),
+                        TableName = (from t in db.Tables where t.Id == row.TableId select t.TableName.ToString()).FirstOrDefault(),
+                        Description = row.Note,
+                        DishOrderStatusId = row.DishOrderStatusId,
+                        DishOrderStatusName = ((from s in db.DishOrderStatuses where s.Id == row.DishOrderStatusId select s.DishOrderStatusName.ToString()).FirstOrDefault()),
+                        CreatedTime = row.CreatedTime,
+                        DishOrderDetails = (from dod in db.DishOrderDetails
+                                            where row.Id == dod.DishOrderId && dod.Active
+                                            group dod by dod.DishId into grouped
+                                            select new DishOrderDetailVM()
+                                            {
+                                                DishId = grouped.Key,
+                                                Quantity = grouped.Sum(d => d.Quantity),
+                                                DishName = (from d in db.Dishes where d.Active && d.Id == grouped.Key select d.DishName.ToString()).FirstOrDefault(),
+                                            }).ToList()
+                    }
+                        ).ToListAsync();
+                return result;
+            }
+            return null;
+        }
+
+        public async Task<List<DishOrder>> List()
+        {
+            if (db != null)
+            {
+                return await (
+                    from row in db.DishOrders
+                    where (row.Active)
+                    orderby row.Id descending
+                    select row
+                ).ToListAsync();
+            }
+
+            return null;
+        }
+
+        public async Task<List<DishOrder>> ListPaging(int pageIndex, int pageSize)
+        {
+            int offSet = 0;
+            offSet = (pageIndex - 1) * pageSize;
+            if (db != null)
+            {
+                return await (
+                    from row in db.DishOrders
+                    where (row.Active)
+                    orderby row.Id descending
+                    select row
+                ).Skip(offSet).Take(pageSize).ToListAsync();
+            }
+            return null;
+        }
+
+        public DatabaseFacade GetDatabase()
+        {
+            return db.Database;
+
+        }
+
+
+        public async Task<DishOrder> Detail(long? id)
+        {
+            if (db != null)
+            {
+                return await db.DishOrders.FirstOrDefaultAsync(row => row.Active && row.Id == id);
+            }
+            return null;
+        }
+
+
+        public async Task<DishOrder> Add(DishOrder obj)
+        {
+            if (db != null)
+            {
+                await db.DishOrders.AddAsync(obj);
+                await db.SaveChangesAsync();
+                return obj;
+            }
+            return null;
+        }
+
+        public async Task<bool> Update(DishOrder obj)
+        {
+            if (db != null)
+            {
+                try
+                {
+                    var existingEntity = await db.DishOrders.FindAsync(obj.Id);
+                    if (existingEntity != null)
+                    {
+                        db.Entry(existingEntity).State = EntityState.Detached;
+                    }
+                    db.DishOrders.Attach(obj);
+                    db.Entry(obj).Property(x => x.TableId).IsModified = true;
+                    db.Entry(obj).Property(x => x.AccountId).IsModified = true;
+                    db.Entry(obj).Property(x => x.DishOrderStatusId).IsModified = true;
+                    db.Entry(obj).Property(x => x.Active).IsModified = true;
+
+                    //Commit the transaction
+                    return await db.SaveChangesAsync() > 0;
+                }
+                catch (Exception ex)
+                {
+                    // Log exception to identify the error
+                    Console.WriteLine(ex.Message);
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        public async Task<List<DishOrder>> ListUnPaid(int tableId)
+        {
+            if (db != null)
+            {
+                return await (
+                    from row in db.DishOrders
+                    where (row.Active && (row.DishOrderStatusId != DishOrderStatudConst.PAID) && row.TableId == tableId)
+                    orderby row.Id
+                    select row
+                ).ToListAsync();
+            }
+
+            return null;
+        }
+        public async Task<List<DishOrderViewModel>> DishOrderDetailByTableId(int tableId)
+        {
+            if (db != null)
+            {
+                var result = await (
+                        from row in db.DishOrders
+                        where row.TableId == tableId && row.Active && row.DishOrderStatusId != DishOrderStatudConst.PAID
+                        orderby row.Id descending
+                        select new DishOrderViewModel()
+                        {
+                            Id = row.Id,
+                            TableId = row.TableId,
+                            AccountId = row.AccountId,
+                            OrdererName = (from a in db.Accounts where a.Id == row.AccountId select a.FullName.ToString()).FirstOrDefault(),
+                            Description = row.Note,
+                            DishOrderStatusId = row.DishOrderStatusId,
+                            DishOrderStatusName = (from s in db.DishOrderStatuses where s.Id == row.DishOrderStatusId select s.DishOrderStatusName.ToString()).FirstOrDefault(),
+                            CreatedTime = row.CreatedTime
+                            //DishOrderDetails = (from dod in db.DishOrderDetails where row.Id == dod.DishOrderId && dod.Active select dod).ToList()
+                        }
+                        ).ToListAsync();
+                return result;
+            }
+            return null;
+        }
+
+        public async Task<List<DishOrderViewModel>> DishOrderDetailList(int tableId)
+        {
+            if (db != null)
+            {
+                var validStatuses = new[] { DishOrderStatudConst.PROCESSING, DishOrderStatudConst.DONE };
+
+                var result = await (
+                    from order in db.DishOrders
+                    where
+                        order.TableId == tableId
+                        && order.Active
+                        && validStatuses.Contains(order.DishOrderStatusId)
+                    orderby order.Id descending
+                    select new DishOrderViewModel
+                    {
+                        Id = order.Id,
+                        TableId = order.TableId,
+                        AccountId = order.AccountId,
+                        OrdererName = (from account in db.Accounts
+                                       where account.Id == order.AccountId
+                                       select account.FullName.ToString()).FirstOrDefault(),
+                        Description = order.Note,
+                        DishOrderStatusId = order.DishOrderStatusId,
+                        DishOrderStatusName = (from status in db.DishOrderStatuses
+                                               where status.Id == order.DishOrderStatusId
+                                               select status.DishOrderStatusName.ToString()).FirstOrDefault(),
+                        CreatedTime = order.CreatedTime,
+                    }
+                ).ToListAsync();
+
+                return result;
+            }
+            return null;
+        }
+
+
+        public async Task Delete(DishOrder obj)
+        {
+            if (db != null)
+            {
+                //Update that obj
+                db.DishOrders.Attach(obj);
+                db.Entry(obj).Property(x => x.Active).IsModified = true;
+
+                //Commit the transaction
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public async Task<long> DeletePermanently(long? objId)
+        {
+            int result = 0;
+
+            if (db != null)
+            {
+                //Find the obj for specific obj id
+                var obj = await db.DishOrders.FirstOrDefaultAsync(x => x.Id == objId);
+
+                if (obj != null)
+                {
+                    //Delete that obj
+                    db.DishOrders.Remove(obj);
+
+                    //Commit the transaction
+                    result = await db.SaveChangesAsync();
+                }
+                return result;
+            }
+
+            return result;
+        }
+
+
+        public int Count()
+        {
+            int result = 0;
+
+            if (db != null)
+            {
+                //Find the obj for specific obj id
+                result = (
+                    from row in db.DishOrders
+                    where row.Active
+                    select row
+                            ).Count();
+            }
+
+            return result;
+        }
+        public async Task<DTResult<DishOrder>> ListServerSide(DishOrderDTParameters parameters)
+        {
+            //0. Options
+            string searchAll = parameters.SearchAll.Trim();//Trim text
+            string orderCritirea = "Id";//Set default critirea
+            int recordTotal, recordFiltered;
+            bool orderDirectionASC = true;//Set default ascending
+            if (parameters.Order != null)
+            {
+                orderCritirea = parameters.Columns[parameters.Order[0].Column].Data;
+                orderDirectionASC = parameters.Order[0].Dir == DTOrderDir.ASC;
+            }
+            //1. Join
+            var query = from row in db.DishOrders
+
+
+                        where row.Active
+
+                        select new
+                        {
+                            row
+                        };
+
+            recordTotal = await query.CountAsync();
+            //2. Fillter
+            if (!String.IsNullOrEmpty(searchAll))
+            {
+                searchAll = searchAll.ToLower();
+                query = query.Where(c =>
+                    EF.Functions.Collate(c.row.Id.ToString().ToLower(), SQLParams.Latin_General).Contains(EF.Functions.Collate(searchAll, SQLParams.Latin_General)) ||
+                    EF.Functions.Collate(c.row.Note.ToLower(), SQLParams.Latin_General).Contains(EF.Functions.Collate(searchAll, SQLParams.Latin_General)) ||
+                    EF.Functions.Collate(c.row.DishOrderStatusId.ToString().ToLower(), SQLParams.Latin_General).Contains(EF.Functions.Collate(searchAll, SQLParams.Latin_General)) ||
+                    EF.Functions.Collate(c.row.TableId.ToString().ToLower(), SQLParams.Latin_General).Contains(EF.Functions.Collate(searchAll, SQLParams.Latin_General)) ||
+                    EF.Functions.Collate(c.row.CreatedTime.ToCustomString().ToLower(), SQLParams.Latin_General).Contains(EF.Functions.Collate(searchAll, SQLParams.Latin_General)) ||
+                    EF.Functions.Collate(c.row.Active.ToString().ToLower(), SQLParams.Latin_General).Contains(EF.Functions.Collate(searchAll, SQLParams.Latin_General))
+
+                );
+            }
+            foreach (var item in parameters.Columns)
+            {
+                var fillter = item.Search.Value.Trim();
+                if (fillter.Length > 0)
+                {
+                    switch (item.Data)
+                    {
+                        case "id":
+                            query = query.Where(c => c.row.Id.ToString().Trim().Contains(fillter));
+                            break;
+                        case "note":
+                            query = query.Where(c => (c.row.Note ?? "").Contains(fillter));
+                            break;
+                        case "dishOrderStatusId":
+                            query = query.Where(c => c.row.DishOrderStatusId.ToString().Trim().Contains(fillter));
+                            break;
+                        case "tableId":
+                            query = query.Where(c => c.row.TableId.ToString().Trim().Contains(fillter));
+                            break;
+                        case "createdTime":
+                            if (fillter.Contains(" - "))
+                            {
+                                var dates = fillter.Split(" - ");
+                                var startDate = DateTime.ParseExact(dates[0], "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                                var endDate = DateTime.ParseExact(dates[1], "dd/MM/yyyy", CultureInfo.InvariantCulture).AddDays(1).AddSeconds(-1);
+                                query = query.Where(c => c.row.CreatedTime >= startDate && c.row.CreatedTime <= endDate);
+                            }
+                            else
+                            {
+                                var date = DateTime.ParseExact(fillter, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                                query = query.Where(c => c.row.CreatedTime.Date == date.Date);
+                            }
+                            break;
+                        case "active":
+                            query = query.Where(c => c.row.Active.ToString().Trim().Contains(fillter));
+                            break;
+
+                    }
+                }
+            }
+
+            //3.Query second
+            var query2 = query.Select(c => new DishOrder()
+            {
+                Id = c.row.Id,
+                Note = c.row.Note,
+                DishOrderStatusId = c.row.DishOrderStatusId,
+                TableId = c.row.TableId,
+                CreatedTime = c.row.CreatedTime,
+                Active = c.row.Active,
+
+            });
+            //4. Sort
+            query2 = query2.OrderByDynamic<DishOrder>(orderCritirea, orderDirectionASC ? LinqExtensions.Order.Asc : LinqExtensions.Order.Desc);
+            recordFiltered = await query2.CountAsync();
+            //5. Return data
+            return new DTResult<DishOrder>()
+            {
+                data = await query2.Skip(parameters.Start).Take(parameters.Length).ToListAsync(),
+                draw = parameters.Draw,
+                recordsFiltered = recordFiltered,
+                recordsTotal = recordTotal
+            };
+        }
+    }
+}
+
+
+********** Module 3: Thanh toán & Tạo hóa đơn
+
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CoffeeCRM.Data.Model;
+using CoffeeCRM.Core.Repository;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using CoffeeCRM.Core.Util;
+using CoffeeCRM.Data.Constants;
+using CoffeeCRM.Core.Service;
+using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Data.ViewModels;
+using CoffeeCRM.Core.Helper.VNPay;
+using CoffeeCRM.Data.Enums.VNPay;
+using CoffeeCRM.Data.VNPay;
+
+namespace CfCRM.DATN.Controllers
+{
+    [Route("[controller]")]
+    [ApiController]
+    public class InvoiceController : ControllerBase
+    {
+        IInvoiceService service;
+        IVNPayService _vnPayservice;
+        IConfiguration _configuration;
+        public InvoiceController(IInvoiceService _service, IVNPayService vnPayservice, IConfiguration configuration)
+        {
+            service = _service;
+            _vnPayservice = vnPayservice;
+            _configuration = configuration;
+            _vnPayservice.Initialize(_configuration["Vnpay:TmnCode"], _configuration["Vnpay:HashSecret"], _configuration["Vnpay:BaseUrl"], _configuration["Vnpay:CallbackUrl"]);
+        }
+
+        [HttpGet]
+        [Route("api/List")]
+        public async Task<IActionResult> List()
+        {
+            try
+            {
+                var dataList = await service.List();
+                if (dataList == null || dataList.Count == 0)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList());
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        [Route("api/Detail/{Id}")]
+        public async Task<IActionResult> Detail(int? Id)
+        {
+            if (Id == null)
+            {
+                return BadRequest();
+            }
+            try
+            {
+                var dataList = await service.Detail(Id);
+                if (dataList == null)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList);
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+
+
+
+        [HttpGet]
+        [Route("api/ListPaging")]
+        public async Task<IActionResult> ListPaging(int pageIndex, int pageSize)
+        {
+            if (pageIndex < 0 || pageSize < 0) return BadRequest();
+            try
+            {
+                var dataList = await service.ListPaging(pageIndex, pageSize);
+
+                if (dataList == null || dataList.Count == 0)
+                {
+                    return NotFound();
+                }
+
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(dataList.Cast<object>().ToList());
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+        [HttpPost]
+        [Route("api/Add")]
+        public async Task<IActionResult> Add([FromBody] Invoice model)
+        {
+            if (ModelState.IsValid)
+            {
+                //1. business logic
+
+                //data validation
+                if (model.Active == false)
+                {
+                    return BadRequest();
+                }
+                //2. add new object
+                try
+                {
+                    await service.Add(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.CREATED(model);
+                    return Created("", coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+
+
+        [HttpPost]
+        [Route("api/Update")]
+        public async Task<IActionResult> Update([FromBody] Invoice model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    //1. business logic 
+                    //2. update object
+                    await service.Update(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                    return Ok(coffeemanagementResponse);
+                }
+                catch (Exception ex)
+                {
+                    if (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException")
+                    {
+                        return NotFound();
+                    }
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+        [HttpPost]
+        [Route("api/Delete")]
+        public async Task<IActionResult> Delete([FromBody] Invoice model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    //1. business logic
+                    await service.Delete(model);
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                    return Ok(coffeemanagementResponse);
+                }
+                catch (Exception ex)
+                {
+                    if (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException")
+                    {
+                        return NotFound();
+                    }
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+        [HttpPost]
+        [Route("api/DeletePermanently")]
+        public async Task<IActionResult> DeletePermanently([FromBody] Invoice model)
+        {
+            var result = 0;
+            if (!(model.Id > 0))
+            {
+                return BadRequest();
+            }
+            try
+            {
+                //physically delete object
+                result = (int)await service.DeletePermanently(model.Id);
+                if (result == 0)
+                {
+                    return NotFound();
+                }
+                var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(model);
+                return Ok(coffeemanagementResponse);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+
+        [HttpGet]
+        [Route("api/Count")]
+        public int CountInvoice()
+        {
+            int result = service.Count();
+            return result;
+        }
+        [HttpPost]
+        [Route("api/list-server-side")]
+        public async Task<IActionResult> ListServerSide([FromBody] InvoiceDTParameters parameters)
+        {
+            try
+            {
+                var data = await service.ListServerSide(parameters);
+                return Ok(data);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+
+        [HttpPost]
+        [Route("api/AddOrUpdateVM")]
+        public async Task<IActionResult> AddOrUpdateVM([FromBody] InvoiceViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var invoiceCreated = await service.AddOrUpdateVM(model);
+                    if (invoiceCreated == null)
+                    {
+                        return BadRequest();
+                    }
+                    if (model.PaymentMethod == PaymentMethodConst.CASH)
+                    {
+                        return Created("", CoffeeManagementResponse.SUCCESS(invoiceCreated));
+                    }
+                    var ipAddress = NetworkHelper.GetIpAddress(HttpContext); // Lấy địa chỉ IP của thiết bị thực hiện giao dịch
+                    var request = new PaymentRequest
+                    {
+                        PaymentId = DateTime.Now.Ticks,
+                        Money = (double)model.TotalMoney,
+                        Description = model.Id.ToString(),
+                        IpAddress = ipAddress,
+                        BankCode = BankCode.ANY, // Tùy chọn. Mặc định là tất cả phương thức giao dịch
+                        CreatedDate = DateTime.Now, // Tùy chọn. Mặc định là thời điểm hiện tại
+                        Currency = Currency.VND, // Tùy chọn. Mặc định là VND (Việt Nam đồng)
+                        Language = DisplayLanguage.Vietnamese // Tùy chọn. Mặc định là tiếng Việt
+                    };
+
+                    var paymentUrl = _vnPayservice.GetPaymentUrl(request);
+                    invoiceCreated.UriVnPay = paymentUrl;
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(invoiceCreated);
+                    return Created("", coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+
+        [HttpPost]
+        [Route("api/UpdateStatus")]
+        public async Task<IActionResult> UpdateStatus([FromBody] InvoiceViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var invoiceCreated = await service.UpdateStatus(model);
+                    if (invoiceCreated == null)
+                    {
+                        return BadRequest();
+                    }
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(invoiceCreated);
+                    return Created("", coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+
+        [HttpGet]
+        [Route("api/InvoiceDetailVM")]
+        public async Task<IActionResult> DetailVM(int invoiceId)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+
+                    var result = await service.InvoiceDetailById(invoiceId);
+                    if (result == null)
+                    {
+                        return BadRequest();
+                    }
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS(result);
+                    return Created("", coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+
+        [HttpPost]
+        [Route("api/PaymentSuccess")]
+        public async Task<IActionResult> PaymentSuccess(int id, string invoiceCode)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await service.PaymentSuccess(id, invoiceCode);
+                    
+                    var coffeemanagementResponse = CoffeeManagementResponse.SUCCESS();
+                    return Created("", coffeemanagementResponse);
+                }
+                catch (Exception)
+                {
+
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+    }
+}
+
+using CoffeeCRM.Data.Model;
+
+namespace CoffeeCRM.Data.ViewModels
+{
+    public class InvoiceViewModel
+    {
+        public int Id { get; set; }
+        public string? InvoiceCode { get; set; }
+        public decimal TotalMoney { get; set; }
+        public string PaymentStatus { get; set; }
+        public DateTime CreatedTime { get; set; }
+        public bool Active { get; set; }
+        public int PaymentMethodId { get; set; }
+        public string  PaymentMethod { get; set; }
+        public int AccountId { get; set; }
+        public int TableId { get; set; }
+        public string? TableName { get; set; }
+        public string? OrdererName { get; set; }
+        public string? UriVnPay { get; set; }
+        public List<InvoiceDetail>? InvoiceDetails { get; set; }
+    }
+}
+using CoffeeCRM.Data.Model;
+using CoffeeCRM.Core.Util;using CoffeeCRM.Data;
+using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Data.ViewModels;
+using System.Threading.Tasks;
+
+namespace CoffeeCRM.Core.Service
+{
+    public interface IInvoiceService : IBaseService<Invoice>
+    {
+        Task<DTResult<Invoice>> ListServerSide(InvoiceDTParameters parameters);
+        Task<InvoiceVM> InvoiceDetailById(int invoiceId);
+        Task<InvoiceViewModel> AddOrUpdateVM(InvoiceViewModel model);
+        Task<InvoiceViewModel> UpdateStatus(InvoiceViewModel model);
+        Task PaymentSuccess(int id, string transCode);
+    }
+}
+using CoffeeCRM.Data.Model;
+using CoffeeCRM.Core.Repository;
+using CoffeeCRM.Core.Util;
+using CoffeeCRM.Data;
+using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Data.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using CoffeeCRM.Data.Constants;
+using CoffeeCRM.Core.Repository.Interfaces;
+using Microsoft.AspNetCore.SignalR;
+using CoffeeCRM.Data.DTO;
+using NetTopologySuite.Noding;
+using CoffeeCRM.Core.Helper.VNPay;
+using CoffeeCRM.Data.Enums.VNPay;
+using CoffeeCRM.Data.VNPay;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+
+namespace CoffeeCRM.Core.Service
+{
+    public class InvoiceService : IInvoiceService
+    {
+        IInvoiceRepository invoiceRepository;
+        IDishOrderRepository dishOrderRepository;
+        IDishOrderDetailRepository dishOrderDetailRepository;
+        IInvoiceDetailRepository invoiceDetailRepository;
+        ITableRepository tableRepository;
+        ICashFlowRepository cashFlowRepository;
+        IAccountRepository accountRepository;
+        INotificationRepository notificationRepository;
+        IHubContext<NotificationHub, INotificationHub> notificationHub;
+        IVNPayService _vnPayservice;
+        IConfiguration _configuration;
+
+        public InvoiceService(
+            IInvoiceRepository _invoiceRepository, IDishOrderRepository _dishOrderRepository, IDishOrderDetailRepository _dishOrderDetailRepository,
+            IInvoiceDetailRepository _invoiceDetailRepository, ITableRepository _tableRepository, ICashFlowRepository _cashFlowRepository,
+            IAccountRepository _accountRepository, INotificationRepository _notificationRepository,
+            IHubContext<NotificationHub, INotificationHub> _notificationHub, IVNPayService vnPayservice, IConfiguration configuration)         
+        {
+            _configuration = configuration;
+            _vnPayservice = vnPayservice;
+            invoiceRepository = _invoiceRepository;
+            dishOrderRepository = _dishOrderRepository;
+            dishOrderDetailRepository = _dishOrderDetailRepository;
+            invoiceDetailRepository = _invoiceDetailRepository;
+            tableRepository = _tableRepository;
+            cashFlowRepository = _cashFlowRepository;
+            accountRepository = _accountRepository;
+            notificationRepository = _notificationRepository;
+            notificationHub = _notificationHub;
+            _vnPayservice.Initialize(_configuration["Vnpay:TmnCode"], _configuration["Vnpay:HashSecret"], _configuration["Vnpay:BaseUrl"], _configuration["Vnpay:CallbackUrl"]);
+        }
+        public async Task Add(Invoice obj)
+        {
+            obj.Active = true;
+            obj.CreatedTime = DateTime.Now;
+            await invoiceRepository.Add(obj);
+        }
+
+        public int Count()
+        {
+            var result = invoiceRepository.Count();
+            return result;
+        }
+
+        public async Task Delete(Invoice obj)
+        {
+            obj.Active = false;
+            await invoiceRepository.Delete(obj);
+        }
+
+        public async Task<long> DeletePermanently(long? id)
+        {
+            return await invoiceRepository.DeletePermanently(id);
+        }
+
+        public async Task<Invoice> Detail(long? id)
+        {
+            return await invoiceRepository.Detail(id);
+        }
+
+        public async Task<List<Invoice>> List()
+        {
+            return await invoiceRepository.List();
+        }
+
+        public async Task<List<Invoice>> ListPaging(int pageIndex, int pageSize)
+        {
+            return await invoiceRepository.ListPaging(pageIndex, pageSize);
+        }
+
+        public async Task<DTResult<Invoice>> ListServerSide(InvoiceDTParameters parameters)
+        {
+            return await invoiceRepository.ListServerSide(parameters);
+        }
+
+        public async Task Update(Invoice obj)
+        {
+            await invoiceRepository.Update(obj);
+        }
+
+        public async Task<InvoiceViewModel> AddByVm(InvoiceViewModel model)
+        {
+            using (var transaction = invoiceRepository.GetDatabase().BeginTransaction())
+            {
+                try
+                {
+                    var invoiceId = model.Id;
+                    var currentYear = DateTime.Now.Year;
+                    var lastInvoice = await invoiceRepository.getLastestInvoice();
+                    // Lấy ID tiếp theo (hoặc bắt đầu từ 1 nếu là hóa đơn đầu tiên của năm)
+                    int nextId;
+                    if (lastInvoice != null)
+                    {
+                        string[] parts = lastInvoice.InvoiceCode.Split('-');
+
+                        // Kiểm tra xem phần tử cuối có thể chuyển thành int không
+                        if (parts.Length > 2 && int.TryParse(parts.Last(), out int lastId))
+                        {
+                            nextId = lastId + 1;
+                        }
+                        else
+                        {
+                            nextId = 1; // Reset ID nếu không tìm thấy hoặc không thể parse
+                        }
+                    }
+                    else
+                    {
+                        nextId = 1; // Nếu chưa có hóa đơn nào trong năm
+                    }
+                    // Tạo mã hóa đơn mới
+                    string newInvoiceCode = $"HD-{currentYear}-{nextId}";
+                    if (model.Id == 0) // Nếu Id = 0 thì thêm mới
+                    {
+                        var newInvoice = new Invoice();
+                        newInvoice.InvoiceCode = newInvoiceCode;
+                        newInvoice.AccountId = model.AccountId;
+                        newInvoice.PaymentMethod = model.PaymentMethod;
+                        newInvoice.PaymentStatus = PaymentStatusStringConst.PAID;
+                        newInvoice.TotalMoney = model.TotalMoney;
+                        newInvoice.CreatedTime = DateTime.Now;
+                        newInvoice.Active = true;
+                        await invoiceRepository.Add(newInvoice);
+                        if (newInvoice.Id <= 0)
+                        {
+                            await transaction.RollbackAsync();
+                            return null;
+                        }
+                        invoiceId = newInvoice.Id;
+                    }
+                    var listInvoiceDetail = model.InvoiceDetails;
+                    var listCrrInvoiceDetail = await invoiceDetailRepository.ListByInvoideId(invoiceId);
+                    if (listInvoiceDetail == null || listInvoiceDetail.Count <= 0)
+                    {
+                        await transaction.RollbackAsync();
+                        return null;
+                    }
+                    foreach (var item in listInvoiceDetail)
+                    {
+                        if (item.Id == 0)
+                        {
+                            var newInvoiceDetail = item;
+                            newInvoiceDetail.InvoiceId = invoiceId;
+                            newInvoiceDetail.Quantity = item.Quantity;
+                            newInvoiceDetail.UnitPrice = item.UnitPrice;
+                            newInvoiceDetail.DishId = item.DishId;
+                            newInvoiceDetail.CreatedTime = DateTime.Now;
+                            newInvoiceDetail.Active = true;
+                            await invoiceDetailRepository.Add(newInvoiceDetail);
+                            if (newInvoiceDetail.Id <= 0)
+                            {
+                                await transaction.RollbackAsync();
+                                return null;
+                            }
+
+                        }
+                    }
+                    CashFlow cflow = new CashFlow();
+                    cflow.TotalMoney = model.TotalMoney;
+                    cflow.FlowType = CashFlowConst.CASH_FLOW_TYPE_INCOME;
+                    cflow.Note = "Hóa đơn bán hàng";
+                    cflow.CreatedTime = DateTime.Now;
+                    cflow.Active = true;
+                    cflow.AccountId = model.AccountId;
+                    await cashFlowRepository.Add(cflow);
+                    if (cflow.Id <= 0)
+                    {
+                        await transaction.RollbackAsync();
+                        return null;
+                    }
+
+                    bool isExist;
+                    foreach (var item in listCrrInvoiceDetail)
+                    {
+                        isExist = false;
+                        foreach (var i in listInvoiceDetail)
+                        {
+                            if (item.Id == i.Id) isExist = true;
+                        }
+                        if (!isExist)
+                        {
+                            var od = new InvoiceDetail();
+                            od.Id = item.Id;
+                            od.Active = false;
+                            await invoiceDetailRepository.Delete(od);
+                        }
+                    }                 
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return null;
+                }
+                await transaction.CommitAsync();
+                return model;
+            }
+        }
+
+        public async Task<InvoiceViewModel> AddOrUpdateVM(InvoiceViewModel model)
+        {
+            using (var transaction = invoiceRepository.GetDatabase().BeginTransaction())
+            {
+                var invoiceCode = "";
+                var accountId = 0;
+                var invoiceId = model.Id;
+                try
+                {                                   
+                    if (model.Id > 0)
+                    {
+                        var invoice = await invoiceRepository.Detail(model.Id);
+                        if(invoice == null)
+                        {
+                            await transaction.RollbackAsync();
+                            return null;
+                        }
+                        //invoice.PaymentMethod = model.PaymentMethod;
+                        invoice.PaymentStatus = model.PaymentStatus; // calcel or paid
+                        //invoice.TotalMoney = model.TotalMoney;
+                        
+                        await invoiceRepository.Update(invoice);
+                        invoiceCode = invoice.InvoiceCode;
+                        accountId = invoice.AccountId;
+                    }
+                    else if(model.Id == 0)
+                    {
+                        var currentYear = DateTime.Now.Year;
+                        var lastInvoice = await invoiceRepository.getLastestInvoice();
+                        // Lấy ID tiếp theo (hoặc bắt đầu từ 1 nếu là hóa đơn đầu tiên của năm)
+                        int nextId;
+                        if (lastInvoice != null)
+                        {
+                            string[] parts = lastInvoice.InvoiceCode.Split('-');
+
+                            // Kiểm tra xem phần tử cuối có thể chuyển thành int không
+                            if (parts.Length > 2 && int.TryParse(parts.Last(), out int lastId))
+                            {
+                                nextId = lastId + 1;
+                            }
+                            else
+                            {
+                                nextId = 1; // Reset ID nếu không tìm thấy hoặc không thể parse
+                            }
+                        }
+                        else
+                        {
+                            nextId = 1; // Nếu chưa có hóa đơn nào trong năm
+                        }
+                        // Tạo mã hóa đơn mới
+                        string newInvoiceCode = $"HD-{currentYear}-{nextId}";
+
+                        var invoice = new Invoice();
+                        invoice.InvoiceCode = newInvoiceCode;
+                        invoice.AccountId = model.AccountId;
+                        invoice.PaymentMethod = model.PaymentMethod;
+                        invoice.PaymentStatus = PaymentStatusStringConst.PENDING;
+                        invoice.TotalMoney = model.TotalMoney;
+                        invoice.TableId = model.TableId;
+                        invoice.CreatedTime = DateTime.Now;
+                        invoice.Active = true;
+                        await invoiceRepository.Add(invoice);
+                        if (invoice.Id <= 0)
+                        {
+                            await transaction.RollbackAsync();
+                            return null;
+                        }
+                        invoiceId = invoice.Id;
+                        invoiceCode = invoice.InvoiceCode;
+                        accountId = invoice.AccountId;
+                    }
+
+                    var details = model.InvoiceDetails;
+                    var listCrrInvoiceDetail = await invoiceDetailRepository.ListByInvoideId(invoiceId);
+
+                    if (details == null || details.Count <= 0)
+                    {
+                        await transaction.RollbackAsync();
+                        return null;
+                    }
+
+                    foreach (var item in details)
+                    {
+                        if(item.Id == 0)
+                        {
+                            var newInvoiceDetail = new InvoiceDetail();
+                            newInvoiceDetail.InvoiceId = invoiceId;
+                            newInvoiceDetail.Quantity = item.Quantity;
+                            newInvoiceDetail.UnitPrice = item.UnitPrice;
+                            newInvoiceDetail.DishId = item.DishId;
+                            newInvoiceDetail.CreatedTime = DateTime.Now;
+                            newInvoiceDetail.Active = true;
+                            await invoiceDetailRepository.Add(newInvoiceDetail);
+                            if (newInvoiceDetail.Id <= 0)
+                            {
+                                await transaction.RollbackAsync();
+                                return null;
+                            }
+                        }
+                        else if(item.Id > 0)
+                        {
+                            var invoiceDetail = await invoiceDetailRepository.Detail(item.Id);
+                            if (invoiceDetail == null)
+                            {
+                                await transaction.RollbackAsync();
+                                return null;
+                            }
+                            invoiceDetail.Quantity = item.Quantity;
+                            invoiceDetail.UnitPrice = item.UnitPrice;
+                            invoiceDetail.DishId = item.DishId;
+                            invoiceDetail.Active = true;
+                            await invoiceDetailRepository.Update(invoiceDetail);
+                        }
+                    }
+
+                    //bool isExist;
+                    //foreach (var item in listCrrInvoiceDetail)
+                    //{
+                    //    isExist = false;
+                    //    foreach (var i in details)
+                    //    {
+                    //        if (item.Id == i.Id) isExist = true;
+                    //    }
+                    //    if (!isExist)
+                    //    {
+                    //        var od = new InvoiceDetail();
+                    //        od.Id = item.Id;
+                    //        od.Active = false;
+                    //        await invoiceDetailRepository.Delete(od);
+                    //    }
+                    //}
+
+                    if (model.PaymentStatus == PaymentStatusStringConst.PAID)
+                    {
+                        CashFlow cflow = new CashFlow();
+                        cflow.TotalMoney = model.TotalMoney;
+                        cflow.FlowType = CashFlowConst.CASH_FLOW_TYPE_INCOME;
+                        cflow.Note = "Hóa đơn bán hàng";
+                        cflow.CreatedTime = DateTime.Now;
+                        cflow.Active = true;
+                        cflow.AccountId = model.AccountId;
+                        await cashFlowRepository.Add(cflow);
+                        if (cflow.Id <= 0)
+                        {
+                            await transaction.RollbackAsync();
+                            return null;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return null;
+                }
+
+                var listOldDishOrder = await dishOrderRepository.ListUnPaid(model.TableId);
+                foreach (var item in listOldDishOrder)
+                {
+                    item.DishOrderStatusId = DishOrderStatudConst.PAID;
+                    if (!await dishOrderRepository.Update(item))
+                    {
+                        await transaction.RollbackAsync();
+                        return null;
+                    }
+                }
+
+                var table = await tableRepository.Detail(model.TableId);
+                if(table == null)
+                {
+                    await transaction.RollbackAsync();
+                    return null;
+                }
+                table.TableStatus = TableConst.AVAILABLE;
+                await tableRepository.Update(table);
+
+                var accountName = await accountRepository.Detail(accountId);
+                var listAdmin = await accountRepository.GetByRoleId(RoleConst.ADMIN);
+                var ids = listAdmin.Select(x => x.Id).ToList();
+                ids.Add(accountId);
+                var mess = model.Id > 0 ? $"{accountName} đã cập nhật hoá đơn {invoiceCode}" : $"{accountName} đã tạo mới hoá đơn {invoiceCode}";
+
+                foreach (var id in ids)
+                {
+                    var noti = new Notification();
+                    noti.AccountId = id;
+                    noti.NotificationStatusId = NotificationStatusId.Unread;
+                    noti.Name = mess;
+                    noti.Description = mess;
+                    noti.SenderId = accountId;
+                    noti.CreatedTime = DateTime.Now;
+                    noti.Active = true;
+                    noti.Url = $"/invoice/detail/{invoiceId}";
+                    await notificationHub.Clients.All.ReceiveNotification(noti);
+                }
+
+                await transaction.CommitAsync();
+
+                model.Id = invoiceId;
+                return model;
+            }
+        }
+        public async Task<InvoiceVM> InvoiceDetailById(int invoiceId)
+        {
+            return await invoiceRepository.InvoiceDetailById(invoiceId);
+        }
+
+        public async Task<InvoiceViewModel> UpdateStatus(InvoiceViewModel model)
+        {
+            using (var transaction = invoiceRepository.GetDatabase().BeginTransaction())
+            {
+                try
+                {
+                    if (model.Id <= 0)
+                    {
+                        throw new BadRequestException("ID không tồn tại");
+                    }
+
+                    var invoice = await invoiceRepository.Detail(model.Id);
+                    if (invoice == null)
+                    {
+                        await transaction.RollbackAsync();
+                        return null;
+                    }
+                    //invoice.PaymentMethod = model.PaymentMethod;
+                    invoice.PaymentStatus = model.PaymentStatus; 
+                    invoice.PaymentMethod = model.PaymentMethod; 
+
+                    await invoiceRepository.Update(invoice);
+
+                    if (model.PaymentStatus == PaymentStatusStringConst.PAID)
+                    {
+                        CashFlow cflow = new CashFlow();
+                        cflow.TotalMoney = model.TotalMoney;
+                        cflow.FlowType = CashFlowConst.CASH_FLOW_TYPE_INCOME;
+                        cflow.Note = "Hóa đơn bán hàng";
+                        cflow.CreatedTime = DateTime.Now;
+                        cflow.Active = true;
+                        cflow.AccountId = model.AccountId;
+                        await cashFlowRepository.Add(cflow);
+                        if (cflow.Id <= 0)
+                        {
+                            await transaction.RollbackAsync();
+                            return null;
+                        }
+                    }
+
+                    await transaction.CommitAsync();
+                    return model;
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return null;
+                }
+            }
+        }
+
+        public async Task PaymentSuccess(int id, string transCode)
+        {
+            // invoice - invoiceCode
+            using (var transaction = invoiceRepository.GetDatabase().BeginTransaction())
+            {
+                try
+                {
+                    if (id <= 0)
+                    {
+                        throw new BadRequestException("ID không tồn tại");
+                    }
+
+                    var invoice = await invoiceRepository.Detail(id);
+                    if (invoice == null)
+                    {
+                        await transaction.RollbackAsync();
+                        return;
+                    }
+
+                    invoice.InvoiceCode = transCode != "" ? transCode : ""; // Cập nhật mã giao dịch từ VNPay
+                    invoice.PaymentStatus = PaymentStatusStringConst.PAID;
+                    await invoiceRepository.Update(invoice);
+
+                    CashFlow cflow = new CashFlow();
+                    cflow.TotalMoney = invoice.TotalMoney;
+                    cflow.FlowType = CashFlowConst.CASH_FLOW_TYPE_INCOME;
+                    cflow.Note = "Hóa đơn bán hàng";
+                    cflow.CreatedTime = DateTime.Now;
+                    cflow.Active = true;
+                    cflow.AccountId = 1;
+                    await cashFlowRepository.Add(cflow);
+                    if (cflow.Id <= 0)
+                    {
+                        await transaction.RollbackAsync();
+                        return;
+                    }
+
+                    await transaction.CommitAsync();
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return;
+                }
+            }
+        }
+    }
+}
+
+using CoffeeCRM.Data.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CoffeeCRM.Core.Util;using CoffeeCRM.Data;
+using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Data.ViewModels;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+
+
+namespace CoffeeCRM.Core.Repository
+{
+    public interface IInvoiceRepository
+    {
+        Task<List<Invoice>> List();
+
+        DatabaseFacade GetDatabase();
+
+        Task<List<Invoice>> ListPaging(int pageIndex, int pageSize);
+
+        Task<Invoice> Detail(long? postId);
+
+        Task<Invoice> Add(Invoice Invoice);
+
+        Task Update(Invoice Invoice);
+
+        Task Delete(Invoice Invoice);
+
+        Task<long> DeletePermanently(long? InvoiceId);
+
+        int Count();
+
+        Task<DTResult<Invoice>> ListServerSide(InvoiceDTParameters parameters);
+        Task<Invoice> getLastestInvoice();
+        Task<InvoiceVM> InvoiceDetailById(int invoiceId);
+    }
+}
+
+using CoffeeCRM.Data.Model;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CoffeeCRM.Core.Util;using CoffeeCRM.Data;
+using CoffeeCRM.Core.Util.Parameters;
+using CoffeeCRM.Data.ViewModels;
+using System.Globalization;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+
+namespace CoffeeCRM.Core.Repository
+{
+    public class InvoiceRepository : IInvoiceRepository
+    {
+        SysDbContext db;
+        public InvoiceRepository(SysDbContext _db)
+        {
+            db = _db;
+        }
+
+        public async Task<List<Invoice>> List()
+        {
+            if (db != null)
+            {
+                return await (
+                    from row in db.Invoices
+                    where (row.Active)
+                    orderby row.Id descending
+                    select row
+                ).ToListAsync();
+            }
+
+            return null;
+        }
+
+        public async Task<List<Invoice>> ListPaging(int pageIndex, int pageSize)
+        {
+            int offSet = 0;
+            offSet = (pageIndex - 1) * pageSize;
+            if (db != null)
+            {
+                return await (
+                    from row in db.Invoices
+                    where (row.Active)
+                    orderby row.Id descending
+                    select row
+                ).Skip(offSet).Take(pageSize).ToListAsync();
+            }
+            return null;
+        }
+
+        public async Task<Invoice> Detail(long? id)
+        {
+            if (db != null)
+            {
+                return await db.Invoices.FirstOrDefaultAsync(row => row.Active && row.Id == id);
+            }
+            return null;
+        }
+
+        public async Task<Invoice> Add(Invoice obj)
+        {
+            if (db != null)
+            {
+                await db.Invoices.AddAsync(obj);
+                await db.SaveChangesAsync();
+                return obj;
+            }
+            return null;
+        }
+
+        public async Task Update(Invoice obj)
+        {
+            if (db != null)
+            {
+                //Update that object
+                db.Invoices.Attach(obj);
+                db.Entry(obj).Property(x => x.InvoiceCode).IsModified = true;
+                db.Entry(obj).Property(x => x.TotalMoney).IsModified = true;
+                db.Entry(obj).Property(x => x.PaymentStatus).IsModified = true;
+                db.Entry(obj).Property(x => x.Active).IsModified = true;
+                db.Entry(obj).Property(x => x.PaymentMethod).IsModified = true;
+                db.Entry(obj).Property(x => x.AccountId).IsModified = true;
+                db.Entry(obj).Property(x => x.TableId).IsModified = true;
+                db.Entry(obj).Property(x => x.TotalGuest).IsModified = true;
+
+                //Commit the transaction
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public async Task Delete(Invoice obj)
+        {
+            if (db != null)
+            {
+                //Update that obj
+                db.Invoices.Attach(obj);
+                db.Entry(obj).Property(x => x.Active).IsModified = true;
+
+                //Commit the transaction
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public async Task<long> DeletePermanently(long? objId)
+        {
+            int result = 0;
+
+            if (db != null)
+            {
+                //Find the obj for specific obj id
+                var obj = await db.Invoices.FirstOrDefaultAsync(x => x.Id == objId);
+
+                if (obj != null)
+                {
+                    //Delete that obj
+                    db.Invoices.Remove(obj);
+
+                    //Commit the transaction
+                    result = await db.SaveChangesAsync();
+                }
+                return result;
+            }
+
+            return result;
+        }
+
+        public int Count()
+        {
+            int result = 0;
+
+            if (db != null)
+            {
+                //Find the obj for specific obj id
+                result = (
+                    from row in db.Invoices
+                    where row.Active
+                    select row
+                            ).Count();
+            }
+
+            return result;
+        }
+
+        public async Task<DTResult<Invoice>> ListServerSide(InvoiceDTParameters parameters)
+        {
+            //0. Options
+            string searchAll = parameters.SearchAll.Trim();//Trim text
+            string orderCritirea = "Id";//Set default critirea
+            int recordTotal, recordFiltered;
+            bool orderDirectionASC = true;//Set default ascending
+            if (parameters.Order != null)
+            {
+                orderCritirea = parameters.Columns[parameters.Order[0].Column].Data;
+                orderDirectionASC = parameters.Order[0].Dir == DTOrderDir.ASC;
+            }
+            //1. Join
+            var query = from row in db.Invoices
+
+
+                        where row.Active
+
+                        select new
+                        {
+                            row
+                        };
+
+            recordTotal = await query.CountAsync();
+            //2. Fillter
+            if (!String.IsNullOrEmpty(searchAll))
+            {
+                searchAll = searchAll.ToLower();
+                query = query.Where(c =>
+                    EF.Functions.Collate(c.row.Id.ToString().ToLower(), SQLParams.Latin_General).Contains(EF.Functions.Collate(searchAll, SQLParams.Latin_General)) ||
+EF.Functions.Collate(c.row.InvoiceCode.ToLower(), SQLParams.Latin_General).Contains(EF.Functions.Collate(searchAll, SQLParams.Latin_General)) ||
+EF.Functions.Collate(c.row.TotalMoney.ToString().ToLower(), SQLParams.Latin_General).Contains(EF.Functions.Collate(searchAll, SQLParams.Latin_General)) ||
+EF.Functions.Collate(c.row.PaymentStatus.ToLower(), SQLParams.Latin_General).Contains(EF.Functions.Collate(searchAll, SQLParams.Latin_General)) ||
+EF.Functions.Collate(c.row.CreatedTime.ToCustomString().ToLower(), SQLParams.Latin_General).Contains(EF.Functions.Collate(searchAll, SQLParams.Latin_General)) ||
+EF.Functions.Collate(c.row.Active.ToString().ToLower(), SQLParams.Latin_General).Contains(EF.Functions.Collate(searchAll, SQLParams.Latin_General)) ||
+EF.Functions.Collate(c.row.PaymentMethod.ToLower(), SQLParams.Latin_General).Contains(EF.Functions.Collate(searchAll, SQLParams.Latin_General)) ||
+EF.Functions.Collate(c.row.AccountId.ToString().ToLower(), SQLParams.Latin_General).Contains(EF.Functions.Collate(searchAll, SQLParams.Latin_General)) ||
+EF.Functions.Collate(c.row.TableId.ToString().ToLower(), SQLParams.Latin_General).Contains(EF.Functions.Collate(searchAll, SQLParams.Latin_General)) ||
+EF.Functions.Collate(c.row.TotalGuest.ToString().ToLower(), SQLParams.Latin_General).Contains(EF.Functions.Collate(searchAll, SQLParams.Latin_General))
+
+                );
+            }
+            foreach (var item in parameters.Columns)
+            {
+                var fillter = item.Search.Value.Trim();
+                if (fillter.Length > 0)
+                {
+                    switch (item.Data)
+                    {
+                        case "id":
+                            query = query.Where(c => c.row.Id.ToString().Trim().Contains(fillter));
+                            break;
+                        case "invoiceCode":
+                            query = query.Where(c => (c.row.InvoiceCode ?? "").Contains(fillter));
+                            break;
+                        case "totalMoney":
+                            query = query.Where(c => c.row.TotalMoney.ToString().Trim().Contains(fillter));
+                            break;
+                        case "paymentStatus":
+                            query = query.Where(c => (c.row.PaymentStatus ?? "").Contains(fillter));
+                            break;
+                        case "createdTime":
+                            if (fillter.Contains(" - "))
+                            {
+                                var dates = fillter.Split(" - ");
+                                var startDate = DateTime.ParseExact(dates[0], "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                                var endDate = DateTime.ParseExact(dates[1], "dd/MM/yyyy", CultureInfo.InvariantCulture).AddDays(1).AddSeconds(-1);
+                                query = query.Where(c => c.row.CreatedTime >= startDate && c.row.CreatedTime <= endDate);
+                            }
+                            else
+                            {
+                                var date = DateTime.ParseExact(fillter, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                                query = query.Where(c => c.row.CreatedTime.Date == date.Date);
+                            }
+                            break;
+                        case "active":
+                            query = query.Where(c => c.row.Active.ToString().Trim().Contains(fillter));
+                            break;
+                        case "paymentMethod":
+                            query = query.Where(c => (c.row.PaymentMethod ?? "").Contains(fillter));
+                            break;
+                        case "accountId":
+                            query = query.Where(c => c.row.AccountId.ToString().Trim().Contains(fillter));
+                            break;
+                        case "tableId":
+                            query = query.Where(c => c.row.TableId.ToString().Trim().Contains(fillter));
+                            break;
+                        case "totalGuest":
+                            query = query.Where(c => c.row.TotalGuest.ToString().Trim().Contains(fillter));
+                            break;
+
+                    }
+                }
+            }
+
+            //3.Query second
+            var query2 = query.Select(c => new Invoice()
+            {
+                Id = c.row.Id,
+                InvoiceCode = c.row.InvoiceCode,
+                TotalMoney = c.row.TotalMoney,
+                PaymentStatus = c.row.PaymentStatus,
+                CreatedTime = c.row.CreatedTime,
+                Active = c.row.Active,
+                PaymentMethod = c.row.PaymentMethod,
+                AccountId = c.row.AccountId,
+                TableId = c.row.TableId,
+                TotalGuest = c.row.TotalGuest,
+
+            });
+            //4. Sort
+            query2 = query2.OrderByDynamic<Invoice>(orderCritirea, orderDirectionASC ? LinqExtensions.Order.Asc : LinqExtensions.Order.Desc);
+            recordFiltered = await query2.CountAsync();
+            //5. Return data
+            return new DTResult<Invoice>()
+            {
+                data = await query2.Skip(parameters.Start).Take(parameters.Length).ToListAsync(),
+                draw = parameters.Draw,
+                recordsFiltered = recordFiltered,
+                recordsTotal = recordTotal
+            };
+        }
+
+        public DatabaseFacade GetDatabase()
+        {
+            return db.Database;
+
+        }
+        public async Task<Invoice> getLastestInvoice()
+        {
+            // Lấy năm hiện tại
+            var currentYear = DateTime.Now.Year;
+
+            // Lấy hóa đơn mới nhất trong năm hiện tại
+            var lastInvoice = await db.Invoices
+                .Where(i => i.CreatedTime.Year == currentYear)
+                .OrderByDescending(i => i.Id)
+                .FirstOrDefaultAsync();
+            return lastInvoice;
+
+        }
+
+        public async Task<InvoiceVM> InvoiceDetailById(int invoiceId)
+        {
+            if (db != null)
+            {
+                var result = await (from row in db.Invoices
+                                    where row.Id == invoiceId && row.Active == true
+                                    select new InvoiceVM()
+                                    {
+                                        Id = row.Id,
+                                        InvoiceCode = row.InvoiceCode,
+                                        TotalMoney = row.TotalMoney,
+                                        PaymentStatus = row.PaymentStatus,
+                                        CreatedTime = row.CreatedTime,
+                                        PaymentMethod = row.PaymentMethod,
+                                        AccountId = row.AccountId,
+                                        CashierName = (from a in db.Accounts where a.Active == true && a.Id == row.AccountId select a.FullName).FirstOrDefault(),
+                                        invoiceDetails = (from d in db.InvoiceDetails
+                                                          where d.InvoiceId == row.Id && d.Active == true
+                                                          select new InvoiceDetailViewModel()
+                                                          {
+                                                              Id = d.Id,
+                                                              Quantity = d.Quantity,
+                                                              InvoiceId = row.Id,
+                                                              UnitPrice = d.UnitPrice,
+                                                              DishName = (from dish in db.Dishes where dish.Id == d.DishId && dish.Active == true select dish.DishName).FirstOrDefault(),
+                                                              DishId = d.DishId
+                                                          }).ToList()
+                                    }).FirstOrDefaultAsync();
+                return result;
+            }
+            return null;
+        }
+    }
+}
+
+
+************** Module 4: Thanh toán bằng VNPAY
+
+using CoffeeCRM.Core.Helper;
+using CoffeeCRM.Core.Helper.VNPay;
+using CoffeeCRM.Core.Service;
+using CoffeeCRM.Data.Constants;
+using CoffeeCRM.Data.Enums.VNPay;
+using CoffeeCRM.Data.Model;
+using CoffeeCRM.Data.VNPay;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+
+namespace CoffeeCRM.Api.Controllers
+{
+    [ApiController]
+    [Route("[controller]")]
+    public class VnpayController : ControllerBase
+    {
+        private readonly IVNPayService _vnPayservice;
+        private readonly IConfiguration _configuration;
+        private readonly IInvoiceService _orderService;
+        private readonly INotificationService _notificationService;
+        IHubContext<NotificationHub, INotificationHub> notificationHub;
+
+        public VnpayController(IVNPayService vnPayservice, IConfiguration configuration, IInvoiceService orderService, INotificationService notificationService, IHubContext<NotificationHub, INotificationHub> notificationHub)
+        {
+            _vnPayservice = vnPayservice;
+            _configuration = configuration;
+            _orderService = orderService;
+            _notificationService = notificationService;
+            this.notificationHub = notificationHub;
+            _vnPayservice.Initialize(_configuration["Vnpay:TmnCode"], _configuration["Vnpay:HashSecret"], _configuration["Vnpay:BaseUrl"], _configuration["Vnpay:CallbackUrl"]);
+        }
+
+        /// <summary>
+        /// Tạo url thanh toán
+        /// </summary>
+        /// <param name="money">Số tiền phải thanh toán</param>
+        /// <param name="description">Mô tả giao dịch</param>
+        /// <returns></returns>
+        [HttpGet("api/CreatePaymentUrl")]
+        public ActionResult<string> CreatePaymentUrl(double money, string description)
+        {
+            try
+            {
+                var ipAddress = NetworkHelper.GetIpAddress(HttpContext); // Lấy địa chỉ IP của thiết bị thực hiện giao dịch
+
+                var request = new PaymentRequest
+                {
+                    PaymentId = DateTime.Now.Ticks,
+                    Money = money,
+                    Description = description,
+                    IpAddress = ipAddress,
+                    BankCode = BankCode.ANY, // Tùy chọn. Mặc định là tất cả phương thức giao dịch
+                    CreatedDate = DateTime.Now, // Tùy chọn. Mặc định là thời điểm hiện tại
+                    Currency = Currency.VND, // Tùy chọn. Mặc định là VND (Việt Nam đồng)
+                    Language = DisplayLanguage.Vietnamese // Tùy chọn. Mặc định là tiếng Việt
+                };
+
+                var paymentUrl = _vnPayservice.GetPaymentUrl(request);
+
+                return Created(paymentUrl, paymentUrl);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Thực hiện hành động sau khi thanh toán. URL này cần được khai báo với VNPAY để API này hoạt đồng (ví dụ: http://localhost:1234/api/Vnpay/IpnAction)
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("api/IpnAction")]
+        public async Task<IActionResult> IpnAction()
+        {
+            if (Request.QueryString.HasValue)
+            {
+                try
+                {
+                    var paymentResult = _vnPayservice.GetPaymentResult(Request.Query);
+                    if (paymentResult.IsSuccess)
+                    {
+                        int orderId = Convert.ToInt32(paymentResult.Description);
+                        await _orderService.PaymentSuccess(orderId, paymentResult.PaymentId.ToString());
+                    }
+                   
+                    var redirectUrl = $"{Request.Scheme}://{Request.Host}/tai-khoan/lich-su-don-hang";
+                    return Redirect(redirectUrl);
+                    // Thực hiện hành động nếu thanh toán thất bại tại đây. Ví dụ: Hủy đơn hàng.        
+                    //return BadRequest("Thanh toán thất bại");
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+            }
+
+            return NotFound("Không tìm thấy thông tin thanh toán.");
+        }
+
+        /// <summary>
+        /// Trả kết quả thanh toán về cho người dùng
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("api/Callback")]
+        public async Task< ActionResult<PaymentResult>> Callback()
+        {
+            if (Request.QueryString.HasValue)
+            {
+                try
+                {
+
+                    var paymentResult = _vnPayservice.GetPaymentResult(Request.Query);
+                    var ids = Convert.ToInt32(paymentResult.Description);
+                    var order = await _orderService.InvoiceDetailById(ids);
+                    if (paymentResult.IsSuccess)
+                    {
+                        await _orderService.PaymentSuccess(order.Id, paymentResult.PaymentId.ToString());
+                        var redirectUrl = $"https://localhost:7125/booking/admin/success";
+                        var notifi = new Notification
+                        {
+                            Active = true,
+                            AccountId = this.GetLoggedInUserId(), // 
+                            NotificationStatusId = NotificationStatusId.Unread,
+                            Name = "Thanh toán thành công",
+                            SenderId = RoleConst.WAITER,
+                            Description = order.Id.ToString(),
+                            CreatedTime = DateTime.Now,
+                            ApproveTime = null,
+                            Url = ""
+                        };
+                        //await notificationRepository.Add(notifi);
+                        await notificationHub.Clients.All.ReceiveNotification(notifi);
+                        return Redirect(redirectUrl);
+                    }
+
+                    return BadRequest(paymentResult);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+            }
+
+            return NotFound("Không tìm thấy thông tin thanh toán.");
+        }
+    }
+}
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using CoffeeCRM.Data.VNPay;
+using Microsoft.AspNetCore.Http;
+
+namespace CoffeeCRM.Core.Service
+{
+    public interface IVNPayService : IScoped
+    {
+        /// <summary>
+        /// Khởi tạo các tham số cần thiết cho giao dịch thanh toán với VNPAY.
+        /// Phương thức này thiết lập các tham số như mã cửa hàng, mật khẩu bảo mật, và URL callback.
+        /// </summary>
+        /// <param name="tmnCode">Mã cửa hàng của bạn trên VNPAY.</param>
+        /// <param name="hashSecret">Mật khẩu bảo mật dùng để mã hóa và xác thực giao dịch.</param>
+        /// <param name="callbackUrl">URL mà VNPAY sẽ gọi lại sau khi giao dịch hoàn tất.</param>
+        /// <param name="baseUrl">URL của trang web thanh toán, mặc định sử dụng URL của môi trường Sandbox.</param>
+        /// <param name="version">Phiên bản của API mà bạn đang sử dụng.</param>
+        /// <param name="orderType">Loại đơn hàng.</param>
+        void Initialize(
+            string tmnCode,
+            string hashSecret,
+            string baseUrl,
+            string callbackUrl,
+            string version = "2.1.0",
+            string orderType = "other");
+
+        /// <summary>
+        /// Tạo URL thanh toán cho giao dịch dựa trên các tham số trong yêu cầu thanh toán.
+        /// </summary>
+        /// <param name="request">Thông tin yêu cầu thanh toán, bao gồm các tham số như mã giao dịch, số tiền, mô tả,...</param>
+        /// <param name="isTest">Chỉ định xem có phải là môi trường thử nghiệm hay không (mặc định là true).</param>
+        /// <returns>URL thanh toán để chuyển hướng người dùng tới trang thanh toán của VNPAY.</returns>
+        string GetPaymentUrl(PaymentRequest request);
+
+        /// <summary>
+        /// Thực hiện giao dịch thanh toán và trả về kết quả.
+        /// Phương thức này được gọi khi nhận được thông tin callback từ VNPAY.
+        /// </summary>
+        /// <param name="collections">Thông tin các tham số trả về từ VNPAY qua callback.</param>
+        /// <returns></returns>
+        PaymentResult GetPaymentResult(IQueryCollection parameters);
+    }
+}
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using CoffeeCRM.Core.Helper.VNPay;
+using CoffeeCRM.Data.Enums.VNPay;
+using CoffeeCRM.Data.VNPay;
+using Microsoft.AspNetCore.Http;
+
+namespace CoffeeCRM.Core.Service
+{
+    public class VNPayService : IVNPayService
+    {
+        private string _tmnCode;
+        private string _hashSecret;
+        private string _callbackUrl;
+        private string _baseUrl;
+        private string _version;
+        private string _orderType;
+
+        public void Initialize(string tmnCode,
+            string hashSecret,
+            string baseUrl,
+            string callbackUrl,
+            string version = "2.1.0",
+            string orderType = "other")
+        {
+            _tmnCode = tmnCode;
+            _hashSecret = hashSecret;
+            _callbackUrl = callbackUrl;
+            _baseUrl = baseUrl;
+            _version = version;
+            _orderType = orderType;
+
+            EnsureParametersBeforePayment();
+        }
+
+        /// <summary>
+        /// Tạo URL thanh toán 
+        /// </summary>
+        /// <param name="request">Thông tin cần có để tạo yêu cầu</param>
+        /// <returns></returns>
+        public string GetPaymentUrl(PaymentRequest request)
+        {
+            EnsureParametersBeforePayment();
+
+            if (request.Money < 5000 || request.Money > 1000000000)
+            {
+                throw new ArgumentException("Số tiền thanh toán phải nằm trong khoảng 5.000 (VND) đến 1.000.000.000 (VND).");
+            }
+
+            if (string.IsNullOrEmpty(request.Description))
+            {
+                throw new ArgumentException("Không được để trống mô tả giao dịch.");
+            }
+
+            if (string.IsNullOrEmpty(request.IpAddress))
+            {
+                throw new ArgumentException("Không được để trống địa chỉ IP.");
+            }
+
+            var helper = new PaymentHelper();
+            helper.AddRequestData("vnp_Version", _version);
+            helper.AddRequestData("vnp_Command", "pay");
+            helper.AddRequestData("vnp_TmnCode", _tmnCode);
+            helper.AddRequestData("vnp_Amount", (request.Money * 100).ToString());
+            helper.AddRequestData("vnp_CreateDate", request.CreatedDate.ToString("yyyyMMddHHmmss"));
+            helper.AddRequestData("vnp_CurrCode", request.Currency.ToString().ToUpper());
+            helper.AddRequestData("vnp_IpAddr", request.IpAddress);
+            helper.AddRequestData("vnp_Locale", EnumHelper.GetDescription(request.Language));
+            helper.AddRequestData("vnp_BankCode", request.BankCode == BankCode.ANY ? string.Empty : request.BankCode.ToString());
+            helper.AddRequestData("vnp_OrderInfo", request.Description.Trim());
+            helper.AddRequestData("vnp_OrderType", _orderType);
+            helper.AddRequestData("vnp_ReturnUrl", _callbackUrl);
+            helper.AddRequestData("vnp_TxnRef", request.PaymentId.ToString());
+
+            return helper.GetPaymentUrl(_baseUrl, _hashSecret);
+        }
+
+        /// <summary>
+        /// Lấy kết quả thanh toán sau khi thực hiện giao dịch.
+        /// </summary>
+        /// <param name="parameters">Các tham số trong chuỗi truy vấn của <c>CallbackUrl</c></param>
+        /// <returns></returns>
+        public PaymentResult GetPaymentResult(IQueryCollection parameters)
+        {
+            var responseData = parameters
+                .Where(kv => !string.IsNullOrEmpty(kv.Key) && kv.Key.StartsWith("vnp_"))
+                .ToDictionary(kv => kv.Key, kv => kv.Value.ToString());
+
+            var vnp_BankCode = responseData.GetValueOrDefault("vnp_BankCode");
+            var vnp_BankTranNo = responseData.GetValueOrDefault("vnp_BankTranNo");
+            var vnp_CardType = responseData.GetValueOrDefault("vnp_CardType");
+            var vnp_PayDate = responseData.GetValueOrDefault("vnp_PayDate");
+            var vnp_OrderInfo = responseData.GetValueOrDefault("vnp_OrderInfo");
+            var vnp_TransactionNo = responseData.GetValueOrDefault("vnp_TransactionNo");
+            var vnp_ResponseCode = responseData.GetValueOrDefault("vnp_ResponseCode");
+            var vnp_TransactionStatus = responseData.GetValueOrDefault("vnp_TransactionStatus");
+            var vnp_TxnRef = responseData.GetValueOrDefault("vnp_TxnRef");
+            var vnp_SecureHash = responseData.GetValueOrDefault("vnp_SecureHash");
+
+            if (string.IsNullOrEmpty(vnp_BankCode)
+                || string.IsNullOrEmpty(vnp_OrderInfo)
+                || string.IsNullOrEmpty(vnp_TransactionNo)
+                || string.IsNullOrEmpty(vnp_ResponseCode)
+                || string.IsNullOrEmpty(vnp_TransactionStatus)
+                || string.IsNullOrEmpty(vnp_TxnRef)
+                || string.IsNullOrEmpty(vnp_SecureHash))
+            {
+                throw new ArgumentException("Không đủ dữ liệu để xác thực giao dịch");
+            }
+
+            var helper = new PaymentHelper();
+            foreach (var (key, value) in responseData)
+            {
+                if (!key.Equals("vnp_SecureHash"))
+                {
+                    helper.AddResponseData(key, value);
+                }
+            }
+
+            var responseCode = (ResponseCode)sbyte.Parse(vnp_ResponseCode);
+            var transactionStatusCode = (TransactionStatusCode)sbyte.Parse(vnp_TransactionStatus);
+
+            return new PaymentResult
+            {
+                PaymentId = long.Parse(vnp_TxnRef),
+                VnpayTransactionId = long.Parse(vnp_TransactionNo),
+                IsSuccess = transactionStatusCode == TransactionStatusCode.Code_00 && responseCode == ResponseCode.Code_00 && helper.IsSignatureCorrect(vnp_SecureHash, _hashSecret),
+                Description = vnp_OrderInfo,
+                PaymentMethod = string.IsNullOrEmpty(vnp_CardType)
+                    ? "Không xác định"
+                    : vnp_CardType,
+                Timestamp = string.IsNullOrEmpty(vnp_PayDate)
+                    ? DateTime.Now
+                    : DateTime.ParseExact(vnp_PayDate, "yyyyMMddHHmmss", CultureInfo.InvariantCulture),
+                TransactionStatus = new TransactionStatus
+                {
+                    Code = transactionStatusCode,
+                    Description = EnumHelper.GetDescription(transactionStatusCode)
+                },
+                PaymentResponse = new PaymentResponse
+                {
+                    Code = responseCode,
+                    Description = EnumHelper.GetDescription(responseCode)
+                },
+                BankingInfor = new BankingInfor
+                {
+                    BankCode = vnp_BankCode,
+                    BankTransactionId = string.IsNullOrEmpty(vnp_BankTranNo)
+                        ? "Không xác định"
+                        : vnp_BankTranNo,
+                }
+            };
+        }
+
+        private void EnsureParametersBeforePayment()
+        {
+            if (string.IsNullOrEmpty(_baseUrl) || string.IsNullOrEmpty(_tmnCode) || string.IsNullOrEmpty(_hashSecret) || string.IsNullOrEmpty(_callbackUrl))
+            {
+                throw new ArgumentException("Không tìm thấy BaseUrl, TmnCode, HashSecret, hoặc CallbackUrl");
+            }
+        }
+    }
+}
+
+
