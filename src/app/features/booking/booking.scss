@@ -5,6 +5,14 @@
   display: block;
 }
 
+.booking-button--order-history {
+  background-color: rgba($color-primary-container, 0.3);
+  color: $color-primary;
+  &:hover {
+    background-color: rgba($color-primary-container, 0.5);
+  }
+}
+
 .booking-page {
   padding: 0;
   max-width: 100%;
@@ -263,6 +271,37 @@ button.booking-button[tuiButton] {
 
   &:hover:not(:disabled) {
     background-color: color.adjust(#1f7a35, $lightness: -5%);
+  }
+
+  .material-symbols-outlined {
+    font-size: 0.95rem;
+  }
+
+  span:last-child {
+    white-space: nowrap;
+  }
+}
+
+.booking-button--order-dishes {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  margin-left: 0;
+  inline-size: auto;
+  width: auto;
+  max-width: calc(100% - 2rem);
+  flex: 0 0 auto;
+  min-height: 2.1rem;
+  padding: 0.42rem 0.72rem;
+  border-radius: 0.75rem;
+  color: #ffffff;
+  background-color: #d86b1e;
+  box-shadow: 0 10px 20px -16px rgba(216, 107, 30, 0.72);
+  font-size: var(--label-sm-size);
+
+  &:hover:not(:disabled) {
+    background-color: color.adjust(#d86b1e, $lightness: -5%);
   }
 
   .material-symbols-outlined {

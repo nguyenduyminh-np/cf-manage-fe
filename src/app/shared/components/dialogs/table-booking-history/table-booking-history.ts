@@ -49,6 +49,7 @@ import { PosTableBooking } from '../pos-table-booking/pos-table-booking';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TableBookingHistoryService } from '../../../../core/services/table-booking-history/table-booking-history.service';
 import { TableBookingDetail } from '../table-booking-detail/table-booking-detail';
+import { ActionCellRender } from '../../action-cell-render/action-cell-render';
 
 interface BookingGridRow extends TableBookingHistoryItem {
   stt: number;
@@ -246,17 +247,12 @@ export class TableBookingHistory {
   // Output: shared AG Grid column behavior.
   protected readonly defaultColDef: ColDef<BookingGridRow> = {
     sortable: true,
-    filter: 'agTextColumnFilter',
-    filterParams: {
-      debounceMs: 120,
-    },
-    floatingFilter: true,
     resizable: true,
-    suppressMovable: false,
     minWidth: 90,
     flex: 1,
+    filter: true,
+    menuTabs: ['filterMenuTab'],
   };
-
   // Grid columns.
   // Input: booking row fields.
   // Output: table structure for the history list.
@@ -406,6 +402,22 @@ export class TableBookingHistory {
       cellClass: 'cell-compact',
       sortable: true,
       filter: true,
+    },
+    {
+      headerName: 'Thao tác',
+      colId: 'actions',
+      pinned: 'right',
+      lockPinned: true,
+      width: 180,
+      minWidth: 180,
+      maxWidth: 200,
+      suppressSizeToFit: true,
+      sortable: false,
+      filter: false,
+      cellRenderer: ActionCellRender,
+      cellRendererParams: {
+        onDeleted: () => this.refreshGrid(),
+      },
     },
   ];
 
@@ -1007,5 +1019,10 @@ export class TableBookingHistory {
   // Output: keeps overlays aligned with loading/data state.
   protected onStateRendered(_state: TableBookingHistoryViewState | null): void {
     // Overlays are driven by template bindings ([loading] and rowData).
+  }
+
+  private refreshGrid(): void {
+    const currentQuery = this.querySubject.getValue();
+    this.querySubject.next(currentQuery);
   }
 }

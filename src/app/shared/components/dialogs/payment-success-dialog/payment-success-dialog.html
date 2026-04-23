@@ -1,0 +1,87 @@
+<div class="payment-success" *ngIf="data">
+  <!-- Header -->
+  <header class="payment-success__header">
+    <div class="payment-success__status-icon">
+      <span class="material-symbols-outlined">check_circle</span>
+    </div>
+    <h1 class="payment-success__title">Thanh toán thành công</h1>
+  </header>
+
+  <!-- Scrollable Content -->
+  <div class="payment-success__content">
+    <!-- Metadata Grid -->
+    <div class="payment-success__meta-grid">
+      <div class="payment-success__meta-item">
+        <p class="payment-success__meta-label">Mã hóa đơn</p>
+        <p class="payment-success__meta-value payment-success__meta-value--bold">{{ invoice?.invoiceCode }}</p>
+      </div>
+      <div class="payment-success__meta-item">
+        <p class="payment-success__meta-label">Ngày lập</p>
+        <p class="payment-success__meta-value">{{ invoice?.createdAt | date: 'dd/MM/yyyy HH:mm:ss' }}</p>
+      </div>
+      <div class="payment-success__meta-item">
+        <p class="payment-success__meta-label">Bàn</p>
+        <p class="payment-success__meta-value">{{ data.tableName }}</p>
+      </div>
+      <div class="payment-success__meta-item" *ngIf="invoice?.customerName">
+        <p class="payment-success__meta-label">Khách hàng</p>
+        <p class="payment-success__meta-value">
+          {{ invoice?.customerName }}
+          {{ invoice?.customerPhone ? '(' + invoice?.customerPhone + ')' : '' }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Items Table -->
+    <div class="payment-success__table-wrapper">
+      <table class="payment-success__table">
+        <thead>
+          <tr>
+            <th>Sản phẩm</th>
+            <th class="text-center">SL</th>
+            <th class="text-right">Đơn giá</th>
+            <th class="text-right">Thành tiền</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of items">
+            <td>{{ item.dishName }}</td>
+            <td class="text-center">{{ item.quantity }}</td>
+            <td class="text-right">{{ item.unitPrice | number: '1.0-0' }}đ</td>
+            <td class="text-right font-medium">{{ item.subtotal | number: '1.0-0' }}đ</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Summary & Notes -->
+    <div class="payment-success__summary-row">
+      <div class="payment-success__note-card" *ngIf="cashFlow?.note">
+        <p class="payment-success__meta-label">Ghi chú dòng tiền</p>
+        <p class="payment-success__note-text">{{ cashFlow?.note }}</p>
+      </div>
+
+      <div class="payment-success__summary-card">
+        <div class="payment-success__summary-item">
+          <span class="payment-success__summary-item-label">Phương thức:</span>
+          <span class="payment-success__summary-item-value">{{ invoice?.paymentMethod }}</span>
+        </div>
+        <div class="payment-success__total-row">
+          <span class="payment-success__total-label">Tổng cộng:</span>
+          <span class="payment-success__total-value">{{ invoice?.totalAmount | number: '1.0-0' }}đ</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Actions -->
+  <footer class="payment-success__footer">
+    <button class="payment-success__btn payment-success__btn--outline" (click)="printInvoice()" type="button">
+      <span class="material-symbols-outlined">print</span>
+      In hóa đơn
+    </button>
+    <button class="payment-success__btn payment-success__btn--primary" (click)="close()" type="button">
+      Đóng
+    </button>
+  </footer>
+</div>

@@ -141,6 +141,16 @@
                   {{ isCheckingInTable(table.tableId) ? 'Đang check-in...' : 'Check-in' }}
                 </span>
               </button>
+            } @else if (table.tableStatus === 'OCCUPIED') {
+              <button
+                tuiButton
+                type="button"
+                class="booking-button booking-button--order-dishes type-label-md"
+                (click)="onOrderDishesClick($event, table)"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">restaurant_menu</span>
+                <span>Gọi món</span>
+              </button>
             }
           </div>
 

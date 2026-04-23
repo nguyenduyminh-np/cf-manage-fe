@@ -198,3 +198,13 @@ export interface BookingRequestPayload {
   note: string;
   isWalkIn?: boolean;
 }
+
+
+export interface DeleteTableBookingRequest {
+  bookingId: number;
+}
+
+export interface DeleteTableBookingResponse {
+  status: number;
+  message: string;
+}

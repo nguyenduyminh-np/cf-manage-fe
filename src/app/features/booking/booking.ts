@@ -22,6 +22,10 @@ import {
 } from '../../core/models/table-booking/table-booking.model';
 import { TableBookingService } from '../../core/services/table-booking/table-booking.service';
 import { PosTableBooking } from '../../shared/components/dialogs/pos-table-booking/pos-table-booking';
+import {
+  PosOrderDishes,
+  PosOrderDishesDialogInput,
+} from '../../shared/components/dialogs/pos-order-dishes/pos-order-dishes';
 import { TableBookingDetail } from '../../shared/components/dialogs/table-booking-detail/table-booking-detail';
 import { TableBookingHistory } from '../../shared/components/dialogs/table-booking-history/table-booking-history';
 import { TableDetailDialog } from '../../shared/components/dialogs/table-detail-dialog/table-detail-dialog';
@@ -34,6 +38,7 @@ import {
   SeatFilterValue,
   StatusFilterValue,
 } from '../../core/facade/booking.facade';
+import { OrderDishesHistory } from '../../shared/components/dialogs/order-dishes-history/order-dishes-history';
 
 @Component({
   selector: 'app-booking',
@@ -69,6 +74,7 @@ export class Booking implements OnInit {
 
   protected readonly tableMenuOptions = [
     { key: 'history', label: 'Lịch sử đặt bàn', icon: 'history' },
+    { key: 'orderHistory', label: 'Lịch sử gọi món', icon: 'receipt_long' },
     { key: 'book', label: 'Đặt bàn', icon: 'calendar_add_on' },
     { key: 'walkIn', label: 'Khách vãng lai', icon: 'directions_walk' },
     { key: 'empty', label: 'Làm trống', icon: 'cleaning_services' },
@@ -238,6 +244,9 @@ export class Booking implements OnInit {
       case 'history':
         this.openTableBookingHistory(selectedTable);
         break;
+      case 'orderHistory': // <-- Thêm case này
+        this.openOrderDishesHistory(selectedTable);
+        break;
       case 'book':
         this.bookTable(selectedTable.tableId);
         break;
@@ -275,6 +284,12 @@ export class Booking implements OnInit {
     event.preventDefault();
     event.stopPropagation();
     this.checkInTable(table);
+  }
+
+  protected onOrderDishesClick(event: MouseEvent, table: BookingTable): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.openPosOrderDishesDialog(table);
   }
 
   protected isCheckingInTable(tableId: number): boolean {
@@ -331,6 +346,18 @@ export class Booking implements OnInit {
       .subscribe();
   }
 
+  protected openOrderDishesHistory(table: BookingTable): void {
+    this.dialogService
+      .open<void>(new PolymorpheusComponent(OrderDishesHistory, this.injector), {
+        data: { tableId: table.tableId, tableName: table.tableName },
+        size: 'auto',
+        dismissible: true,
+        closeable: true, // Dialog đã có nút Đóng riêng
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
+  }
+
   protected openPosTableBookingDialog(dialogData?: PosTableBookingDialogInput): void {
     this.dialogService
       .open<PosTableBookingDialogResult | null>(
@@ -350,6 +377,24 @@ export class Booking implements OnInit {
 
         this.facade.forceReload();
       });
+  }
+
+  protected openPosOrderDishesDialog(table: BookingTable): void {
+    const dialogData: PosOrderDishesDialogInput = {
+      tableId: table.tableId,
+      tableName: table.tableName,
+      pax: table.slot,
+    };
+
+    this.dialogService
+      .open<void>(new PolymorpheusComponent(PosOrderDishes, this.injector), {
+        data: dialogData,
+        size: 'auto',
+        dismissible: true,
+        closeable: false,
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
   }
 
   protected openTableBookingDetail(bookingId: number): void {

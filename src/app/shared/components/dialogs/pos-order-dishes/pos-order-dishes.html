@@ -1,1 +1,290 @@
-<p>pos-order-dishes works!</p>
+<div class="pos-order-dishes">
+  <header class="pos-order-dishes__header">
+    <div class="pos-order-dishes__header-left">
+      <button type="button" class="icon-btn" (click)="close()" aria-label="Quay lại">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </button>
+      <h1 class="pos-order-dishes__title">Đặt món</h1>
+    </div>
+
+    <div class="pos-order-dishes__header-right">
+      <button type="button" class="icon-btn" (click)="close()" aria-label="Đóng">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="pos-order-dishes__subheader">
+    <div class="pos-order-dishes__chip pos-order-dishes__chip--primary">
+      <span class="material-symbols-outlined">restaurant</span>
+      Đặt món
+    </div>
+    <div class="pos-order-dishes__chip">
+      <span class="material-symbols-outlined">table_restaurant</span>
+      {{ tableName }}
+    </div>
+    <div class="pos-order-dishes__chip">
+      <span class="material-symbols-outlined">groups</span>
+      {{ pax }} người
+    </div>
+    <div class="pos-order-dishes__chip">
+      <span class="material-symbols-outlined">schedule</span>
+      {{ currentTime }}
+    </div>
+  </div>
+
+  <main class="pos-order-dishes__main">
+    <section class="pos-order-dishes__menu">
+      <div class="pos-order-dishes__top-actions">
+        <div class="pos-order-dishes__search-wrapper">
+          <span class="material-symbols-outlined pos-order-dishes__search-icon">search</span>
+          <input
+            type="text"
+            class="pos-order-dishes__search-input"
+            placeholder="Tìm kiếm món..."
+            [formControl]="searchControl"
+          />
+        </div>
+        <div class="pos-order-dishes__tabs">
+          @if (categories$ | async; as categories) {
+            @for (cat of categories; track cat.id) {
+              <button
+                type="button"
+                class="pos-order-dishes__tab"
+                [class.pos-order-dishes__tab--active]="activeCategoryId() === cat.id"
+                (click)="selectCategory(cat.id)"
+              >
+                {{ cat.name }}
+              </button>
+            }
+          }
+        </div>
+      </div>
+
+      <div class="pos-order-dishes__product-list">
+        @if (loading()) {
+          <p class="pos-order-dishes__loading">Đang tải danh sách món...</p>
+        }
+        @if (noDishesFound() && !loading()) {
+          <p class="pos-order-dishes__loading">Không tìm thấy món nào</p>
+        }
+        <div class="pos-order-dishes__grid">
+          @if (dishes$ | async; as dishes) {
+            @for (dish of dishes; track dish.id) {
+              <article class="pos-order-dishes__card">
+                <div class="pos-order-dishes__card-img-wrap">
+                  <img
+                    [src]="dish.photo ? baseUrl + dish.photo : 'assets/placeholder-dish.png'"
+                    [alt]="dish.dishName"
+                    class="pos-order-dishes__card-img"
+                  />
+                </div>
+                <div class="pos-order-dishes__card-info">
+                  <h3 class="pos-order-dishes__card-title">{{ dish.dishName }}</h3>
+                  <p class="pos-order-dishes__card-price">{{ dish.price | number: '1.0-0' }}đ</p>
+                </div>
+                <button type="button" class="pos-order-dishes__card-btn" (click)="addToCart(dish)">
+                  + Thêm
+                </button>
+              </article>
+            }
+          }
+        </div>
+      </div>
+    </section>
+
+    <aside class="pos-order-dishes__cart">
+      <div class="pos-order-dishes__cart-header">
+        <h2 class="pos-order-dishes__cart-title">
+          <span class="material-symbols-outlined">shopping_cart</span>
+          Giỏ hàng
+        </h2>
+        <div class="pos-order-dishes__cart-meta">
+          <span class="pos-order-dishes__cart-id">Hóa đơn #{{ tableName }}</span>
+          <div class="pos-order-dishes__cart-staff">
+            <span class="material-symbols-outlined">person</span>
+            Nhân viên: Admin
+          </div>
+        </div>
+      </div>
+
+      @if (cartItems().length === 0) {
+        <div class="pos-order-dishes__cart-body pos-order-dishes__cart-body--empty">
+          <div class="pos-order-dishes__cart-empty-icon">
+            <span class="material-symbols-outlined">shopping_basket</span>
+          </div>
+          <div class="pos-order-dishes__cart-empty-text">
+            <p class="font-bold">Giỏ hàng trống</p>
+            <p class="text-subtle">Vui lòng chọn món từ thực đơn</p>
+          </div>
+        </div>
+      } @else {
+        <div class="pos-order-dishes__cart-items">
+          @for (item of cartItems(); track item.dish.id) {
+            <div class="cart-item">
+              <img
+                class="cart-item__img"
+                [src]="item.dish.photo ? baseUrl + item.dish.photo : 'assets/placeholder-dish.png'"
+                alt=""
+              />
+              <div class="cart-item__info">
+                <span class="cart-item__name">{{ item.dish.dishName }}</span>
+                <span class="cart-item__price">{{ item.dish.price | number: '1.0-0' }}đ</span>
+              </div>
+              <div class="cart-item__actions">
+                <button
+                  type="button"
+                  class="cart-item__action-btn"
+                  (click)="updateQuantity(item.dish.id, item.quantity - 1)"
+                >
+                  -
+                </button>
+                <span class="cart-item__qty">{{ item.quantity }}</span>
+                <button
+                  type="button"
+                  class="cart-item__action-btn"
+                  (click)="updateQuantity(item.dish.id, item.quantity + 1)"
+                >
+                  +
+                </button>
+                <button
+                  type="button"
+                  class="cart-item__remove-btn"
+                  (click)="removeFromCart(item.dish.id)"
+                  aria-label="Xóa món"
+                >
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="pos-order-dishes__summary">
+        <div class="pos-order-dishes__discount-section">
+          <h3 class="pos-order-dishes__discount-title">
+            <span class="material-symbols-outlined">sell</span>
+            Áp dụng giảm giá
+          </h3>
+          <div class="pos-order-dishes__discount-tags">
+            <button
+              type="button"
+              class="pos-order-dishes__discount-tag"
+              [class.pos-order-dishes__discount-tag--active]="discountPercent() === 0"
+              (click)="applyDiscount(0)"
+            >
+              Không
+            </button>
+            <button
+              type="button"
+              class="pos-order-dishes__discount-tag"
+              [class.pos-order-dishes__discount-tag--active]="discountPercent() === 10"
+              (click)="applyDiscount(10)"
+            >
+              10%
+            </button>
+            <button
+              type="button"
+              class="pos-order-dishes__discount-tag"
+              [class.pos-order-dishes__discount-tag--active]="discountPercent() === 15"
+              (click)="applyDiscount(15)"
+            >
+              15%
+            </button>
+            <button
+              type="button"
+              class="pos-order-dishes__discount-tag"
+              [class.pos-order-dishes__discount-tag--active]="discountPercent() === 20"
+              (click)="applyDiscount(20)"
+            >
+              20%
+            </button>
+            <button type="button" class="pos-order-dishes__discount-tag">Khác</button>
+          </div>
+          <div class="pos-order-dishes__discount-input-row">
+            <input
+              type="text"
+              class="pos-order-dishes__input"
+              placeholder="Mã giảm giá"
+              [ngModel]="customDiscountCode()"
+              (ngModelChange)="customDiscountCode.set($event)"
+            />
+            <button
+              type="button"
+              class="pos-order-dishes__btn-apply"
+              (click)="applyCustomDiscount()"
+            >
+              Áp dụng
+            </button>
+          </div>
+        </div>
+
+        <div class="pos-order-dishes__note">
+          <h3 class="pos-order-dishes__note-title">
+            <span class="material-symbols-outlined">edit_note</span>
+            Ghi chú
+          </h3>
+
+          <textarea
+            class="pos-order-dishes__note-input"
+            rows="1"
+            placeholder="Nhập ghi chú cho đơn hàng... "
+            [ngModel]="orderDescription()"
+            (ngModelChange)="orderDescription.set($event)"
+          ></textarea>
+        </div>
+
+        <div class="pos-order-dishes__totals">
+          <div class="pos-order-dishes__totals-row">
+            <span>Tạm tính</span>
+            <span class="font-medium">{{ subtotal() | number: '1.0-0' }}đ</span>
+          </div>
+          <div class="pos-order-dishes__totals-row">
+            <span>Giảm giá</span>
+            <span class="text-error font-medium">-{{ discountAmount() | number: '1.0-0' }}đ</span>
+          </div>
+          <div class="pos-order-dishes__totals-row pos-order-dishes__totals-row--grand">
+            <span>Tổng cộng</span>
+            <span class="text-grand">{{ total() | number: '1.0-0' }}đ</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="pos-order-dishes__footer">
+    <div class="pos-order-dishes__footer-left">
+      <button
+        type="button"
+        class="pos-order-dishes__btn pos-order-dishes__btn--ghost"
+        [disabled]="cartItems().length === 0"
+        (click)="close()"
+      >
+        Đóng
+      </button>
+      <button type="button" class="pos-order-dishes__btn pos-order-dishes__btn--secondary">
+        <span class="material-symbols-outlined">print</span>
+        In tạm tính
+      </button>
+      <button type="button" class="pos-order-dishes__btn pos-order-dishes__btn--secondary">
+        <span class="material-symbols-outlined">save</span>
+        Lưu tạm
+      </button>
+      <button type="button" class="pos-order-dishes__btn pos-order-dishes__btn--secondary">
+        <span class="material-symbols-outlined">account_balance_wallet</span>
+        Thanh toán
+      </button>
+    </div>
+
+    <button
+      type="button"
+      class="pos-order-dishes__btn pos-order-dishes__btn--primary"
+      [disabled]="cartItems().length === 0 || submitting()"
+      (click)="confirmOrder()"
+    >
+      <span class="material-symbols-outlined">check_circle</span>
+      + {{ submitting() ? 'Đang xử lý...' : 'Xác nhận đơn hàng' }}
+    </button>
+  </footer>
+</div>

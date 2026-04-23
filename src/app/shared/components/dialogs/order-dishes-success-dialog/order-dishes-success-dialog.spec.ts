@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { OrderDishesDialog } from './order-dishes-dialog';
+import { OrderDishesSuccessDialog } from './order-dishes-success-dialog';
 
-describe('OrderDishesDialog', () => {
-  let component: OrderDishesDialog;
-  let fixture: ComponentFixture<OrderDishesDialog>;
+describe('OrderDishesSuccessDialog', () => {
+  let component: OrderDishesSuccessDialog;
+  let fixture: ComponentFixture<OrderDishesSuccessDialog>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [OrderDishesDialog]
+      imports: [OrderDishesSuccessDialog]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(OrderDishesDialog);
+    fixture = TestBed.createComponent(OrderDishesSuccessDialog);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

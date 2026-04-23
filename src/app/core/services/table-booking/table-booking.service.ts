@@ -22,6 +22,8 @@ import {
   TableBookingUpdateResponse,
   TableBookingUpdateStatusRequest,
   TableBookingUpdateStatusResponse,
+  DeleteTableBookingRequest,
+  DeleteTableBookingResponse,
 } from '../../models/table-booking/table-booking.model';
 
 const DEFAULT_SORT_FIELD: TableBookingSortField = 'expectedArriveTime';
@@ -32,6 +34,10 @@ const DEFAULT_SORT_DIR: TableBookingSortDir = 'desc';
 export class TableBookingService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = 'http://localhost:8080/api/v1/table-booking';
+
+  delete(request: DeleteTableBookingRequest): Observable<DeleteTableBookingResponse> {
+    return this.http.post<DeleteTableBookingResponse>(`${this.baseUrl}/delete`, request);
+  }
 
   create(request: TableBookingCreateRequest): Observable<TableBookingCreateResponse> {
     return this.http

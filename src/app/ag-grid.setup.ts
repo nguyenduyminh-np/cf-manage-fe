@@ -1,4 +1,14 @@
-import { ModuleRegistry } from 'ag-grid-community';
+import {
+  DateFilterModule,
+  ModuleRegistry,
+  NumberFilterModule,
+  TextFilterModule,
+} from 'ag-grid-community';
 import { AllCommunityModule } from 'ag-grid-community';
 
-ModuleRegistry.registerModules([AllCommunityModule]);
+ModuleRegistry.registerModules([
+  AllCommunityModule,
+  TextFilterModule,
+  NumberFilterModule,
+  DateFilterModule,
+]);

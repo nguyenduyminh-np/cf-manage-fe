@@ -5,7 +5,6 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TuiButton, TuiDialogService } from '@taiga-ui/core';
 import { PolymorpheusComponent } from '@taiga-ui/polymorpheus';
 
-import { OrderDishesDialog } from '../../../shared/components/dialogs/order-dishes-dialog/order-dishes-dialog';
 import { PosOrderDishes } from '../../../shared/components/dialogs/pos-order-dishes/pos-order-dishes';
 import { TableBookingDetail } from '../../../shared/components/dialogs/table-booking-detail/table-booking-detail';
 import { TableBookingHistory } from '../../../shared/components/dialogs/table-booking-history/table-booking-history';
@@ -124,16 +123,6 @@ export class DialogCatalog {
             dismissible: true,
             closeable: true,
             label: 'Table Booking Detail',
-          })
-          .subscribe();
-        return;
-      case 'order-dishes-dialog':
-        this.dialogService
-          .open(new PolymorpheusComponent(OrderDishesDialog, this.injector), {
-            size: 'auto',
-            dismissible: true,
-            closeable: true,
-            label: 'Order Dishes Dialog',
           })
           .subscribe();
         return;

@@ -1,0 +1,104 @@
+<div class="order-success-dialog">
+  <!-- Header -->
+  <header class="order-success-dialog__header">
+    <div class="order-success-dialog__title-wrap">
+      <div class="order-success-dialog__icon-circle">
+        <span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+      </div>
+      <h2>Đặt món thành công!</h2>
+    </div>
+  </header>
+
+  <!-- Body Content -->
+  <main class="order-success-dialog__body">
+    <!-- Order Meta Grid -->
+    <div class="order-success-dialog__meta-grid">
+      <div class="order-success-dialog__meta-item">
+        <span class="order-success-dialog__meta-label">Mã đơn</span>
+        <span class="order-success-dialog__meta-value">#{{ data.dishOrderId }}</span>
+      </div>
+      <div class="order-success-dialog__meta-item">
+        <span class="order-success-dialog__meta-label">Bàn</span>
+        <span class="order-success-dialog__meta-value">{{ data.tableName }}</span>
+      </div>
+      <div class="order-success-dialog__meta-item">
+        <span class="order-success-dialog__meta-label">Nhân viên</span>
+        <span class="order-success-dialog__meta-value order-success-dialog__meta-value--truncate" [title]="data.accountName">{{ data.accountName }}</span>
+      </div>
+      <div class="order-success-dialog__meta-item">
+        <span class="order-success-dialog__meta-label">Thời gian</span>
+        <span class="order-success-dialog__meta-value">{{ data.createdTime | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div class="order-success-dialog__status">
+      <span class="order-success-dialog__status-label">Trạng thái:</span>
+      <span class="order-success-dialog__status-badge">
+        <span class="order-success-dialog__status-dot"></span>
+        {{ data.dishOrderStatusName }}
+      </span>
+    </div>
+
+    <!-- Items Table -->
+    <div class="order-success-dialog__table-wrap">
+      <table class="order-success-dialog__table">
+        <thead>
+          <tr>
+            <th class="col-dish">Món ăn</th>
+            <th class="col-qty">Số lượng</th>
+            <th class="col-note">Ghi chú</th>
+            <th class="col-total">Thành tiền</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of data.dishOrderDetails; track item.dishName) {
+            <tr>
+              <td>
+                <div class="order-success-dialog__dish">
+                  @if (item.photo) {
+                    <img [alt]="item.dishName" class="order-success-dialog__dish-img" [src]="baseUrl + item.photo" />
+                  } @else {
+                    <div class="order-success-dialog__dish-img order-success-dialog__dish-img--placeholder">
+                      <span class="material-symbols-outlined">restaurant</span>
+                    </div>
+                  }
+                  <div class="order-success-dialog__dish-name">{{ item.dishName }}</div>
+                </div>
+              </td>
+              <td class="col-qty">{{ item.quantity }}</td>
+              <td class="col-note text-italic">{{ item.note || '-' }}</td>
+              <td class="col-total text-medium">{{ item.totalPrice | number }}đ</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- General Note -->
+    <div class="order-success-dialog__note">
+      <span class="material-symbols-outlined order-success-dialog__note-icon">edit_note</span>
+      <div class="order-success-dialog__note-content">
+        <strong>Ghi chú đơn: </strong>
+        <span [class.text-italic]="!data.note" [class.text-on-surface-variant]="!data.note">{{ data.note || 'Không có ghi chú' }}</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="order-success-dialog__footer">
+    <div class="order-success-dialog__total">
+      <span class="order-success-dialog__total-label">Tổng cộng: </span>
+      <span class="order-success-dialog__total-value">{{ data.totalBill | number }}đ</span>
+    </div>
+    <div class="order-success-dialog__actions">
+      <button type="button" class="btn btn--outline" (click)="printInvoice()">
+        <span class="material-symbols-outlined">print</span>
+        In hóa đơn
+      </button>
+      <button type="button" class="btn btn--primary" (click)="close()">
+        Xác nhận
+      </button>
+    </div>
+  </footer>
+</div>

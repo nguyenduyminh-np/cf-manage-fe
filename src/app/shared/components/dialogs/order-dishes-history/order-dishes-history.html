@@ -1,0 +1,376 @@
+<section class="order-dishes-history" aria-label="Lịch sử đặt món">
+  @if (detailState$ | async; as state) {
+    <header class="order-dishes-history__header">
+      <div class="order-dishes-history__title-wrap">
+        <span class="material-symbols-outlined" aria-hidden="true">restaurant_menu</span>
+        <div>
+          <h2>Lịch sử đặt món</h2>
+          <p>{{ displayTableName(state) }}</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Filter bar -->
+    <section class="order-dishes-history__searchbar" aria-label="Bộ lọc">
+      <form class="order-dishes-history__search-form" (ngSubmit)="applySearch()">
+        <div class="order-dishes-history__search-grid">
+          <label class="order-dishes-history__field">
+            <span>Tên bàn</span>
+            <input
+              type="text"
+              [(ngModel)]="filters.tableName"
+              (ngModelChange)="onFilterChange()"
+              name="tableName"
+              placeholder="Nhập tên bàn"
+              autocomplete="off"
+              [disabled]="isBulkUpdating"
+            />
+          </label>
+          <label class="order-dishes-history__field">
+            <span>Tên nhân viên</span>
+            <input
+              type="text"
+              [(ngModel)]="filters.employeeName"
+              (ngModelChange)="onFilterChange()"
+              name="employeeName"
+              placeholder="Nhập tên nhân viên"
+              autocomplete="off"
+              [disabled]="isBulkUpdating"
+            />
+          </label>
+          <label class="order-dishes-history__field">
+            <span>Trạng thái</span>
+            <div class="order-dishes-history__custom-select" (click)="$event.stopPropagation()">
+              <button
+                type="button"
+                class="order-dishes-history__select-trigger"
+                [class.order-dishes-history__select-trigger--open]="openedDropdown === 'status'"
+                [disabled]="isBulkUpdating"
+                (click)="toggleDropdown('status', $event)"
+              >
+                <span
+                  >{{ statusOptions.find(o => o.value === filters.status)?.label || 'Tất cả' }}</span
+                >
+                <span class="order-dishes-history__select-chevron"></span>
+              </button>
+              @if (openedDropdown === 'status') {
+                <ul class="order-dishes-history__select-menu">
+                  @for (opt of statusOptions; track opt.value) {
+                    <li>
+                      <button
+                        type="button"
+                        class="order-dishes-history__select-option"
+                        [class.order-dishes-history__select-option--selected]="
+                          filters.status === opt.value
+                        "
+                        (click)="
+                          filters.status = opt.value; onFilterChange(); openedDropdown = null
+                        "
+                      >
+                        {{ opt.label }}
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          </label>
+        </div>
+
+        <div class="order-dishes-history__search-actions">
+          <button
+            tuiButton
+            type="button"
+            class="btn btn--ghost"
+            [class.btn--advanced-active]="
+              filters.sortField !== 'createdAt' || filters.sortDir !== 'desc'
+            "
+            [disabled]="isBulkUpdating"
+            (click)="toggleAdvancedSearch(); $event.stopPropagation()"
+            title="Mở bộ lọc sắp xếp nâng cao"
+          >
+            <span class="material-symbols-outlined">tune</span>
+            <span>Sắp xếp</span>
+          </button>
+          <button
+            tuiButton
+            type="button"
+            class="btn btn--ghost"
+            [disabled]="isBulkUpdating"
+            (click)="resetSearch()"
+            title="Xóa bộ lọc và làm mới"
+          >
+            <span class="material-symbols-outlined">refresh</span>
+            <span>Làm mới</span>
+          </button>
+          <button
+            tuiButton
+            type="submit"
+            class="btn btn--primary"
+            [disabled]="isBulkUpdating"
+            title="Tìm kiếm với bộ lọc hiện tại"
+          >
+            <span class="material-symbols-outlined">search</span>
+            <span>Tìm kiếm</span>
+          </button>
+        </div>
+
+        @if (advancedSearchOpen) {
+          <div class="order-dishes-history__advanced-popup" (click)="$event.stopPropagation()">
+            <header class="order-dishes-history__advanced-header">
+              <h3>Sắp xếp</h3>
+              <button
+                tuiButton
+                type="button"
+                class="btn btn--ghost"
+                (click)="advancedSearchOpen = false"
+              >
+                Đóng
+              </button>
+            </header>
+            <div class="order-dishes-history__advanced-grid">
+              <label class="order-dishes-history__field">
+                <span>Sắp xếp theo</span>
+                <div class="order-dishes-history__select-wrap">
+                  <select
+                    [(ngModel)]="filters.sortField"
+                    (ngModelChange)="onFilterChange()"
+                    name="sortField"
+                    [disabled]="isBulkUpdating"
+                  >
+                    @for (opt of sortFieldOptions; track opt.value) {
+                      <option [ngValue]="opt.value">{{ opt.label }}</option>
+                    }
+                  </select>
+                  <span class="order-dishes-history__select-chevron"></span>
+                </div>
+              </label>
+              <label class="order-dishes-history__field">
+                <span>Thứ tự</span>
+                <div class="order-dishes-history__select-wrap">
+                  <select
+                    [(ngModel)]="filters.sortDir"
+                    (ngModelChange)="onFilterChange()"
+                    name="sortDir"
+                    [disabled]="isBulkUpdating"
+                  >
+                    @for (opt of sortDirOptions; track opt.value) {
+                      <option [ngValue]="opt.value">{{ opt.label }}</option>
+                    }
+                  </select>
+                  <span class="order-dishes-history__select-chevron"></span>
+                </div>
+              </label>
+            </div>
+          </div>
+        }
+      </form>
+    </section>
+
+    <!-- Thao tác section -->
+    <section class="order-dishes-history__action-bar" aria-label="Thao tác">
+      <div class="order-dishes-history__bulk-actions">
+        @if (hasSelection) {
+          @if (showComplete) {
+            <button
+              tuiButton
+              type="button"
+              class="btn btn--success"
+              [disabled]="isBulkUpdating"
+              (click)="confirmAndUpdate('DONE')"
+              title="Cập nhật trạng thái Hoàn thành"
+            >
+              @if (isBulkUpdating) {
+                <span class="loader loader--inline"></span>
+              } @else {
+                <span class="material-symbols-outlined">task_alt</span>
+              }
+              <span>Hoàn thành ({{ selectedRows.length }})</span>
+            </button>
+          }
+          @if (showPay) {
+            <button
+              tuiButton
+              type="button"
+              class="btn btn--success"
+              [disabled]="isBulkUpdating"
+              (click)="confirmAndUpdate('PAID')"
+              title="Cập nhật trạng thái Đã thanh toán"
+            >
+              @if (isBulkUpdating) {
+                <span class="loader loader--inline"></span>
+              } @else {
+                <span class="material-symbols-outlined">task_alt</span>
+              }
+              <span>Thanh toán ({{ selectedRows.length }})</span>
+            </button>
+          }
+          @if (showCancel) {
+            <button
+              tuiButton
+              type="button"
+              class="btn btn--danger"
+              [disabled]="isBulkUpdating"
+              (click)="confirmAndUpdate('CANCEL')"
+              title="Hủy đơn hàng"
+            >
+              @if (isBulkUpdating) {
+                <span class="loader loader--inline"></span>
+              } @else {
+                <span class="material-symbols-outlined">cancel</span>
+              }
+              <span>Hủy ({{ selectedRows.length }})</span>
+            </button>
+          }
+          <button
+            tuiButton
+            type="button"
+            class="btn btn--ghost btn--icon"
+            [disabled]="isBulkUpdating"
+            (click)="gridApi?.deselectAll()"
+            title="Bỏ chọn tất cả"
+          >
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        }
+      </div>
+      
+      <!-- Always visible: Export Excel on far right -->
+      <button
+        tuiButton
+        type="button"
+        class="btn btn--outline"
+        [disabled]="isBulkUpdating"
+        (click)="exportExcel()"
+        title="Xuất file Excel"
+      >
+        <span class="material-symbols-outlined">download</span>
+        <span>Xuất Excel</span>
+      </button>
+    </section>
+
+    @if (state.isLoading) {
+      <div class="order-dishes-history__loading-bar" role="status">Đang tải dữ liệu...</div>
+    }
+    @if (state.error) {
+      <section class="order-dishes-history__error" role="alert">
+        <p>{{ state.error }}</p>
+      </section>
+    }
+
+    <!-- Selection bar removed in favor of header actions -->
+
+    <!-- Global bulk progress -->
+    @if (isBulkUpdating) {
+      <div class="order-dishes-history__bulk-progress" aria-live="polite" role="status">
+        <span class="loader"></span>
+        <span>Đang cập nhật {{ selectedRows.length }} đơn...</span>
+      </div>
+    }
+
+    <!-- Grid container -->
+    <div class="order-dishes-history__grid-wrap">
+      <ag-grid-angular
+        class="ag-theme-quartz order-dishes-history__grid"
+        [columnDefs]="columnDefs"
+        [defaultColDef]="defaultColDef"
+        [rowData]="state.rowData"
+        [rowSelection]="rowSelection"
+        (selectionChanged)="onSelectionChanged()"
+        [pagination]="false"
+        [loading]="state.isLoading"
+        [suppressCellFocus]="true"
+        [isRowSelectable]="isRowSelectable"
+        [headerHeight]="46"
+        [rowHeight]="46"
+        (gridReady)="onGridReady($event)"
+        (gridSizeChanged)="onGridSizeChanged($event)"
+      ></ag-grid-angular>
+
+      <!-- ✅ Empty state hiển thị bên ngoài grid, đảm bảo chính xác -->
+      @if (!state.isLoading && !state.error && state.rowData.length === 0) {
+        <div class="order-dishes-history__empty-state">
+          <span class="material-symbols-outlined">inbox</span>
+          <p>Không có đơn hàng</p>
+          <small>Thử thay đổi bộ lọc hoặc tạo đơn mới</small>
+        </div>
+      }
+    </div>
+
+    <footer class="order-dishes-history__footer">
+      <div class="order-dishes-history__result-controls">
+        <p>Tổng số: {{ state.totalElements }}</p>
+        <label class="order-dishes-history__limit-control">
+          <span>Hiển thị</span>
+          <div class="order-dishes-history__custom-select" (click)="$event.stopPropagation()">
+            <button
+              type="button"
+              class="order-dishes-history__select-trigger"
+              [class.order-dishes-history__select-trigger--open]="openedDropdown === 'pageSize'"
+              [disabled]="state.isLoading || isBulkUpdating"
+              (click)="toggleDropdown('pageSize', $event)"
+            >
+              <span>{{ state.pageSize }}</span>
+              <span class="order-dishes-history__select-chevron"></span>
+            </button>
+            @if (openedDropdown === 'pageSize') {
+              <ul class="order-dishes-history__select-menu">
+                @for (opt of pageSizeOptions; track opt) {
+                  <li>
+                    <button
+                      type="button"
+                      class="order-dishes-history__select-option"
+                      [class.order-dishes-history__select-option--selected]="state.pageSize === opt"
+                      (click)="setPageSize(opt)"
+                    >
+                      {{ opt }}
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+          <span>bản ghi</span>
+        </label>
+      </div>
+
+      <div class="order-dishes-history__pagination">
+        <button
+          tuiButton
+          type="button"
+          class="btn btn--ghost btn--icon"
+          [disabled]="!canGoPrevious(state) || isBulkUpdating"
+          (click)="previousPage()"
+          aria-label="Trang trước"
+          title="Trang trước"
+        >
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <span class="order-dishes-history__page-indicator">{{ pageSummary(state) }}</span>
+        <button
+          tuiButton
+          type="button"
+          class="btn btn--ghost btn--icon"
+          [disabled]="!canGoNext(state) || isBulkUpdating"
+          (click)="nextPage()"
+          aria-label="Trang sau"
+          title="Trang sau"
+        >
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
+    </footer>
+
+    <div class="order-dishes-history__actions">
+      <button
+        tuiButton
+        type="button"
+        class="btn btn--ghost"
+        (click)="close()"
+        [disabled]="isBulkUpdating"
+      >
+        Đóng
+      </button>
+    </div>
+  }
+</section>
