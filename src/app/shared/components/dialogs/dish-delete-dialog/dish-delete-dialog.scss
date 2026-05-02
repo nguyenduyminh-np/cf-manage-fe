@@ -1,0 +1,31 @@
+@use 'sass:color';
+@use '../../../../../assets/styles/color-kit' as *;
+
+.dd-dialog {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 1.2rem; padding: 1.75rem 1.5rem 1.5rem; min-width: 320px; max-width: 420px; text-align: center;
+}
+.dd-dialog__icon-wrap {
+  width: 3.2rem; height: 3.2rem; border-radius: 50%;
+  background: rgba(#ba1a1a, 0.1); display: grid; place-items: center;
+}
+.dd-dialog__icon { font-size: 1.7rem; color: #ba1a1a; }
+.dd-dialog__body { display: flex; flex-direction: column; gap: 0.5rem; }
+.dd-dialog__title { margin: 0; font-size: 1.05rem; font-weight: 700; color: $color-primary; }
+.dd-dialog__msg   { margin: 0; font-size: 0.875rem; color: rgba($color-secondary, 0.9); line-height: 1.55; }
+.dd-dialog__name  { color: $color-primary; font-weight: 700; }
+.dd-dialog__footer { display: flex; justify-content: center; gap: 0.7rem; width: 100%; margin-top: 0.4rem; }
+
+button.btn[tuiButton] { border: none; box-shadow: none; }
+.btn { min-height: 2.4rem; border-radius: 0.66rem; padding: 0 1.2rem; cursor: pointer; transition: background-color 140ms ease; }
+.btn--ghost {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  color: $color-primary; background-color: rgba($color-surface, 0.95);
+  border: 1px solid rgba($color-outline-variant, 0.68) !important;
+  &:hover { background-color: rgba($color-surface-container-highest, 0.95); }
+}
+.btn--danger {
+  display: inline-flex; align-items: center; gap: 0.45rem; color: #fff; background-color: #ba1a1a;
+  &:hover { background-color: color.adjust(#ba1a1a, $lightness: -6%); }
+  .material-symbols-outlined { font-size: 1.05rem; }
+}

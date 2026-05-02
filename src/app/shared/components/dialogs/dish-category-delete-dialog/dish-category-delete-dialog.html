@@ -1,0 +1,24 @@
+<div class="dcd-dialog">
+  <div class="dcd-dialog__icon-wrap" aria-hidden="true">
+    <span class="material-symbols-outlined dcd-dialog__icon">delete_forever</span>
+  </div>
+
+  <div class="dcd-dialog__body">
+    <h2 class="dcd-dialog__title">Xóa danh mục</h2>
+    <p class="dcd-dialog__message">
+      Bạn có chắc chắn muốn xóa danh mục
+      <strong class="dcd-dialog__name">{{ categoryName }}</strong>?
+      Hành động này sẽ ẩn danh mục khỏi hệ thống.
+    </p>
+  </div>
+
+  <div class="dcd-dialog__footer">
+    <button tuiButton type="button" class="btn btn--ghost" (click)="cancel()">
+      Hủy bỏ
+    </button>
+    <button tuiButton type="button" class="btn btn--danger" (click)="confirm()">
+      <span class="material-symbols-outlined">delete</span>
+      Xóa
+    </button>
+  </div>
+</div>

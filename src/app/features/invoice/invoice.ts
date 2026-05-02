@@ -7,6 +7,7 @@ import {
   ColDef,
   GridApi,
   GridReadyEvent,
+  GridSizeChangedEvent,
   ICellRendererParams,
   RowDoubleClickedEvent,
   ValueFormatterParams,
@@ -100,6 +101,7 @@ export class Invoice {
 
   private latestState: InvoiceViewState | null = null;
   private gridApi: GridApi<InvoiceListItem> | null = null;
+  private fitGridRafId: number | null = null;
 
   // ---- Filter Form Model ----
   protected searchFilters: InvoiceSearchFilters = {
@@ -135,29 +137,49 @@ export class Invoice {
         (params.node?.rowIndex ?? 0) +
         1 +
         (this.latestState?.currentPage ?? 0) * (this.latestState?.pageSize ?? 20),
-      width: 70,
+      flex: 0.55,
+      minWidth: 72,
+      maxWidth: 90,
+      pinned: 'left',
       sortable: false,
       filter: false,
-      cellClass: 'cell-center',
+      cellClass: 'cell-center cell-bold',
     },
-    { headerName: 'Mã hóa đơn', field: 'invoiceCode', sortable: true, filter: true },
+    {
+      headerName: 'Mã hóa đơn',
+      field: 'invoiceCode',
+      minWidth: 160,
+      flex: 1.2,
+      sortable: true,
+      filter: true,
+    },
     {
       headerName: 'Tổng tiền',
       field: 'totalAmount',
       valueFormatter: (params: ValueFormatterParams<InvoiceListItem>) =>
         this.formatCurrency(params.value),
-      cellClass: 'cell-right',
+      minWidth: 140,
+      flex: 1.1,
+      cellClass: 'cell-right cell-bold',
       sortable: true,
       filter: 'agNumberColumnFilter',
     },
     {
       headerName: 'Trạng thái',
       field: 'paymentStatus',
+      minWidth: 170,
+      flex: 1.2,
       cellRenderer: (params: ICellRendererParams<InvoiceListItem>) => {
         const status = params.value;
-        const label =
-          status === 'PAID' ? 'Đã thanh toán' : status === 'PENDING' ? 'Chờ thanh toán' : status;
-        const cssClass = status === 'PAID' ? 'invoice-status--paid' : 'invoice-status--pending';
+        const isPaid = status === 'PAID' || status === 'Đã thanh toán';
+        const isPending = status === 'PENDING' || status === 'Chờ thanh toán';
+
+        const label = isPaid ? 'Đã thanh toán' : isPending ? 'Chờ thanh toán' : status;
+        const cssClass = isPaid
+          ? 'invoice-status--paid'
+          : isPending
+            ? 'invoice-status--pending'
+            : 'invoice-status--default';
         return `<span class="invoice-status ${cssClass}">${label}</span>`;
       },
       sortable: true,
@@ -165,31 +187,46 @@ export class Invoice {
     },
     {
       headerName: 'Phương thức',
+      minWidth: 150,
+      flex: 1.1,
       valueGetter: (params: ValueGetterParams<InvoiceListItem>) => {
         switch (params.data?.paymentMethod) {
           case 'BANK':
+          case 'Chuyển khoản':
             return 'Chuyển khoản';
           case 'CASH':
+          case 'Tiền mặt':
             return 'Tiền mặt';
           default:
-            return params.data?.paymentMethod;
+            return params.data?.paymentMethod || '-';
         }
       },
       sortable: true,
       filter: true,
     },
-    { headerName: 'Người tạo', field: 'fullName', sortable: true, filter: true },
+    {
+      headerName: 'Người tạo',
+      field: 'fullName',
+      minWidth: 150,
+      flex: 1.2,
+      sortable: true,
+      filter: true,
+    },
     {
       headerName: 'Ngày tạo',
       field: 'createdAt',
+      minWidth: 160,
+      flex: 1.2,
       valueFormatter: (params: ValueFormatterParams<InvoiceListItem>) =>
         this.formatDateTime(params.value),
       sortable: true,
       filter: 'agDateColumnFilter',
     },
     {
-      headerName: 'Mã booking',
+      headerName: 'Mã đơn đặt',
       field: 'bookingInvoiceCode',
+      minWidth: 150,
+      flex: 1.2,
       valueFormatter: (params: ValueFormatterParams<InvoiceListItem>) => params.value || '-',
       sortable: true,
       filter: true,
@@ -198,7 +235,13 @@ export class Invoice {
       headerName: 'Thao tác',
       colId: 'actions',
       cellRenderer: () => `<span class="material-symbols-outlined">visibility</span>`,
-      width: 80,
+      width: 90,
+      minWidth: 90,
+      maxWidth: 100,
+      flex: 0,
+      pinned: 'right',
+      lockPinned: true,
+      suppressSizeToFit: true,
       sortable: false,
       filter: false,
       cellClass: 'cell-center cell-clickable',
@@ -216,6 +259,25 @@ export class Invoice {
   // -------------------------
   protected onGridReady(event: GridReadyEvent<InvoiceListItem>): void {
     this.gridApi = event.api;
+    this.fitGridWidth();
+  }
+
+  protected onGridSizeChanged(_event: GridSizeChangedEvent<InvoiceListItem>): void {
+    this.fitGridWidth();
+  }
+
+  private fitGridWidth(): void {
+    const gridApi = this.gridApi;
+    if (!gridApi) return;
+
+    if (this.fitGridRafId !== null) {
+      cancelAnimationFrame(this.fitGridRafId);
+    }
+
+    this.fitGridRafId = requestAnimationFrame(() => {
+      this.fitGridRafId = null;
+      gridApi.sizeColumnsToFit({ defaultMinWidth: 80 });
+    });
   }
 
   protected onCellClicked(event: CellClickedEvent<InvoiceListItem>): void {

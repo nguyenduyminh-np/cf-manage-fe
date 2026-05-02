@@ -1,18 +1,17 @@
 <main class="invoice-page">
   <!-- Header -->
   <header class="invoice-page__header">
-    <div>
-      <h1 class="invoice-page__title">Quản lý hóa đơn</h1>
-      <p class="invoice-page__subtitle">Quản lý và theo dõi các giao dịch thanh toán của quán.</p>
+    <div class="invoice-page__title-wrap">
+      <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
+      <div>
+        <h1 class="invoice-page__title type-headline-lg">Hóa đơn bán hàng</h1>
+        <p class="invoice-page__subtitle type-body-sm text-uppercase">Quản lý và theo dõi các giao dịch thanh toán của quán.</p>
+      </div>
     </div>
     <div class="invoice-page__actions">
-      <button tuiButton type="button" class="btn btn--ghost">
+      <button tuiButton type="button" class="btn btn--primary type-label-md" (click)="createInvoice()">
         <span class="material-symbols-outlined">download</span>
-        Xuất file
-      </button>
-      <button tuiButton type="button" class="btn btn--primary" (click)="createInvoice()">
-        <span class="material-symbols-outlined">add</span>
-        Tạo mới
+        Xuất excel
       </button>
     </div>
   </header>
@@ -22,8 +21,9 @@
     <form (ngSubmit)="applySearch()">
       <div class="invoice-search__grid">
         <label class="invoice-search__field">
-          <span>Mã hóa đơn</span>
+          <span class="type-label-sm">Mã hóa đơn</span>
           <input
+            class="type-body-md"
             name="invoiceCode"
             type="text"
             [(ngModel)]="searchFilters.invoiceCode"
@@ -34,8 +34,9 @@
         </label>
 
         <label class="invoice-search__field">
-          <span>Trạng thái</span>
+          <span class="type-label-sm">Trạng thái</span>
           <select
+            class="type-body-md"
             name="paymentStatus"
             [(ngModel)]="searchFilters.paymentStatus"
             (ngModelChange)="onFiltersChanged()"
@@ -47,8 +48,9 @@
         </label>
 
         <label class="invoice-search__field">
-          <span>Phương thức</span>
+          <span class="type-label-sm">Phương thức</span>
           <select
+            class="type-body-md"
             name="paymentMethod"
             [(ngModel)]="searchFilters.paymentMethod"
             (ngModelChange)="onFiltersChanged()"
@@ -60,8 +62,9 @@
         </label>
 
         <label class="invoice-search__field">
-          <span>Tổng tiền từ</span>
+          <span class="type-label-sm">Tổng tiền từ</span>
           <input
+            class="type-body-md"
             name="totalAmountFrom"
             type="number"
             [(ngModel)]="searchFilters.totalAmountFrom"
@@ -72,8 +75,9 @@
         </label>
 
         <label class="invoice-search__field">
-          <span>đến</span>
+          <span class="type-label-sm">đến</span>
           <input
+            class="type-body-md"
             name="totalAmountTo"
             type="number"
             [(ngModel)]="searchFilters.totalAmountTo"
@@ -85,11 +89,11 @@
       </div>
 
       <div class="invoice-search__actions">
-        <button tuiButton type="submit" class="btn btn--primary btn--small">
+        <button tuiButton type="submit" class="btn btn--primary btn--small type-label-md">
           <span class="material-symbols-outlined">search</span>
           Tìm kiếm
         </button>
-        <button tuiButton type="button" class="btn btn--ghost btn--small" (click)="resetSearch()">
+        <button tuiButton type="button" class="btn btn--ghost btn--small type-label-md" (click)="resetSearch()">
           <span class="material-symbols-outlined">refresh</span>
           Làm mới
         </button>
@@ -124,6 +128,7 @@
         [headerHeight]="46"
         [rowHeight]="46"
         (gridReady)="onGridReady($event)"
+        (gridSizeChanged)="onGridSizeChanged($event)"
         (cellClicked)="onCellClicked($event)"
         (rowDoubleClicked)="onRowDoubleClicked($event)"
       ></ag-grid-angular>
@@ -131,11 +136,12 @@
 
     <!-- Pagination Footer -->
     <footer class="invoice-pagination">
-      <div class="invoice-pagination__info">
-        <p>Tổng số bản ghi: {{ state.totalElements }}</p>
-        <label for="invoice-page-size">Hiển thị</label>
+      <div class="invoice-pagination__info type-body-sm">
+        <span>Tổng số bản ghi: {{ state.totalElements }}</span>
+        <label for="invoice-page-size" class="type-label-md"> - Hiển thị </label>
         <select
           id="invoice-page-size"
+          class="type-label-md"
           [ngModel]="state.pageSize"
           (ngModelChange)="setPageSize($event)"
         >
@@ -143,25 +149,25 @@
             <option [ngValue]="size">{{ size }}</option>
           }
         </select>
-        <span>bản ghi</span>
+        <span> bản ghi</span>
       </div>
 
       <div class="invoice-pagination__nav">
         <button
           tuiButton
           type="button"
-          class="btn--ghost btn--icon"
+          class="btn btn--ghost btn--icon"
           [disabled]="!canGoPrevious(state)"
           (click)="previousPage()"
           aria-label="Trang trước"
         >
           <span class="material-symbols-outlined">chevron_left</span>
         </button>
-        <span class="invoice-pagination__indicator">{{ pageSummary(state) }}</span>
+        <span class="invoice-pagination__indicator type-label-md">{{ pageSummary(state) }}</span>
         <button
           tuiButton
           type="button"
-          class="btn--ghost btn--icon"
+          class="btn btn--ghost btn--icon"
           [disabled]="!canGoNext(state)"
           (click)="nextPage()"
           aria-label="Trang sau"

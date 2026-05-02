@@ -1,145 +1,233 @@
 <div class="dish-page">
-  <!-- Page Header -->
-  <header class="dish-page__header">
-    <div>
-      <h1 class="dish-page__title">Quản lý nhóm món</h1>
-      <p class="dish-page__subtitle">Quản lý và sắp xếp các món trong thực đơn của quán.</p>
-    </div>
-    <button type="button" class="dish-btn dish-btn--primary">
-      <span class="material-symbols-outlined">add</span>
-      Thêm món mới
-    </button>
-  </header>
 
-  <!-- Filters & Search Bar -->
-  <div class="dish-filters">
-    <div class="dish-filters__field">
-      <label class="dish-filters__label" for="dish-search">Tìm kiếm</label>
-      <div class="dish-filters__search-wrap">
-        <span class="material-symbols-outlined dish-filters__search-icon">search</span>
-        <input
-          id="dish-search"
-          type="text"
-          class="dish-filters__input"
-          placeholder="Tìm kiếm tên món..."
-          [(ngModel)]="searchText"
-        />
+  <!-- ── Shared Page Header ─────────────────────────────────────────────── -->
+  <header class="dish-page__header">
+    <div class="dish-page__title-wrap">
+      <span class="material-symbols-outlined" aria-hidden="true">restaurant_menu</span>
+      <div>
+        <h1 class="dish-page__title type-headline-lg">Quản lý thực đơn</h1>
+        <p class="dish-page__subtitle type-body-sm">Quản lý danh mục và món ăn trong thực đơn của quán.</p>
       </div>
     </div>
 
-    <div class="dish-filters__field">
-      <label class="dish-filters__label" for="dish-category">Loại món</label>
-      <select
-        id="dish-category"
-        class="dish-filters__select"
-        [(ngModel)]="selectedCategory"
-      >
-        <option *ngFor="let cat of categories" [value]="cat.value">{{ cat.label }}</option>
-      </select>
-    </div>
+    <!-- Action button changes per tab -->
+    @if (activeTab === 'category') {
+      <div class="dish-page__actions">
+        <button tuiButton type="button" class="btn btn--primary type-label-md" (click)="openCatCreateDialog()">
+          <span class="material-symbols-outlined">add</span>
+          Thêm danh mục
+        </button>
+      </div>
+    } @else {
+      <div class="dish-page__actions">
+        <button tuiButton type="button" class="btn btn--primary type-label-md" (click)="openDishCreateDialog()">
+          <span class="material-symbols-outlined">add</span>
+          Thêm món ăn
+        </button>
+      </div>
+    }
+  </header>
 
-    <button type="button" class="dish-btn dish-btn--search">
-      Tìm kiếm
+  <!-- ── Tab bar ────────────────────────────────────────────────────────── -->
+  <nav class="dish-tabs" aria-label="Điều hướng thực đơn" role="tablist">
+    <button
+      role="tab"
+      class="dish-tabs__tab"
+      [class.dish-tabs__tab--active]="activeTab === 'category'"
+      [attr.aria-selected]="activeTab === 'category'"
+      (click)="switchTab('category')"
+      id="tab-category"
+      aria-controls="panel-category"
+    >
+      <span class="material-symbols-outlined">category</span>
+      Quản lý nhóm món
     </button>
-  </div>
+    <button
+      role="tab"
+      class="dish-tabs__tab"
+      [class.dish-tabs__tab--active]="activeTab === 'dish'"
+      [attr.aria-selected]="activeTab === 'dish'"
+      (click)="switchTab('dish')"
+      id="tab-dish"
+      aria-controls="panel-dish"
+    >
+      <span class="material-symbols-outlined">lunch_dining</span>
+      Quản lý món ăn
+    </button>
+    <div class="dish-tabs__ink" [class.dish-tabs__ink--dish]="activeTab === 'dish'"></div>
+  </nav>
 
-  <!-- Data Table -->
-  <section class="dish-table-wrap" aria-label="Danh sách món ăn">
-    <div class="dish-table-scroll">
-      <table class="dish-table">
-        <thead>
-          <tr class="dish-table__heading-row">
-            <th class="text-center">STT</th>
-            <th>Ảnh</th>
-            <th>Tên món</th>
-            <th>Nhóm món</th>
-            <th>Giá</th>
-            <th>Ngày tạo</th>
-            <th class="text-center">Thao tác</th>
-          </tr>
-        </thead>
+  <!-- ══════════════════════════════════════════════════════════════════════
+       PANEL: CATEGORY
+  ══════════════════════════════════════════════════════════════════════════ -->
+  @if (activeTab === 'category') {
+    <div id="panel-category" role="tabpanel" aria-labelledby="tab-category" class="dish-panel">
 
-        <tbody>
-          @for (dish of filteredDishes; track dish.no) {
-            <tr class="dish-table__row">
-              <td class="dish-table__index">{{ dish.no }}</td>
-
-              <td class="dish-table__photo-cell">
-                @if (dish.photo) {
-                  <img [src]="dish.photo" [alt]="dish.name" class="dish-table__photo" />
-                } @else {
-                  <div class="dish-table__photo-placeholder">
-                    <span class="material-symbols-outlined">restaurant</span>
-                  </div>
+      <!-- Search -->
+      <section class="panel-search" aria-label="Bộ lọc danh mục">
+        <form (ngSubmit)="catApplySearch()">
+          <div class="panel-search__grid">
+            <label class="panel-search__field">
+              <span class="type-label-sm">Mã danh mục</span>
+              <input class="type-body-md" name="catCode" type="text"
+                [(ngModel)]="catSearchFilters.dishCategoryCode" (ngModelChange)="catOnFiltersChanged()"
+                placeholder="Tìm mã..." autocomplete="off" />
+            </label>
+            <label class="panel-search__field">
+              <span class="type-label-sm">Tên danh mục</span>
+              <input class="type-body-md" name="catName" type="text"
+                [(ngModel)]="catSearchFilters.dishCategoryName" (ngModelChange)="catOnFiltersChanged()"
+                placeholder="Tìm tên..." autocomplete="off" />
+            </label>
+            <label class="panel-search__field">
+              <span class="type-label-sm">Trạng thái</span>
+              <select class="type-body-md" name="catActive"
+                [(ngModel)]="catSearchFilters.isActive" (ngModelChange)="catOnFiltersChanged()">
+                @for (o of activeStatusOptions; track o.value) {
+                  <option [ngValue]="o.value">{{ o.label }}</option>
                 }
-              </td>
+              </select>
+            </label>
+          </div>
+          <div class="panel-search__actions">
+            <button tuiButton type="submit" class="btn btn--primary btn--small type-label-md">
+              <span class="material-symbols-outlined">search</span> Tìm kiếm
+            </button>
+            <button tuiButton type="button" class="btn btn--ghost btn--small type-label-md" (click)="catResetSearch()">
+              <span class="material-symbols-outlined">refresh</span> Làm mới
+            </button>
+          </div>
+        </form>
+      </section>
 
-              <td class="dish-table__name">{{ dish.name }}</td>
-
-              <td>
-                <span class="dish-category-tag" [class]="categoryClass(dish.category)">
-                  {{ dish.categoryLabel }}
-                </span>
-              </td>
-
-              <td class="dish-table__price">
-                {{ dish.price | number: '1.0-0' }}&nbsp;đ
-              </td>
-
-              <td class="dish-table__date">{{ dish.createdAt }}</td>
-
-              <td class="dish-table__actions">
-                <div class="dish-action-group">
-                  <button type="button" class="dish-action-btn dish-action-btn--edit" title="Chỉnh sửa">
-                    <span class="material-symbols-outlined">edit</span>
-                  </button>
-                  <button type="button" class="dish-action-btn dish-action-btn--delete" title="Xóa">
-                    <span class="material-symbols-outlined">delete</span>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          }
-
-          @if (filteredDishes.length === 0) {
-            <tr>
-              <td colspan="7" class="dish-table__empty">
-                <span class="material-symbols-outlined">search_off</span>
-                <p>Không tìm thấy món nào phù hợp</p>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Pagination -->
-    <footer class="dish-pagination">
-      <p class="dish-pagination__info">
-        Hiển thị <strong>1</strong> đến <strong>10</strong> trong <strong>45</strong> kết quả
-      </p>
-
-      <nav class="dish-pagination__actions" aria-label="Phân trang">
-        <button type="button" class="dish-pagination__arrow" aria-label="Trang trước">
-          <span class="material-symbols-outlined">chevron_left</span>
-        </button>
-
-        @for (item of paginationItems; track item.label) {
-          @if (item.type === 'page') {
-            <button
-              type="button"
-              class="dish-pagination__page"
-              [class.dish-pagination__page--active]="item.active"
-            >{{ item.label }}</button>
-          } @else {
-            <span class="dish-pagination__dots">{{ item.label }}</span>
-          }
+      <!-- Grid -->
+      @if (catState$ | async; as state) {
+        @if (state.isLoading) {
+          <div class="panel-loading" aria-live="polite">Đang tải danh sách danh mục...</div>
         }
+        @if (state.error) {
+          <div class="panel-error" role="alert">{{ state.error }}</div>
+        }
+        <div class="panel-grid-wrap">
+          <ag-grid-angular class="panel-grid ag-theme-quartz"
+            [columnDefs]="catColumnDefs" [defaultColDef]="defaultColDef"
+            [rowData]="state.rowData" [pagination]="false" [loading]="state.isLoading"
+            [overlayLoadingTemplate]="'Đang tải dữ liệu...'"
+            [overlayNoRowsTemplate]="'Không có danh mục nào'"
+            [suppressCellFocus]="true" [headerHeight]="46" [rowHeight]="46"
+            (gridReady)="onCatGridReady($event)"
+            (gridSizeChanged)="onCatGridSizeChanged($event)"
+            (cellClicked)="onCatCellClicked($event)"
+          ></ag-grid-angular>
+        </div>
+        <footer class="panel-pagination">
+          <div class="panel-pagination__info type-body-sm">
+            <span>Tổng: {{ state.totalElements }} bản ghi</span>
+            <label for="cat-page-size" class="type-label-md"> – Hiển thị </label>
+            <select id="cat-page-size" class="type-label-md" [ngModel]="state.pageSize" (ngModelChange)="catSetPageSize($event)">
+              @for (s of pageSizeOptions; track s) { <option [ngValue]="s">{{ s }}</option> }
+            </select>
+            <span> / trang</span>
+          </div>
+          <div class="panel-pagination__nav">
+            <button tuiButton type="button" class="btn btn--ghost btn--icon" [disabled]="!catCanPrev(state)" (click)="catPrev()" aria-label="Trang trước">
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <span class="panel-pagination__indicator type-label-md">{{ pageSummary(state) }}</span>
+            <button tuiButton type="button" class="btn btn--ghost btn--icon" [disabled]="!catCanNext(state)" (click)="catNext()" aria-label="Trang sau">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
+        </footer>
+      }
+    </div>
+  }
 
-        <button type="button" class="dish-pagination__arrow" aria-label="Trang sau">
-          <span class="material-symbols-outlined">chevron_right</span>
-        </button>
-      </nav>
-    </footer>
-  </section>
+  <!-- ══════════════════════════════════════════════════════════════════════
+       PANEL: DISH
+  ══════════════════════════════════════════════════════════════════════════ -->
+  @if (activeTab === 'dish') {
+    <div id="panel-dish" role="tabpanel" aria-labelledby="tab-dish" class="dish-panel">
+
+      <!-- Search -->
+      <section class="panel-search" aria-label="Bộ lọc món ăn">
+        <form (ngSubmit)="dishApplySearch()">
+          <div class="panel-search__grid">
+            <label class="panel-search__field">
+              <span class="type-label-sm">Mã món</span>
+              <input class="type-body-md" name="dishCode" type="text"
+                [(ngModel)]="dishSearchFilters.dishCode" (ngModelChange)="dishOnFiltersChanged()"
+                placeholder="Tìm mã..." autocomplete="off" />
+            </label>
+            <label class="panel-search__field">
+              <span class="type-label-sm">Tên món ăn</span>
+              <input class="type-body-md" name="dishName" type="text"
+                [(ngModel)]="dishSearchFilters.dishName" (ngModelChange)="dishOnFiltersChanged()"
+                placeholder="Tìm tên..." autocomplete="off" />
+            </label>
+            <label class="panel-search__field">
+              <span class="type-label-sm">Trạng thái</span>
+              <select class="type-body-md" name="dishActive"
+                [(ngModel)]="dishSearchFilters.isActive" (ngModelChange)="dishOnFiltersChanged()">
+                @for (o of activeStatusOptions; track o.value) {
+                  <option [ngValue]="o.value">{{ o.label }}</option>
+                }
+              </select>
+            </label>
+          </div>
+          <div class="panel-search__actions">
+            <button tuiButton type="submit" class="btn btn--primary btn--small type-label-md">
+              <span class="material-symbols-outlined">search</span> Tìm kiếm
+            </button>
+            <button tuiButton type="button" class="btn btn--ghost btn--small type-label-md" (click)="dishResetSearch()">
+              <span class="material-symbols-outlined">refresh</span> Làm mới
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Grid -->
+      @if (dishState$ | async; as state) {
+        @if (state.isLoading) {
+          <div class="panel-loading" aria-live="polite">Đang tải danh sách món ăn...</div>
+        }
+        @if (state.error) {
+          <div class="panel-error" role="alert">{{ state.error }}</div>
+        }
+        <div class="panel-grid-wrap">
+          <ag-grid-angular class="panel-grid ag-theme-quartz"
+            [columnDefs]="dishColumnDefs" [defaultColDef]="defaultColDef"
+            [rowData]="state.rowData" [pagination]="false" [loading]="state.isLoading"
+            [overlayLoadingTemplate]="'Đang tải dữ liệu...'"
+            [overlayNoRowsTemplate]="'Không có món ăn nào'"
+            [suppressCellFocus]="true" [headerHeight]="46" [rowHeight]="46"
+            (gridReady)="onDishGridReady($event)"
+            (gridSizeChanged)="onDishGridSizeChanged($event)"
+            (cellClicked)="onDishCellClicked($event)"
+            (rowDoubleClicked)="onDishRowDoubleClicked($event)"
+          ></ag-grid-angular>
+        </div>
+        <footer class="panel-pagination">
+          <div class="panel-pagination__info type-body-sm">
+            <span>Tổng: {{ state.totalElements }} bản ghi</span>
+            <label for="dish-page-size" class="type-label-md"> – Hiển thị </label>
+            <select id="dish-page-size" class="type-label-md" [ngModel]="state.pageSize" (ngModelChange)="dishSetPageSize($event)">
+              @for (s of pageSizeOptions; track s) { <option [ngValue]="s">{{ s }}</option> }
+            </select>
+            <span> / trang</span>
+          </div>
+          <div class="panel-pagination__nav">
+            <button tuiButton type="button" class="btn btn--ghost btn--icon" [disabled]="!dishCanPrev(state)" (click)="dishPrev()" aria-label="Trang trước">
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <span class="panel-pagination__indicator type-label-md">{{ pageSummary(state) }}</span>
+            <button tuiButton type="button" class="btn btn--ghost btn--icon" [disabled]="!dishCanNext(state)" (click)="dishNext()" aria-label="Trang sau">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
+        </footer>
+      }
+    </div>
+  }
+
 </div>

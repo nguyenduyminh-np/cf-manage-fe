@@ -14,10 +14,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs';
 
 import { PaymentService } from '../../../../core/services/POS/pos-confirm-payment/pos-confirm-payment.service';
-import {
-  PaymentPreviewData,
-  PaymentData,
-} from '../../../../core/models/payment/payment.model';
+import { PaymentPreviewData, PaymentData } from '../../../../core/models/payment/payment.model';
 
 export type PaymentMethod = 'CASH' | 'BANK_TRANSFER';
 
@@ -53,6 +50,11 @@ export class PosConfirmPayment implements OnInit {
   protected readonly error = signal<string | null>(null);
   protected readonly selectedMethod = signal<PaymentMethod>('CASH');
 
+  // Collapsible sections
+  protected readonly expandedOrderInfo = signal(true);
+  protected readonly expandedItemsTable = signal(true);
+  protected readonly expandedPaymentMethod = signal(true);
+
   // Preview data loaded from API
   protected preview: PaymentPreviewData | null = null;
 
@@ -71,6 +73,10 @@ export class PosConfirmPayment implements OnInit {
 
   protected selectMethod(method: PaymentMethod): void {
     this.selectedMethod.set(method);
+  }
+
+  protected toggleSection(sectionSignal: typeof this.expandedOrderInfo): void {
+    sectionSignal.update((v) => !v);
   }
 
   protected confirm(): void {
@@ -94,8 +100,7 @@ export class PosConfirmPayment implements OnInit {
         },
         error: (err) => {
           console.error('[PosConfirmPayment] Payment failed', err);
-          const message =
-            err?.error?.message || 'Thanh toán thất bại. Vui lòng thử lại.';
+          const message = err?.error?.message || 'Thanh toán thất bại. Vui lòng thử lại.';
           this.alert
             .open(message, {
               label: 'Lỗi thanh toán',
@@ -129,19 +134,14 @@ export class PosConfirmPayment implements OnInit {
         next: (response) => {
           this.preview = response.data;
           // Default payment method từ API suggestions
-          if (
-            response.data.suggestedPaymentMethods?.length > 0
-          ) {
-            this.selectedMethod.set(
-              response.data.suggestedPaymentMethods[0] as PaymentMethod,
-            );
+          if (response.data.suggestedPaymentMethods?.length > 0) {
+            this.selectedMethod.set(response.data.suggestedPaymentMethods[0] as PaymentMethod);
           }
         },
         error: (err) => {
           console.error('[PosConfirmPayment] Preview failed', err);
           this.error.set(
-            err?.error?.message ||
-              'Không thể tải thông tin thanh toán. Vui lòng thử lại.',
+            err?.error?.message || 'Không thể tải thông tin thanh toán. Vui lòng thử lại.',
           );
         },
       });

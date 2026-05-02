@@ -1,0 +1,81 @@
+<div class="dcf-dialog">
+  <header class="dcf-dialog__header">
+    <span class="material-symbols-outlined dcf-dialog__icon" aria-hidden="true">category</span>
+    <div>
+      <h2 class="dcf-dialog__title">
+        {{ isEdit ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới' }}
+      </h2>
+      <p class="dcf-dialog__subtitle">
+        {{ isEdit ? 'Cập nhật thông tin danh mục món ăn.' : 'Điền thông tin để tạo danh mục mới.' }}
+      </p>
+    </div>
+  </header>
+
+  <form class="dcf-dialog__form" (ngSubmit)="submit()">
+    <label class="dcf-field">
+      <span class="dcf-field__label">Mã danh mục <span class="dcf-field__optional">(tuỳ chọn)</span></span>
+      <input
+        class="dcf-field__input"
+        id="dcf-code"
+        name="dishCategoryCode"
+        type="text"
+        [(ngModel)]="formData.dishCategoryCode"
+        placeholder="Ví dụ: DC001"
+        autocomplete="off"
+      />
+    </label>
+
+    <label class="dcf-field">
+      <span class="dcf-field__label">Tên danh mục <span class="dcf-field__required">*</span></span>
+      <input
+        class="dcf-field__input"
+        id="dcf-name"
+        name="dishCategoryName"
+        type="text"
+        [(ngModel)]="formData.dishCategoryName"
+        placeholder="Ví dụ: Cà phê, Trà, Freeze..."
+        autocomplete="off"
+        required
+      />
+    </label>
+
+    @if (isEdit) {
+      <div class="dcf-field">
+        <span class="dcf-field__label">Trạng thái</span>
+        <div class="dcf-toggle">
+          <label class="dcf-toggle__label" [class.dcf-toggle__label--active]="formData.active">
+            <input
+              type="checkbox"
+              name="active"
+              [(ngModel)]="formData.active"
+              class="dcf-toggle__checkbox"
+            />
+            <span class="dcf-toggle__track">
+              <span class="dcf-toggle__thumb"></span>
+            </span>
+            <span class="dcf-toggle__text">
+              {{ formData.active ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
+            </span>
+          </label>
+        </div>
+      </div>
+    }
+
+    <div class="dcf-dialog__footer">
+      <button
+        tuiButton
+        type="button"
+        class="btn btn--ghost"
+        (click)="cancel()"
+      >Hủy</button>
+      <button
+        tuiButton
+        type="submit"
+        class="btn btn--primary"
+        [disabled]="!formData.dishCategoryName.trim()"
+      >
+        {{ isEdit ? 'Lưu thay đổi' : 'Tạo mới' }}
+      </button>
+    </div>
+  </form>
+</div>

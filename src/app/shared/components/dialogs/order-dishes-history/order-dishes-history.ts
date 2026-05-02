@@ -194,11 +194,7 @@ export class OrderDishesHistory {
    */
   private openPaymentFlow(): void {
     if (this.selectedRows.length !== 1) {
-      this.showAlert(
-        'Vui lòng chọn đúng 1 đơn hàng để thanh toán.',
-        'Thông báo',
-        'warning',
-      );
+      this.showAlert('Vui lòng chọn đúng 1 đơn hàng để thanh toán.', 'Thông báo', 'warning');
       return;
     }
 
@@ -208,15 +204,12 @@ export class OrderDishesHistory {
 
     // Bước 1: Mở dialog xác nhận thanh toán
     this.dialogService
-      .open<PosConfirmPaymentResult>(
-        new PolymorpheusComponent(PosConfirmPayment, this.injector),
-        {
-          data: { orderId },
-          size: 'auto',
-          dismissible: false,
-          closeable: false // Không cho click ngoài đóng khi đang thanh toán
-        },
-      )
+      .open<PosConfirmPaymentResult>(new PolymorpheusComponent(PosConfirmPayment, this.injector), {
+        data: { orderId },
+        size: 'auto',
+        dismissible: false,
+        closeable: false, // Không cho click ngoài đóng khi đang thanh toán
+      })
       .subscribe((result: PosConfirmPaymentResult) => {
         if (result) {
           // Thanh toán thành công → mở dialog kết quả
@@ -236,14 +229,11 @@ export class OrderDishesHistory {
     };
 
     this.dialogService
-      .open<boolean | null>(
-        new PolymorpheusComponent(PaymentSuccessDialog, this.injector),
-        {
-          data: successInput,
-          size: 'auto',
-          dismissible: true,
-        },
-      )
+      .open<boolean | null>(new PolymorpheusComponent(PaymentSuccessDialog, this.injector), {
+        data: successInput,
+        size: 'auto',
+        dismissible: true,
+      })
       .subscribe(() => {
         // Sau khi đóng dialog success → refresh danh sách & clear selection
         this.gridApi?.deselectAll();
@@ -252,11 +242,7 @@ export class OrderDishesHistory {
         const current = this.querySubject.value;
         this.querySubject.next({ ...current });
 
-        this.showAlert(
-          'Thanh toán thành công!',
-          'Thành công',
-          'positive',
-        );
+        this.showAlert('Thanh toán thành công!', 'Thành công', 'positive');
       });
   }
 

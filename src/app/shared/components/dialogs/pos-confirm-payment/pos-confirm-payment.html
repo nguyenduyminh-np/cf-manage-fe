@@ -2,7 +2,12 @@
   <!-- Header -->
   <header class="pos-confirm-payment__header">
     <h2 class="pos-confirm-payment__title">Xác nhận thanh toán</h2>
-    <button class="pos-confirm-payment__close-btn" (click)="close()" type="button" aria-label="Đóng">
+    <button
+      class="pos-confirm-payment__close-btn"
+      (click)="close()"
+      type="button"
+      aria-label="Đóng"
+    >
       <span class="material-symbols-outlined">close</span>
     </button>
   </header>
@@ -20,7 +25,11 @@
     <div class="pos-confirm-payment__error">
       <span class="material-symbols-outlined">error_outline</span>
       <p>{{ error() }}</p>
-      <button class="pos-confirm-payment__btn pos-confirm-payment__btn--ghost" (click)="close()" type="button">
+      <button
+        class="pos-confirm-payment__btn pos-confirm-payment__btn--ghost"
+        (click)="close()"
+        type="button"
+      >
         Đóng
       </button>
     </div>
@@ -29,15 +38,21 @@
   <!-- Main Content (preview loaded) -->
   <ng-container *ngIf="!loading() && !error() && preview">
     <div class="pos-confirm-payment__content">
-
       <!-- Order Summary Card -->
-      <section class="pos-confirm-payment__card">
-        <div class="pos-confirm-payment__card-header">
-          <h3 class="pos-confirm-payment__card-title">
-            <span class="material-symbols-outlined">receipt_long</span>
-            Thông tin đơn hàng
-          </h3>
-          <span class="pos-confirm-payment__order-id">#{{ preview.orderId }}</span>
+      <section class="pos-confirm-payment__card" [class.--collapsed]="!expandedOrderInfo()">
+        <div class="pos-confirm-payment__card-header" (click)="toggleSection(expandedOrderInfo)">
+          <div class="pos-confirm-payment__card-header-left">
+            <h3 class="pos-confirm-payment__card-title">
+              <span class="material-symbols-outlined">receipt_long</span>
+              Thông tin đơn hàng
+            </h3>
+            <span class="pos-confirm-payment__order-id">#{{ preview.orderId }}</span>
+          </div>
+          <span
+            class="material-symbols-outlined pos-confirm-payment__card-chevron"
+            [class.--rotated]="expandedOrderInfo()"
+            >expand_more</span
+          >
         </div>
 
         <!-- Order fields — mỗi field một dòng riêng -->
@@ -88,26 +103,35 @@
                 <span class="material-symbols-outlined">group</span>
                 Khách hàng
               </span>
-              <span class="pos-confirm-payment__field-value">{{ preview.customer.customerName }}</span>
+              <span class="pos-confirm-payment__field-value">{{
+                preview.customer.customerName
+              }}</span>
             </div>
             <div class="pos-confirm-payment__field" *ngIf="preview.customer.phoneNumber">
               <span class="pos-confirm-payment__field-label">
                 <span class="material-symbols-outlined">phone</span>
                 Số điện thoại
               </span>
-              <span class="pos-confirm-payment__field-value">{{ preview.customer.phoneNumber }}</span>
+              <span class="pos-confirm-payment__field-value">{{
+                preview.customer.phoneNumber
+              }}</span>
             </div>
           </ng-container>
         </div>
       </section>
 
       <!-- Items Table Card -->
-      <section class="pos-confirm-payment__card">
-        <div class="pos-confirm-payment__card-header">
+      <section class="pos-confirm-payment__card" [class.--collapsed]="!expandedItemsTable()">
+        <div class="pos-confirm-payment__card-header" (click)="toggleSection(expandedItemsTable)">
           <h3 class="pos-confirm-payment__card-title">
             <span class="material-symbols-outlined">restaurant_menu</span>
             Chi tiết món ăn
           </h3>
+          <span
+            class="material-symbols-outlined pos-confirm-payment__card-chevron"
+            [class.--rotated]="expandedItemsTable()"
+            >expand_more</span
+          >
         </div>
 
         <div class="pos-confirm-payment__table-container">
@@ -134,17 +158,27 @@
         <!-- Total -->
         <div class="pos-confirm-payment__total">
           <span class="pos-confirm-payment__total-label">Tổng cộng</span>
-          <span class="pos-confirm-payment__total-value">{{ preview.totalAmount | number: '1.0-0' }}đ</span>
+          <span class="pos-confirm-payment__total-value"
+            >{{ preview.totalAmount | number: '1.0-0' }}đ</span
+          >
         </div>
       </section>
 
       <!-- Payment Method Card -->
-      <section class="pos-confirm-payment__card">
-        <div class="pos-confirm-payment__card-header">
+      <section class="pos-confirm-payment__card" [class.--collapsed]="!expandedPaymentMethod()">
+        <div
+          class="pos-confirm-payment__card-header"
+          (click)="toggleSection(expandedPaymentMethod)"
+        >
           <h3 class="pos-confirm-payment__card-title">
             <span class="material-symbols-outlined">payments</span>
             Phương thức thanh toán
           </h3>
+          <span
+            class="material-symbols-outlined pos-confirm-payment__card-chevron"
+            [class.--rotated]="expandedPaymentMethod()"
+            >expand_more</span
+          >
         </div>
 
         <div class="pos-confirm-payment__method-grid">
@@ -155,29 +189,46 @@
             [disabled]="submitting()"
             type="button"
           >
-            <div class="pos-confirm-payment__method-indicator" *ngIf="selectedMethod() === 'CASH'"></div>
+            <div
+              class="pos-confirm-payment__method-indicator"
+              *ngIf="selectedMethod() === 'CASH'"
+            ></div>
             <span class="material-symbols-outlined pos-confirm-payment__method-icon">payments</span>
             <span class="pos-confirm-payment__method-name">Tiền mặt</span>
           </button>
 
           <button
             class="pos-confirm-payment__method-card"
-            [class.pos-confirm-payment__method-card--selected]="selectedMethod() === 'BANK_TRANSFER'"
+            [class.pos-confirm-payment__method-card--selected]="
+              selectedMethod() === 'BANK_TRANSFER'
+            "
             (click)="selectMethod('BANK_TRANSFER')"
             [disabled]="submitting()"
             type="button"
           >
-            <div class="pos-confirm-payment__method-indicator" *ngIf="selectedMethod() === 'BANK_TRANSFER'"></div>
-            <span class="material-symbols-outlined pos-confirm-payment__method-icon">account_balance</span>
+            <div
+              class="pos-confirm-payment__method-indicator"
+              *ngIf="selectedMethod() === 'BANK_TRANSFER'"
+            ></div>
+            <span class="material-symbols-outlined pos-confirm-payment__method-icon"
+              >account_balance</span
+            >
             <span class="pos-confirm-payment__method-name">Chuyển khoản</span>
           </button>
         </div>
 
         <!-- QR info — bên dưới method grid, không làm resize dialog -->
-        <div class="pos-confirm-payment__qr-panel" [class.pos-confirm-payment__qr-panel--visible]="selectedMethod() === 'BANK_TRANSFER'">
+        <div
+          class="pos-confirm-payment__qr-panel"
+          [class.pos-confirm-payment__qr-panel--visible]="selectedMethod() === 'BANK_TRANSFER'"
+        >
           <div class="pos-confirm-payment__qr-inner">
             <div class="pos-confirm-payment__qr-wrapper">
-              <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=ArtisanRoast" alt="QR Code thanh toán" class="pos-confirm-payment__qr-img" />
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=ArtisanRoast"
+                alt="QR Code thanh toán"
+                class="pos-confirm-payment__qr-img"
+              />
             </div>
             <div class="pos-confirm-payment__qr-info">
               <p class="pos-confirm-payment__qr-label">Thông tin chuyển khoản</p>
@@ -187,7 +238,10 @@
               </div>
               <div class="pos-confirm-payment__qr-field">
                 <span class="pos-confirm-payment__qr-field-label">Số tài khoản</span>
-                <span class="pos-confirm-payment__qr-field-value pos-confirm-payment__qr-field-value--accent">123456789</span>
+                <span
+                  class="pos-confirm-payment__qr-field-value pos-confirm-payment__qr-field-value--accent"
+                  >123456789</span
+                >
               </div>
               <div class="pos-confirm-payment__qr-field">
                 <span class="pos-confirm-payment__qr-field-label">Chủ tài khoản</span>
@@ -195,7 +249,10 @@
               </div>
               <div class="pos-confirm-payment__qr-field">
                 <span class="pos-confirm-payment__qr-field-label">Số tiền</span>
-                <span class="pos-confirm-payment__qr-field-value pos-confirm-payment__qr-field-value--accent">{{ preview.totalAmount | number: '1.0-0' }}đ</span>
+                <span
+                  class="pos-confirm-payment__qr-field-value pos-confirm-payment__qr-field-value--accent"
+                  >{{ preview.totalAmount | number: '1.0-0' }}đ</span
+                >
               </div>
               <p class="pos-confirm-payment__qr-note">
                 * Vui lòng nhập đúng số tiền và nội dung chuyển khoản
@@ -222,7 +279,10 @@
         [disabled]="submitting()"
         type="button"
       >
-        <div class="pos-confirm-payment__spinner pos-confirm-payment__spinner--inline" *ngIf="submitting()"></div>
+        <div
+          class="pos-confirm-payment__spinner pos-confirm-payment__spinner--inline"
+          *ngIf="submitting()"
+        ></div>
         {{ submitting() ? 'Đang xử lý...' : 'Xác nhận thanh toán' }}
       </button>
     </footer>

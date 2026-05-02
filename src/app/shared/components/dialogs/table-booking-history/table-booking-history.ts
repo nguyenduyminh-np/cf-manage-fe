@@ -266,6 +266,7 @@ export class TableBookingHistory {
       cellClass: 'cell-center cell-bold',
       sortable: true,
       filter: true,
+      pinned: 'left',
     },
     {
       headerName: 'Mã booking',
