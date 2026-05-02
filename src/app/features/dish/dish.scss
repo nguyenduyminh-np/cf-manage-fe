@@ -1,0 +1,433 @@
+@use '../../../assets/styles/color-kit' as *;
+
+// ── Design tokens ─────────────────────────────────────────────────────────────
+$c-primary:         #361f1a;
+$c-primary-dark:    #1e0a07;
+$c-on-primary:      #ffffff;
+$c-surface:         #fbf9f5;
+$c-surface-low:     #f5f3ef;
+$c-surface-mid:     #efeeea;
+$c-surface-high:    #eae8e4;
+$c-on-surface:      #1b1c1a;
+$c-on-surface-var:  #504442;
+$c-outline:         #827471;
+$c-outline-var:     #d4c3bf;
+$c-error:           #ba1a1a;
+$c-error-container: #ffdad6;
+
+$font-headline: 'Manrope', sans-serif;
+$font-body:     'Work Sans', sans-serif;
+
+// Category chip colors
+$cat-freeze:   (#e8f4fc, #1a5f8a);
+$cat-tra:      (#e8f5e9, #1b6d24);
+$cat-ca-phe:   (rgba(#361f1a, 0.1), #361f1a);
+$cat-phindi:   (#f3e5f5, #6a1b9a);
+$cat-khac:     (#efeeea, #504442);
+
+:host { display: block; }
+
+// ── Page shell ────────────────────────────────────────────────────────────────
+.dish-page {
+  display:        flex;
+  flex-direction: column;
+  gap:            1.5rem;
+  font-family:    $font-body;
+  color:          $c-on-surface;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+.dish-page__header {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     flex-start;
+  gap:             1rem;
+
+  @media (max-width: 680px) {
+    flex-direction: column;
+    align-items:    flex-start;
+  }
+}
+
+.dish-page__title {
+  margin:      0;
+  font-family: $font-headline;
+  font-size:   1.5rem;
+  font-weight: 800;
+  color:       $c-on-surface;
+  line-height: 1.1;
+}
+
+.dish-page__subtitle {
+  margin:    0.35rem 0 0;
+  font-size: 0.875rem;
+  color:     $c-on-surface-var;
+}
+
+// ── Buttons ───────────────────────────────────────────────────────────────────
+.dish-btn {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           0.4rem;
+  padding:       0.6rem 1.1rem;
+  border:        none;
+  border-radius: 0.5rem;
+  font-family:   $font-body;
+  font-size:     0.85rem;
+  font-weight:   700;
+  cursor:        pointer;
+  transition:    background 0.15s, transform 0.12s;
+  white-space:   nowrap;
+
+  &:active { transform: scale(0.97); }
+
+  .material-symbols-outlined { font-size: 1.1rem; }
+
+  &--primary {
+    background: $c-primary;
+    color:      $c-on-primary;
+    box-shadow: 0 4px 12px rgba($c-primary, 0.22);
+    &:hover { background: $c-primary-dark; }
+  }
+
+  &--search {
+    background: $c-surface-high;
+    color:      $c-on-surface;
+    border:     1px solid rgba($c-outline-var, 0.5);
+    align-self: flex-end;
+    &:hover { background: $c-surface-mid; }
+  }
+}
+
+// ── Filter bar ────────────────────────────────────────────────────────────────
+.dish-filters {
+  display:       flex;
+  align-items:   flex-end;
+  gap:           1rem;
+  flex-wrap:     wrap;
+  background:    #ffffff;
+  border:        1px solid rgba($c-outline-var, 0.35);
+  border-radius: 0.75rem;
+  padding:       1rem 1.25rem;
+  box-shadow:    0 4px 16px -12px rgba($c-primary, 0.2);
+}
+
+.dish-filters__field {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.35rem;
+  flex:           1;
+  min-width:      200px;
+}
+
+.dish-filters__label {
+  font-size:      0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight:    700;
+  color:          $c-on-surface-var;
+}
+
+.dish-filters__search-wrap {
+  position: relative;
+}
+
+.dish-filters__search-icon {
+  position:   absolute;
+  left:       0.65rem;
+  top:        50%;
+  transform:  translateY(-50%);
+  font-size:  1.1rem;
+  color:      $c-outline;
+  pointer-events: none;
+}
+
+.dish-filters__input {
+  width:         100%;
+  padding:       0.55rem 0.75rem 0.55rem 2.2rem;
+  border:        1px solid rgba($c-outline-var, 0.55);
+  border-radius: 0.5rem;
+  font-family:   $font-body;
+  font-size:     0.875rem;
+  background:    $c-surface-low;
+  color:         $c-on-surface;
+  transition:    border-color 0.15s, box-shadow 0.15s;
+
+  &:focus {
+    outline:      none;
+    border-color: rgba($c-primary, 0.5);
+    box-shadow:   0 0 0 2px rgba($c-primary, 0.08);
+    background:   #ffffff;
+  }
+}
+
+.dish-filters__select {
+  width:         100%;
+  padding:       0.55rem 0.75rem;
+  border:        1px solid rgba($c-outline-var, 0.55);
+  border-radius: 0.5rem;
+  font-family:   $font-body;
+  font-size:     0.875rem;
+  background:    $c-surface-low;
+  color:         $c-on-surface;
+  cursor:        pointer;
+  appearance:    none;
+  transition:    border-color 0.15s;
+
+  &:focus {
+    outline:      none;
+    border-color: rgba($c-primary, 0.5);
+    box-shadow:   0 0 0 2px rgba($c-primary, 0.08);
+  }
+}
+
+// ── Table wrapper ─────────────────────────────────────────────────────────────
+.dish-table-wrap {
+  background:    #ffffff;
+  border-radius: 0.875rem;
+  border:        1px solid rgba($c-outline-var, 0.35);
+  box-shadow:    0 8px 28px -20px rgba($c-primary, 0.3);
+  overflow:      hidden;
+}
+
+.dish-table-scroll { overflow-x: auto; }
+
+// ── Table ─────────────────────────────────────────────────────────────────────
+.dish-table {
+  width:           100%;
+  border-collapse: collapse;
+  min-width:       720px;
+  font-size:       0.875rem;
+
+  .text-center { text-align: center; }
+
+  td {
+    padding:       0.75rem 1rem;
+    border-bottom: 1px solid rgba($c-outline-var, 0.22);
+    color:         $c-on-surface;
+  }
+}
+
+.dish-table__heading-row th {
+  padding:        0.85rem 1rem;
+  background:     $c-surface-mid;
+  border-bottom:  1px solid rgba($c-outline-var, 0.4);
+  font-size:      0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight:    700;
+  color:          $c-on-surface-var;
+  text-align:     left;
+  white-space:    nowrap;
+}
+
+.dish-table__row {
+  transition: background 0.14s;
+  &:hover { background: rgba($c-surface-low, 0.7); }
+  &:last-child td { border-bottom: none; }
+
+  // Reveal action buttons on row hover
+  &:not(:hover) .dish-action-group {
+    opacity: 0;
+  }
+}
+
+// Cells
+.dish-table__index {
+  text-align:  center;
+  color:       $c-on-surface-var;
+  font-weight: 600;
+  font-size:   0.82rem;
+}
+
+.dish-table__photo-cell {
+  width: 4rem;
+}
+
+.dish-table__photo {
+  width:         3rem;
+  height:        3rem;
+  border-radius: 0.5rem;
+  object-fit:    cover;
+  border:        1px solid rgba($c-outline-var, 0.3);
+  display:       block;
+}
+
+.dish-table__photo-placeholder {
+  width:           3rem;
+  height:          3rem;
+  border-radius:   0.5rem;
+  background:      $c-surface-high;
+  border:          1px solid rgba($c-outline-var, 0.3);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  color:           $c-on-surface-var;
+
+  .material-symbols-outlined { font-size: 1.4rem; }
+}
+
+.dish-table__name {
+  font-weight: 600;
+  color:       $c-on-surface;
+}
+
+.dish-table__price {
+  font-family:    $font-headline;
+  font-weight:    700;
+  color:          $c-primary;
+}
+
+.dish-table__date {
+  font-size: 0.82rem;
+  color:     $c-on-surface-var;
+}
+
+.dish-table__actions {
+  text-align: center;
+}
+
+.dish-table__empty {
+  text-align:  center;
+  padding:     3rem 1rem;
+  color:       $c-on-surface-var;
+
+  .material-symbols-outlined {
+    font-size: 2.5rem;
+    display:   block;
+    margin:    0 auto 0.5rem;
+  }
+
+  p { margin: 0; font-size: 0.875rem; }
+}
+
+// ── Category chips ────────────────────────────────────────────────────────────
+.dish-category-tag {
+  display:       inline-flex;
+  align-items:   center;
+  padding:       0.18rem 0.6rem;
+  border-radius: 999px;
+  font-size:     0.72rem;
+  font-weight:   700;
+  letter-spacing: 0.02em;
+}
+
+.dish-category-tag--freeze {
+  background: #e8f4fc;
+  color:      #1a5f8a;
+}
+
+.dish-category-tag--tra {
+  background: #e8f5e9;
+  color:      #1b6d24;
+}
+
+.dish-category-tag--ca-phe {
+  background: rgba($c-primary, 0.1);
+  color:      $c-primary;
+}
+
+.dish-category-tag--phindi {
+  background: #f3e5f5;
+  color:      #6a1b9a;
+}
+
+.dish-category-tag--khac {
+  background: $c-surface-high;
+  color:      $c-on-surface-var;
+}
+
+// ── Action buttons ────────────────────────────────────────────────────────────
+.dish-action-group {
+  display:         inline-flex;
+  align-items:     center;
+  justify-content: center;
+  gap:             0.25rem;
+  transition:      opacity 0.15s;
+}
+
+.dish-action-btn {
+  display:       inline-flex;
+  align-items:   center;
+  padding:       0.3rem;
+  border:        none;
+  border-radius: 0.4rem;
+  cursor:        pointer;
+  transition:    background 0.14s, color 0.14s;
+  background:    transparent;
+
+  .material-symbols-outlined { font-size: 1.1rem; }
+
+  &--edit {
+    color: $c-on-surface-var;
+    &:hover { background: $c-surface-high; color: $c-primary; }
+  }
+
+  &--delete {
+    color: $c-error;
+    &:hover { background: $c-error-container; }
+  }
+}
+
+// ── Pagination ────────────────────────────────────────────────────────────────
+.dish-pagination {
+  display:          flex;
+  justify-content:  space-between;
+  align-items:      center;
+  gap:              1rem;
+  padding:          0.8rem 1rem;
+  background:       $c-surface-low;
+  border-top:       1px solid rgba($c-outline-var, 0.3);
+
+  @media (max-width: 580px) {
+    flex-direction: column;
+    align-items:    flex-start;
+  }
+}
+
+.dish-pagination__info {
+  margin:    0;
+  font-size: 0.8rem;
+  color:     $c-on-surface-var;
+
+  strong { color: $c-on-surface; font-weight: 700; }
+}
+
+.dish-pagination__actions {
+  display:     inline-flex;
+  align-items: center;
+  gap:         0.2rem;
+}
+
+.dish-pagination__arrow,
+.dish-pagination__page {
+  width:         1.9rem;
+  height:        1.9rem;
+  border:        1px solid rgba($c-outline-var, 0.6);
+  border-radius: 0.4rem;
+  background:    #ffffff;
+  color:         $c-on-surface-var;
+  font-size:     0.8rem;
+  font-weight:   700;
+  display:       inline-grid;
+  place-items:   center;
+  cursor:        pointer;
+  transition:    background 0.14s;
+
+  &:hover { background: $c-surface-high; }
+}
+
+.dish-pagination__arrow .material-symbols-outlined { font-size: 1rem; }
+
+.dish-pagination__page--active {
+  background:   $c-primary;
+  border-color: $c-primary;
+  color:        $c-on-primary;
+  &:hover { background: $c-primary-dark; }
+}
+
+.dish-pagination__dots {
+  padding:   0 0.3rem;
+  font-size: 0.8rem;
+  color:     $c-on-surface-var;
+}

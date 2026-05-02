@@ -1,1 +1,145 @@
-<p>dish works!</p>
+<div class="dish-page">
+  <!-- Page Header -->
+  <header class="dish-page__header">
+    <div>
+      <h1 class="dish-page__title">Quản lý nhóm món</h1>
+      <p class="dish-page__subtitle">Quản lý và sắp xếp các món trong thực đơn của quán.</p>
+    </div>
+    <button type="button" class="dish-btn dish-btn--primary">
+      <span class="material-symbols-outlined">add</span>
+      Thêm món mới
+    </button>
+  </header>
+
+  <!-- Filters & Search Bar -->
+  <div class="dish-filters">
+    <div class="dish-filters__field">
+      <label class="dish-filters__label" for="dish-search">Tìm kiếm</label>
+      <div class="dish-filters__search-wrap">
+        <span class="material-symbols-outlined dish-filters__search-icon">search</span>
+        <input
+          id="dish-search"
+          type="text"
+          class="dish-filters__input"
+          placeholder="Tìm kiếm tên món..."
+          [(ngModel)]="searchText"
+        />
+      </div>
+    </div>
+
+    <div class="dish-filters__field">
+      <label class="dish-filters__label" for="dish-category">Loại món</label>
+      <select
+        id="dish-category"
+        class="dish-filters__select"
+        [(ngModel)]="selectedCategory"
+      >
+        <option *ngFor="let cat of categories" [value]="cat.value">{{ cat.label }}</option>
+      </select>
+    </div>
+
+    <button type="button" class="dish-btn dish-btn--search">
+      Tìm kiếm
+    </button>
+  </div>
+
+  <!-- Data Table -->
+  <section class="dish-table-wrap" aria-label="Danh sách món ăn">
+    <div class="dish-table-scroll">
+      <table class="dish-table">
+        <thead>
+          <tr class="dish-table__heading-row">
+            <th class="text-center">STT</th>
+            <th>Ảnh</th>
+            <th>Tên món</th>
+            <th>Nhóm món</th>
+            <th>Giá</th>
+            <th>Ngày tạo</th>
+            <th class="text-center">Thao tác</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (dish of filteredDishes; track dish.no) {
+            <tr class="dish-table__row">
+              <td class="dish-table__index">{{ dish.no }}</td>
+
+              <td class="dish-table__photo-cell">
+                @if (dish.photo) {
+                  <img [src]="dish.photo" [alt]="dish.name" class="dish-table__photo" />
+                } @else {
+                  <div class="dish-table__photo-placeholder">
+                    <span class="material-symbols-outlined">restaurant</span>
+                  </div>
+                }
+              </td>
+
+              <td class="dish-table__name">{{ dish.name }}</td>
+
+              <td>
+                <span class="dish-category-tag" [class]="categoryClass(dish.category)">
+                  {{ dish.categoryLabel }}
+                </span>
+              </td>
+
+              <td class="dish-table__price">
+                {{ dish.price | number: '1.0-0' }}&nbsp;đ
+              </td>
+
+              <td class="dish-table__date">{{ dish.createdAt }}</td>
+
+              <td class="dish-table__actions">
+                <div class="dish-action-group">
+                  <button type="button" class="dish-action-btn dish-action-btn--edit" title="Chỉnh sửa">
+                    <span class="material-symbols-outlined">edit</span>
+                  </button>
+                  <button type="button" class="dish-action-btn dish-action-btn--delete" title="Xóa">
+                    <span class="material-symbols-outlined">delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+
+          @if (filteredDishes.length === 0) {
+            <tr>
+              <td colspan="7" class="dish-table__empty">
+                <span class="material-symbols-outlined">search_off</span>
+                <p>Không tìm thấy món nào phù hợp</p>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <footer class="dish-pagination">
+      <p class="dish-pagination__info">
+        Hiển thị <strong>1</strong> đến <strong>10</strong> trong <strong>45</strong> kết quả
+      </p>
+
+      <nav class="dish-pagination__actions" aria-label="Phân trang">
+        <button type="button" class="dish-pagination__arrow" aria-label="Trang trước">
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+
+        @for (item of paginationItems; track item.label) {
+          @if (item.type === 'page') {
+            <button
+              type="button"
+              class="dish-pagination__page"
+              [class.dish-pagination__page--active]="item.active"
+            >{{ item.label }}</button>
+          } @else {
+            <span class="dish-pagination__dots">{{ item.label }}</span>
+          }
+        }
+
+        <button type="button" class="dish-pagination__arrow" aria-label="Trang sau">
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </nav>
+    </footer>
+  </section>
+</div>

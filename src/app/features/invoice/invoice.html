@@ -1,117 +1,174 @@
-<div class="invoice-page">
+<main class="invoice-page">
+  <!-- Header -->
   <header class="invoice-page__header">
     <div>
-      <h1>Hóa đơn bán hàng</h1>
-      <p>Quản lý và theo dõi các giao dịch thanh toán của quán.</p>
+      <h1 class="invoice-page__title">Quản lý hóa đơn</h1>
+      <p class="invoice-page__subtitle">Quản lý và theo dõi các giao dịch thanh toán của quán.</p>
     </div>
-
     <div class="invoice-page__actions">
-      <button type="button" class="invoice-btn invoice-btn--ghost">
+      <button tuiButton type="button" class="btn btn--ghost">
         <span class="material-symbols-outlined">download</span>
-        <span>Xuất file</span>
+        Xuất file
       </button>
-      <button type="button" class="invoice-btn invoice-btn--primary">
+      <button tuiButton type="button" class="btn btn--primary" (click)="createInvoice()">
         <span class="material-symbols-outlined">add</span>
-        <span>Tạo mới</span>
+        Tạo mới
       </button>
     </div>
   </header>
 
-  <section class="invoice-table-wrap" aria-label="Danh sách hóa đơn">
-    <div class="invoice-table-scroll">
-      <table class="invoice-table" aria-label="Bảng hóa đơn">
-        <thead>
-          <tr class="invoice-table__heading-row">
-            <th>STT</th>
-            <th>Mã hóa đơn</th>
-            <th>Tổng tiền</th>
-            <th>Trạng thái</th>
-            <th>Phương thức</th>
-            <th>Người tạo</th>
-            <th>Ngày tạo</th>
-            <th>Thao tác</th>
-          </tr>
+  <!-- Dynamic Search Bar -->
+  <section class="invoice-search" aria-label="Bộ lọc hóa đơn">
+    <form (ngSubmit)="applySearch()">
+      <div class="invoice-search__grid">
+        <label class="invoice-search__field">
+          <span>Mã hóa đơn</span>
+          <input
+            name="invoiceCode"
+            type="text"
+            [(ngModel)]="searchFilters.invoiceCode"
+            (ngModelChange)="onFiltersChanged()"
+            placeholder="Tìm mã..."
+            autocomplete="off"
+          />
+        </label>
 
-          <tr class="invoice-table__filters-row">
-            <th><input type="text" placeholder="..." /></th>
-            <th><input type="text" placeholder="Tìm mã..." /></th>
-            <th><input type="text" placeholder="Lọc tiền..." /></th>
-            <th>
-              <select>
-                <option>Tất cả</option>
-                <option>Đã thanh toán</option>
-                <option>Chờ thanh toán</option>
-              </select>
-            </th>
-            <th><input type="text" placeholder="PTTT..." /></th>
-            <th><input type="text" placeholder="Lọc tên..." /></th>
-            <th><input type="text" placeholder="Chọn ngày..." /></th>
-            <th></th>
-          </tr>
-        </thead>
+        <label class="invoice-search__field">
+          <span>Trạng thái</span>
+          <select
+            name="paymentStatus"
+            [(ngModel)]="searchFilters.paymentStatus"
+            (ngModelChange)="onFiltersChanged()"
+          >
+            @for (opt of paymentStatusOptions; track opt.value) {
+              <option [ngValue]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+        </label>
 
-        <tbody>
-          @for (invoice of invoices; track invoice.code) {
-            <tr>
-              <td class="invoice-table__index">{{ invoice.no }}</td>
-              <td class="invoice-table__code">{{ invoice.code }}</td>
-              <td class="invoice-table__amount">{{ invoice.totalAmount }}</td>
+        <label class="invoice-search__field">
+          <span>Phương thức</span>
+          <select
+            name="paymentMethod"
+            [(ngModel)]="searchFilters.paymentMethod"
+            (ngModelChange)="onFiltersChanged()"
+          >
+            @for (opt of paymentMethodOptions; track opt.value) {
+              <option [ngValue]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+        </label>
 
-              <td>
-                <span class="invoice-status" [class]="statusClass(invoice.status)">
-                  {{ statusLabel(invoice.status) }}
-                </span>
-              </td>
+        <label class="invoice-search__field">
+          <span>Tổng tiền từ</span>
+          <input
+            name="totalAmountFrom"
+            type="number"
+            [(ngModel)]="searchFilters.totalAmountFrom"
+            (ngModelChange)="onFiltersChanged()"
+            placeholder="Từ"
+            min="0"
+          />
+        </label>
 
-              <td>
-                <span class="invoice-payment-method">
-                  <span class="material-symbols-outlined">{{
-                    paymentIcon(invoice.paymentMethod)
-                  }}</span>
-                  <span>{{ paymentLabel(invoice.paymentMethod) }}</span>
-                </span>
-              </td>
+        <label class="invoice-search__field">
+          <span>đến</span>
+          <input
+            name="totalAmountTo"
+            type="number"
+            [(ngModel)]="searchFilters.totalAmountTo"
+            (ngModelChange)="onFiltersChanged()"
+            placeholder="Đến"
+            min="0"
+          />
+        </label>
+      </div>
 
-              <td>{{ invoice.createdBy }}</td>
-              <td class="invoice-table__time">{{ invoice.createdAt }}</td>
+      <div class="invoice-search__actions">
+        <button tuiButton type="submit" class="btn btn--primary btn--small">
+          <span class="material-symbols-outlined">search</span>
+          Tìm kiếm
+        </button>
+        <button tuiButton type="button" class="btn btn--ghost btn--small" (click)="resetSearch()">
+          <span class="material-symbols-outlined">refresh</span>
+          Làm mới
+        </button>
+      </div>
+    </form>
+  </section>
 
-              <td>
-                <button type="button" class="invoice-view-btn" aria-label="Xem chi tiết hóa đơn">
-                  <span class="material-symbols-outlined">visibility</span>
-                </button>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+  <!-- Data state (kết hợp async pipe) -->
+  @if (detailState$ | async; as state) {
+    <!-- Loading -->
+    @if (state.isLoading) {
+      <div class="invoice-loading" aria-live="polite">Đang tải danh sách hóa đơn...</div>
+    }
+
+    <!-- Error -->
+    @if (state.error) {
+      <div class="invoice-error" role="alert">{{ state.error }}</div>
+    }
+
+    <!-- AG Grid -->
+    <div class="invoice-grid-wrap">
+      <ag-grid-angular
+        class="invoice-grid ag-theme-quartz"
+        [columnDefs]="columnDefs"
+        [defaultColDef]="defaultColDef"
+        [rowData]="state.rowData"
+        [pagination]="false"
+        [loading]="state.isLoading"
+        [overlayLoadingTemplate]="'Đang tải dữ liệu...'"
+        [overlayNoRowsTemplate]="'Không có hóa đơn nào'"
+        [suppressCellFocus]="true"
+        [headerHeight]="46"
+        [rowHeight]="46"
+        (gridReady)="onGridReady($event)"
+        (cellClicked)="onCellClicked($event)"
+        (rowDoubleClicked)="onRowDoubleClicked($event)"
+      ></ag-grid-angular>
     </div>
 
+    <!-- Pagination Footer -->
     <footer class="invoice-pagination">
-      <p>Đang xem 1 đến 10 trong tổng số 71 mục</p>
+      <div class="invoice-pagination__info">
+        <p>Tổng số bản ghi: {{ state.totalElements }}</p>
+        <label for="invoice-page-size">Hiển thị</label>
+        <select
+          id="invoice-page-size"
+          [ngModel]="state.pageSize"
+          (ngModelChange)="setPageSize($event)"
+        >
+          @for (size of pageSizeOptions; track size) {
+            <option [ngValue]="size">{{ size }}</option>
+          }
+        </select>
+        <span>bản ghi</span>
+      </div>
 
-      <div class="invoice-pagination__actions">
-        <button type="button" class="invoice-pagination__arrow" aria-label="Trang trước">
+      <div class="invoice-pagination__nav">
+        <button
+          tuiButton
+          type="button"
+          class="btn--ghost btn--icon"
+          [disabled]="!canGoPrevious(state)"
+          (click)="previousPage()"
+          aria-label="Trang trước"
+        >
           <span class="material-symbols-outlined">chevron_left</span>
         </button>
-
-        @for (item of paginationItems; track item.label) {
-          @if (item.type === 'page') {
-            <button
-              type="button"
-              class="invoice-pagination__page"
-              [class.invoice-pagination__page--active]="item.active"
-            >
-              {{ item.label }}
-            </button>
-          } @else {
-            <span class="invoice-pagination__dots">{{ item.label }}</span>
-          }
-        }
-
-        <button type="button" class="invoice-pagination__arrow" aria-label="Trang sau">
+        <span class="invoice-pagination__indicator">{{ pageSummary(state) }}</span>
+        <button
+          tuiButton
+          type="button"
+          class="btn--ghost btn--icon"
+          [disabled]="!canGoNext(state)"
+          (click)="nextPage()"
+          aria-label="Trang sau"
+        >
           <span class="material-symbols-outlined">chevron_right</span>
         </button>
       </div>
     </footer>
-  </section>
-</div>
+  }
+</main>

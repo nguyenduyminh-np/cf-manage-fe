@@ -6,9 +6,4 @@ import {
 } from 'ag-grid-community';
 import { AllCommunityModule } from 'ag-grid-community';
 
-ModuleRegistry.registerModules([
-  AllCommunityModule,
-  TextFilterModule,
-  NumberFilterModule,
-  DateFilterModule,
-]);
+ModuleRegistry.registerModules([AllCommunityModule]);

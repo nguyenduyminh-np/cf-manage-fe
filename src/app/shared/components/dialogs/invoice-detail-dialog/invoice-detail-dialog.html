@@ -1,0 +1,112 @@
+<div class="invoice-detail" *ngIf="data">
+  <!-- Decorative header element -->
+  <div class="invoice-detail__deco"></div>
+
+  <div class="invoice-detail__inner">
+    <!-- Header Section -->
+    <header class="invoice-detail__header">
+      <div class="invoice-detail__header-left">
+        <h1 class="invoice-detail__title">{{ data.invoiceData.invoiceCode }}</h1>
+        <p class="invoice-detail__subtitle">
+          Created: {{ data.invoiceData.createdAt | date: 'dd/MM/yyyy HH:mm:ss' }}
+        </p>
+      </div>
+      <div class="invoice-detail__header-right">
+        <div
+          class="invoice-detail__status-badge"
+          [class.invoice-detail__status-badge--paid]="data.invoiceData.paymentStatus === 'PAID'"
+        >
+          <span class="invoice-detail__status-dot"></span>
+          {{ statusLabel(data.invoiceData.paymentStatus) }}
+        </div>
+        <p class="invoice-detail__method">
+          Method: {{ paymentMethodLabel(data.invoiceData.paymentMethod) }}
+        </p>
+      </div>
+    </header>
+
+    <!-- Metadata Grid -->
+    <div class="invoice-detail__meta-grid">
+      <div class="invoice-detail__meta-item">
+        <p class="invoice-detail__meta-label">Dining Table</p>
+        <p class="invoice-detail__meta-value">
+          <span class="material-symbols-outlined">table_restaurant</span>
+          {{ data.invoiceData.diningTable.tableName }}
+          @if (data.invoiceData.diningTable.floor) {
+            (Tầng {{ data.invoiceData.diningTable.floor }}, {{ data.invoiceData.diningTable.tableCode }})
+          }
+        </p>
+      </div>
+
+      @if (data.invoiceData.customer.customerName) {
+        <div class="invoice-detail__meta-item">
+          <p class="invoice-detail__meta-label">Customer</p>
+          <p class="invoice-detail__meta-value">
+            <span class="material-symbols-outlined">person</span>
+            {{ data.invoiceData.customer.customerName }}
+            @if (data.invoiceData.customer.phoneNumber) {
+              ({{ data.invoiceData.customer.phoneNumber }})
+            }
+          </p>
+        </div>
+      }
+
+      <div class="invoice-detail__meta-item">
+        <p class="invoice-detail__meta-label">Created By</p>
+        <p class="invoice-detail__meta-value">
+          <span class="material-symbols-outlined">badge</span>
+          {{ data.invoiceData.createdBy.fullName }}
+          @if (data.invoiceData.createdBy.username) {
+            ({{ data.invoiceData.createdBy.username }})
+          }
+        </p>
+      </div>
+    </div>
+
+    <!-- Items Section -->
+    <div class="invoice-detail__items-section">
+      <h3 class="invoice-detail__items-title">Chi tiết món ăn</h3>
+      <div class="invoice-detail__table-wrapper">
+        <table class="invoice-detail__table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th class="text-center w-20">Qty</th>
+              <th class="text-right w-32">Price</th>
+              <th class="text-right w-32">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of data.invoiceData.items; track item.dishId) {
+              <tr>
+                <td class="font-medium">{{ item.dishName }}</td>
+                <td class="text-center">{{ item.quantity }}</td>
+                <td class="text-right text-muted">{{ item.unitPrice | number: '1.0-0' }}đ</td>
+                <td class="text-right font-medium">{{ item.subtotal | number: '1.0-0' }}đ</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Totals Section -->
+    <div class="invoice-detail__totals-section">
+      <div class="invoice-detail__total-row">
+        <span>Total Amount</span>
+        <span>{{ data.invoiceData.totalAmount | number: '1.0-0' }}đ</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog Footer -->
+  <footer class="invoice-detail__footer">
+    <button class="invoice-detail__btn invoice-detail__btn--outline" (click)="printInvoice()" type="button">
+      <span class="material-symbols-outlined">print</span>
+      In hóa đơn
+    </button>
+    <button class="invoice-detail__btn invoice-detail__btn--primary" (click)="close()" type="button">
+      Đóng
+    </button>
+  </footer>
+</div>

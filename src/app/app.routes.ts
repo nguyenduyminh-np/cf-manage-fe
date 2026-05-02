@@ -49,6 +49,7 @@ export const routes: Routes = [
         path: 'invoice',
         loadComponent: () => import('./features/invoice/invoice').then(m => m.Invoice),
       },
+    
       {
         path: 'purchase-order',
         loadComponent: () => import('./features/purchase-order/purchase-order').then(m => m.PurchaseOrder),

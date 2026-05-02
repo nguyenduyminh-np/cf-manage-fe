@@ -288,7 +288,7 @@ $font-body: 'Work Sans', sans-serif;
       box-shadow: 0 4px 12px rgba($color-primary-container, 0.2);
 
       &:hover {
-        background: lighten($color-primary-container, 5%);
+        background: color.adjust($color-primary-container, $lightness: 5%);
         transform: translateY(-1px);
         box-shadow: 0 6px 16px rgba($color-primary-container, 0.3);
       }
