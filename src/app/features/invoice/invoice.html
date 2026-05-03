@@ -5,13 +5,20 @@
       <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
       <div>
         <h1 class="invoice-page__title type-headline-lg">Hóa đơn bán hàng</h1>
-        <p class="invoice-page__subtitle type-body-sm text-uppercase">Quản lý và theo dõi các giao dịch thanh toán của quán.</p>
+        <p class="invoice-page__subtitle type-body-sm text-uppercase">
+          Quản lý và theo dõi các giao dịch thanh toán của quán.
+        </p>
       </div>
     </div>
     <div class="invoice-page__actions">
-      <button tuiButton type="button" class="btn btn--primary type-label-md" (click)="createInvoice()">
-        <span class="material-symbols-outlined">download</span>
-        Xuất excel
+      <button
+        type="button"
+        class="btn btn--export type-label-md"
+        [disabled]="isExporting()"
+        (click)="exportExcel()"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">download</span>
+        <span>{{ isExporting() ? 'Đang xuất...' : 'Xuất Excel' }}</span>
       </button>
     </div>
   </header>
@@ -93,7 +100,12 @@
           <span class="material-symbols-outlined">search</span>
           Tìm kiếm
         </button>
-        <button tuiButton type="button" class="btn btn--ghost btn--small type-label-md" (click)="resetSearch()">
+        <button
+          tuiButton
+          type="button"
+          class="btn btn--ghost btn--small type-label-md"
+          (click)="resetSearch()"
+        >
           <span class="material-symbols-outlined">refresh</span>
           Làm mới
         </button>

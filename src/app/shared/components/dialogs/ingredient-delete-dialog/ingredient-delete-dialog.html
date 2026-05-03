@@ -1,0 +1,26 @@
+<div class="igd-dialog">
+  <header class="igd-dialog__header">
+    <span class="material-symbols-outlined igd-dialog__icon">warning</span>
+    <h2 class="igd-dialog__title">Xác nhận xóa nguyên liệu</h2>
+  </header>
+
+  <div class="igd-dialog__body">
+    <p class="igd-dialog__message">
+      Bạn có chắc chắn muốn xóa nguyên liệu
+      <strong class="igd-dialog__name">{{ ingredient.ingredientName }}</strong>?
+    </p>
+    <p class="igd-dialog__note">
+      Thao tác này sẽ vô hiệu hóa nguyên liệu. Dữ liệu lô tồn kho liên quan sẽ không bị xóa.
+    </p>
+  </div>
+
+  <footer class="igd-dialog__footer">
+    <button tuiButton type="button" class="igd-btn igd-btn--ghost" (click)="cancel()">
+      Hủy bỏ
+    </button>
+    <button tuiButton type="button" class="igd-btn igd-btn--danger" (click)="confirm()">
+      <span class="material-symbols-outlined">delete</span>
+      Xác nhận xóa
+    </button>
+  </footer>
+</div>

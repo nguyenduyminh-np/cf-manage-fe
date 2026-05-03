@@ -52,6 +52,7 @@ import {
   OrderHistorySearchResponse,
 } from '../../../../core/models/order-dishes/order-dishes.model';
 import { OrderDishesHistoryService } from '../../../../core/services/order-dishes/order-dishes.service';
+import { downloadBlobFile } from '../../../utils/file-download.utils';
 import { PaymentData } from '../../../../core/models/payment/payment.model';
 
 interface OrderHistoryGridRow extends OrderHistoryItem {
@@ -111,6 +112,7 @@ export class OrderDishesHistory {
 
   protected selectedRows: OrderHistoryGridRow[] = [];
   protected selectedStatus: string | null = null;
+  protected isExporting = false;
 
   protected onSelectionChanged(): void {
     const rows = this.gridApi?.getSelectedRows() || [];
@@ -150,8 +152,38 @@ export class OrderDishesHistory {
   }
 
   protected exportExcel(): void {
-    // Placeholder logic for now
-    this.showAlert('Tính năng xuất Excel đang được phát triển.', 'Thông báo', 'positive');
+    if (this.isExporting) {
+      return;
+    }
+
+    const currentQuery = this.querySubject.value;
+    const request: OrderHistorySearchRequest = {
+      diningTableId: this.tableId ?? undefined,
+      tableName: currentQuery.filters.tableName || undefined,
+      employeeName: currentQuery.filters.employeeName || undefined,
+      status: currentQuery.filters.status || undefined,
+      page: 1,
+      limit: Math.max(1, this.latestState?.totalElements ?? currentQuery.limit),
+      sortField: currentQuery.filters.sortField,
+      sortDir: currentQuery.filters.sortDir,
+    };
+
+    this.isExporting = true;
+    this.orderHistoryService
+      .exportExcel(request)
+      .pipe(
+        finalize(() => (this.isExporting = false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (blob) => downloadBlobFile(blob, `LICH_SU_DAT_MON_${Date.now()}.xlsx`, this.alert),
+        error: (error) =>
+          this.alert
+            .open('Không thể xuất Excel lịch sử đặt món. Vui lòng thử lại.', {
+              appearance: 'error',
+            })
+            .subscribe(),
+      });
   }
 
   protected confirmAndUpdate(status: string): void {

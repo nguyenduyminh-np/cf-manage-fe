@@ -1,0 +1,130 @@
+<div class="igf-dialog">
+  <!-- Header -->
+  <header class="igf-dialog__header">
+    <div class="igf-dialog__header-left">
+      <span class="material-symbols-outlined igf-dialog__header-icon">
+        {{ isEdit ? 'edit' : 'add_circle' }}
+      </span>
+      <h2 class="igf-dialog__title">
+        {{ isEdit ? 'Chỉnh sửa nguyên liệu' : 'Thêm nguyên liệu mới' }}
+      </h2>
+    </div>
+    <button type="button" class="igf-dialog__close" (click)="cancel()" aria-label="Đóng">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </header>
+
+  <form class="igf-dialog__form" (ngSubmit)="submit()">
+    <div class="igf-dialog__body">
+
+      @if (loading()) {
+        <div class="igf-skeleton-wrap">
+          <div class="igf-skeleton"></div>
+          <div class="igf-skeleton igf-skeleton--short"></div>
+          <div class="igf-skeleton"></div>
+          <div class="igf-skeleton igf-skeleton--short"></div>
+        </div>
+      } @else {
+
+        <!-- Row 1: Mã + Tên -->
+        <div class="igf-row">
+          <label class="igf-field">
+            <span class="igf-field__label">Mã nguyên liệu</span>
+            <input class="igf-field__input" name="ingredientCode" type="text"
+              [(ngModel)]="formData.ingredientCode" placeholder="VD: ING-001" autocomplete="off" />
+          </label>
+          <label class="igf-field">
+            <span class="igf-field__label">Tên nguyên liệu <span class="igf-field__req">*</span></span>
+            <input class="igf-field__input" name="ingredientName" type="text"
+              [(ngModel)]="formData.ingredientName" placeholder="Nhập tên nguyên liệu"
+              autocomplete="off" required />
+          </label>
+        </div>
+
+        <!-- Row 2: Danh mục + Đơn vị tính -->
+        <div class="igf-row">
+          <label class="igf-field">
+            <span class="igf-field__label">Danh mục <span class="igf-field__req">*</span></span>
+            <select class="igf-field__select" name="ingredientCategoryId"
+              [(ngModel)]="formData.ingredientCategoryId" required>
+              <option [ngValue]="0" disabled>-- Chọn danh mục --</option>
+              @for (c of categories(); track c.id) {
+                <option [ngValue]="c.id">{{ c.ingredientCategoryName }}</option>
+              }
+            </select>
+          </label>
+          <label class="igf-field">
+            <span class="igf-field__label">Đơn vị tính <span class="igf-field__req">*</span></span>
+            <select class="igf-field__select" name="unitId"
+              [(ngModel)]="formData.unitId" required>
+              <option [ngValue]="0" disabled>-- Chọn đơn vị --</option>
+              @for (u of units(); track u.id) {
+                <option [ngValue]="u.id">{{ u.unitName }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        <!-- Nhà cung cấp -->
+        <label class="igf-field">
+          <span class="igf-field__label">Nhà cung cấp <span class="igf-field__req">*</span></span>
+          <select class="igf-field__select" name="supplierId"
+            [(ngModel)]="formData.supplierId" required>
+            <option [ngValue]="0" disabled>-- Chọn nhà cung cấp --</option>
+            @for (s of suppliers(); track s.id) {
+              <option [ngValue]="s.id">{{ s.supplierName }}</option>
+            }
+          </select>
+        </label>
+
+        <!-- Row 3: Hạn sử dụng + Giá trung bình -->
+        <div class="igf-row">
+          <label class="igf-field">
+            <span class="igf-field__label">Hạn sử dụng (ngày) <span class="igf-field__req">*</span></span>
+            <div class="igf-field__input-wrap">
+              <input class="igf-field__input igf-field__input--num" name="selfLife"
+                type="number" min="1" [(ngModel)]="formData.selfLife" placeholder="30" required />
+              <span class="igf-field__suffix">ngày</span>
+            </div>
+          </label>
+          <label class="igf-field">
+            <span class="igf-field__label">Giá trung bình <span class="igf-field__req">*</span></span>
+            <div class="igf-field__input-wrap">
+              <input class="igf-field__input igf-field__input--num" name="averagePrice"
+                type="number" min="0" step="1000" [(ngModel)]="formData.averagePrice"
+                placeholder="0" required />
+              <span class="igf-field__suffix">đ</span>
+            </div>
+          </label>
+        </div>
+
+        <!-- Toggle trạng thái (chỉ khi edit) -->
+        @if (isEdit) {
+          <div class="igf-field">
+            <span class="igf-field__label">Trạng thái</span>
+            <label class="igf-toggle" [class.igf-toggle--on]="formData.active">
+              <input type="checkbox" name="active" [(ngModel)]="formData.active" class="igf-toggle__input" />
+              <span class="igf-toggle__track"><span class="igf-toggle__thumb"></span></span>
+              <span class="igf-toggle__text">
+                {{ formData.active ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
+              </span>
+            </label>
+          </div>
+        }
+
+      }
+    </div><!-- /body -->
+
+    <!-- Footer -->
+    <footer class="igf-dialog__footer">
+      <button tuiButton type="button" class="igf-btn igf-btn--ghost" (click)="cancel()">
+        Hủy bỏ
+      </button>
+      <button tuiButton type="submit" class="igf-btn igf-btn--primary"
+        [disabled]="!isValid || loading()">
+        <span class="material-symbols-outlined">{{ isEdit ? 'save' : 'add_circle' }}</span>
+        {{ isEdit ? 'Lưu thay đổi' : 'Thêm nguyên liệu' }}
+      </button>
+    </footer>
+  </form>
+</div>

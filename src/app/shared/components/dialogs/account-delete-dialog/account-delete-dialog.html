@@ -1,0 +1,25 @@
+<div class="ad-dialog">
+  <header class="ad-dialog__header">
+    <span class="material-symbols-outlined ad-dialog__icon">warning</span>
+    <h2 class="ad-dialog__title">Xác nhận khóa tài khoản</h2>
+  </header>
+
+  <div class="ad-dialog__body">
+    <p class="ad-dialog__message">
+      Bạn có chắc chắn muốn khóa tài khoản
+      <strong class="ad-dialog__name">{{ account.fullName }}</strong
+      >?
+    </p>
+    <p class="ad-dialog__note">
+      Tài khoản sẽ bị ngừng hoạt động. Dữ liệu liên quan vẫn được giữ lại.
+    </p>
+  </div>
+
+  <footer class="ad-dialog__footer">
+    <button tuiButton type="button" class="ad-btn ad-btn--ghost" (click)="cancel()">Hủy bỏ</button>
+    <button tuiButton type="button" class="ad-btn ad-btn--danger" (click)="confirm()">
+      <span class="material-symbols-outlined">delete</span>
+      Xác nhận
+    </button>
+  </footer>
+</div>

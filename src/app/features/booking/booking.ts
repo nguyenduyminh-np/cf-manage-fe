@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { TuiButton, TuiDialogService } from '@taiga-ui/core';
+import { TuiAlertService, TuiButton, TuiDialogService } from '@taiga-ui/core';
 import { PolymorpheusComponent } from '@taiga-ui/polymorpheus';
 import { finalize, map, Observable, of, switchMap } from 'rxjs';
 
@@ -39,10 +39,13 @@ import {
   StatusFilterValue,
 } from '../../core/facade/booking.facade';
 import { OrderDishesHistory } from '../../shared/components/dialogs/order-dishes-history/order-dishes-history';
+import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
+import { downloadBlobFile } from '../../shared/utils/file-download.utils';
 
 @Component({
+  standalone: true,
   selector: 'app-booking',
-  imports: [ReactiveFormsModule, TuiButton, NgClass],
+  imports: [ReactiveFormsModule, NgClass, UiSelectComponent],
   providers: [BookingFacade],
   templateUrl: './booking.html',
   styleUrl: './booking.scss',
@@ -54,9 +57,11 @@ export class Booking implements OnInit {
   private readonly facade = inject(BookingFacade);
   private readonly dialogService = inject(TuiDialogService);
   private readonly tableBookingService = inject(TableBookingService);
+  private readonly alertService = inject(TuiAlertService);
   private tableCardClickTimer: ReturnType<typeof setTimeout> | null = null;
   private tableCardClickTargetId: number | null = null;
   protected readonly isEmptyingTable = signal(false);
+  protected readonly isExporting = signal(false);
   protected readonly checkingInTableId = signal<number | null>(null);
   protected readonly tableActionError = signal<string | null>(null);
 
@@ -177,8 +182,44 @@ export class Booking implements OnInit {
     this.searchForm.controls.floor.setValue(floor);
   }
 
+  protected setSeatFilter(value: string | number | null): void {
+    this.searchForm.controls.seats.setValue(value as SeatFilterValue);
+  }
+
+  protected setStatusFilter(value: string | number | null): void {
+    this.searchForm.controls.status.setValue(value as StatusFilterValue);
+  }
+
+  protected setFloorFilter(value: string | number | null): void {
+    this.searchForm.controls.floor.setValue(value as FloorFilterValue);
+  }
+
   protected search(): void {
     this.facade.forceReload();
+  }
+
+  protected exportExcel(): void {
+    if (this.isExporting()) {
+      return;
+    }
+
+    this.isExporting.set(true);
+    this.facade
+      .exportExcel()
+      .pipe(
+        finalize(() => this.isExporting.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (blob) =>
+          downloadBlobFile(blob, `DANH_SACH_DAT_BAN_${Date.now()}.xlsx`, this.alertService),
+        error: (error) =>
+          this.alertService
+            .open('Không thể xuất Excel danh sách đặt bàn. Vui lòng thử lại.', {
+              appearance: 'error',
+            })
+            .subscribe(),
+      });
   }
 
   protected goToPage(page: number): void {

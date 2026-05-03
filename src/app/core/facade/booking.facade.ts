@@ -13,6 +13,7 @@ import {
   switchMap,
   tap,
   timer,
+  Observable,
 } from 'rxjs';
 
 import { TableSearchRequest } from '../models/table/table-search-request.model';
@@ -162,6 +163,10 @@ export class BookingFacade {
     this.loadTrigger$.next();
   }
 
+  exportExcel(): Observable<Blob> {
+    return this.tableService.exportExcel(this.buildExportRequest());
+  }
+
   private setupFilterPipeline(): void {
     this.filterChange$
       .pipe(
@@ -276,6 +281,16 @@ export class BookingFacade {
       slot: snapshot.filters.seats,
       tableStatus: snapshot.filters.status,
       active: null,
+    };
+  }
+
+  private buildExportRequest(): TableSearchRequest {
+    const request = this.buildRequest();
+
+    return {
+      ...request,
+      page: 0,
+      limit: Math.max(1, this.totalCount()),
     };
   }
 

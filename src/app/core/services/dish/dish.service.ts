@@ -10,7 +10,7 @@ import {
   DishSearchApiResponse,
   DishDetailApiResponse,
   DishDeleteApiResponse,
-} from '../../models/dish/dish.model';   // điều chỉnh đường dẫn thực tế
+} from '../../models/dish/dish.model'; // điều chỉnh đường dẫn thực tế
 
 @Injectable({ providedIn: 'root' })
 export class DishService {
@@ -18,19 +18,25 @@ export class DishService {
   private readonly baseUrl = 'http://localhost:8080/api/v1/dish';
 
   //deprecated
-//   /**
-//    * Lấy danh sách món (menu) – hỗ trợ lọc active (true/false).
-//    * Gửi optional body, nếu không truyền -> lấy mặc định (active = true).
-//    */
-//   list(body?: { active?: boolean }): Observable<DishListApiResponse> {
-//     return this.http.post<DishListApiResponse>(`${this.baseUrl}/list`, body ?? {});
-//   }
+  //   /**
+  //    * Lấy danh sách món (menu) – hỗ trợ lọc active (true/false).
+  //    * Gửi optional body, nếu không truyền -> lấy mặc định (active = true).
+  //    */
+  //   list(body?: { active?: boolean }): Observable<DishListApiResponse> {
+  //     return this.http.post<DishListApiResponse>(`${this.baseUrl}/list`, body ?? {});
+  //   }
 
   /**
    * Tìm kiếm món ăn động (phân trang, lọc, sắp xếp).
    */
   search(request: DishSearchRequest): Observable<DishSearchApiResponse> {
     return this.http.post<DishSearchApiResponse>(`${this.baseUrl}/search`, request);
+  }
+
+  exportExcel(request: DishSearchRequest): Observable<Blob> {
+    return this.http.post(`${this.baseUrl}/export`, request, {
+      responseType: 'blob',
+    });
   }
 
   /**

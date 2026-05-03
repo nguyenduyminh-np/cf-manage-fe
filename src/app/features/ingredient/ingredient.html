@@ -1,1 +1,330 @@
-<p>ingredient works!</p>
+<div class="ing-page">
+  <!-- ── Shared Page Header ─────────────────────────────────────────────── -->
+  <header class="ing-page__header">
+    <div class="ing-page__title-wrap">
+      <span class="material-symbols-outlined" aria-hidden="true">kitchen</span>
+      <div>
+        <h1 class="ing-page__title type-headline-lg">Quản lý kho nguyên liệu</h1>
+        <p class="ing-page__subtitle type-body-sm">
+          Quản lý danh mục và thông tin nguyên liệu trong hệ thống.
+        </p>
+      </div>
+    </div>
+
+    <!-- Action button changes per tab -->
+    @if (activeTab === 'category') {
+      <div class="ing-page__actions">
+        <button
+          type="button"
+          class="btn btn--export type-label-md"
+          [disabled]="isExporting()"
+          (click)="exportExcel()"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">download</span>
+          <span>{{ isExporting() ? 'Đang xuất...' : 'Xuất Excel' }}</span>
+        </button>
+        <button
+          tuiButton
+          type="button"
+          class="btn btn--primary type-label-md"
+          (click)="openCatCreateDialog()"
+        >
+          <span class="material-symbols-outlined">add</span>
+          Thêm danh mục
+        </button>
+      </div>
+    } @else {
+      <div class="ing-page__actions">
+        <button
+          type="button"
+          class="btn btn--export type-label-md"
+          [disabled]="isExporting()"
+          (click)="exportExcel()"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">download</span>
+          <span>{{ isExporting() ? 'Đang xuất...' : 'Xuất Excel' }}</span>
+        </button>
+        <button
+          tuiButton
+          type="button"
+          class="btn btn--primary type-label-md"
+          (click)="openIngCreateDialog()"
+        >
+          <span class="material-symbols-outlined">add</span>
+          Thêm nguyên liệu
+        </button>
+      </div>
+    }
+  </header>
+
+  <!-- ── Tab bar ────────────────────────────────────────────────────────── -->
+  <nav class="ing-tabs" aria-label="Điều hướng nguyên liệu" role="tablist">
+    <button
+      role="tab"
+      class="ing-tabs__tab"
+      [class.ing-tabs__tab--active]="activeTab === 'category'"
+      [attr.aria-selected]="activeTab === 'category'"
+      (click)="switchTab('category')"
+      id="tab-category"
+      aria-controls="panel-category"
+    >
+      <span class="material-symbols-outlined">category</span>
+      Danh mục nguyên liệu
+    </button>
+    <button
+      role="tab"
+      class="ing-tabs__tab"
+      [class.ing-tabs__tab--active]="activeTab === 'ingredient'"
+      [attr.aria-selected]="activeTab === 'ingredient'"
+      (click)="switchTab('ingredient')"
+      id="tab-ingredient"
+      aria-controls="panel-ingredient"
+    >
+      <span class="material-symbols-outlined">inventory_2</span>
+      Danh sách nguyên liệu
+    </button>
+  </nav>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       PANEL: CATEGORY
+  ══════════════════════════════════════════════════════════════════════════ -->
+  @if (activeTab === 'category') {
+    <div id="panel-category" role="tabpanel" aria-labelledby="tab-category" class="ing-panel">
+      <!-- Search -->
+      <section class="panel-search" aria-label="Bộ lọc danh mục">
+        <form (ngSubmit)="catApplySearch()">
+          <div class="panel-search__grid">
+            <label class="panel-search__field">
+              <span class="type-label-sm">Tìm kiếm danh mục</span>
+              <input
+                class="type-body-md"
+                name="catSearchString"
+                type="text"
+                [(ngModel)]="catSearchFilters.searchString"
+                (ngModelChange)="catOnFiltersChanged()"
+                placeholder="Nhập mã hoặc tên danh mục..."
+                autocomplete="off"
+              />
+            </label>
+            <label class="panel-search__field">
+              <span class="type-label-sm">Trạng thái</span>
+              <select
+                class="type-body-md"
+                name="catActive"
+                [(ngModel)]="catSearchFilters.isActive"
+                (ngModelChange)="catOnFiltersChanged()"
+              >
+                @for (o of activeStatusOptions; track o.value) {
+                  <option [ngValue]="o.value">{{ o.label }}</option>
+                }
+              </select>
+            </label>
+          </div>
+          <div class="panel-search__actions">
+            <button tuiButton type="submit" class="btn btn--primary btn--small type-label-md">
+              <span class="material-symbols-outlined">search</span> Tìm kiếm
+            </button>
+            <button
+              tuiButton
+              type="button"
+              class="btn btn--ghost btn--small type-label-md"
+              (click)="catResetSearch()"
+            >
+              <span class="material-symbols-outlined">refresh</span> Làm mới
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Grid -->
+      @if (catState$ | async; as state) {
+        @if (state.isLoading) {
+          <div class="panel-loading" aria-live="polite">Đang tải danh sách danh mục...</div>
+        }
+        @if (state.error) {
+          <div class="panel-error" role="alert">{{ state.error }}</div>
+        }
+        <div class="panel-grid-wrap">
+          <ag-grid-angular
+            class="panel-grid ag-theme-quartz"
+            [columnDefs]="catColumnDefs"
+            [defaultColDef]="defaultColDef"
+            [rowData]="state.rowData"
+            [pagination]="false"
+            [loading]="state.isLoading"
+            [overlayLoadingTemplate]="'Đang tải dữ liệu...'"
+            [overlayNoRowsTemplate]="'Không có danh mục nào'"
+            [suppressCellFocus]="true"
+            [headerHeight]="46"
+            [rowHeight]="46"
+            (gridReady)="onCatGridReady($event)"
+            (gridSizeChanged)="onCatGridSizeChanged($event)"
+            (cellClicked)="onCatCellClicked($event)"
+          ></ag-grid-angular>
+        </div>
+        <footer class="panel-pagination">
+          <div class="panel-pagination__info type-body-sm">
+            <span>Tổng: {{ state.totalElements }} bản ghi</span>
+            <label for="cat-page-size" class="type-label-md"> – Hiển thị </label>
+            <select
+              id="cat-page-size"
+              class="type-label-md"
+              [ngModel]="state.pageSize"
+              (ngModelChange)="catSetPageSize($event)"
+            >
+              @for (s of pageSizeOptions; track s) {
+                <option [ngValue]="s">{{ s }}</option>
+              }
+            </select>
+            <span> / trang</span>
+          </div>
+          <div class="panel-pagination__nav">
+            <button
+              tuiButton
+              type="button"
+              class="btn btn--ghost btn--icon"
+              [disabled]="!catCanPrev(state)"
+              (click)="catPrev()"
+              aria-label="Trang trước"
+            >
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <span class="panel-pagination__indicator type-label-md">{{ pageSummary(state) }}</span>
+            <button
+              tuiButton
+              type="button"
+              class="btn btn--ghost btn--icon"
+              [disabled]="!catCanNext(state)"
+              (click)="catNext()"
+              aria-label="Trang sau"
+            >
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
+        </footer>
+      }
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       PANEL: INGREDIENT
+  ══════════════════════════════════════════════════════════════════════════ -->
+  @if (activeTab === 'ingredient') {
+    <div id="panel-ingredient" role="tabpanel" aria-labelledby="tab-ingredient" class="ing-panel">
+      <!-- Search -->
+      <section class="panel-search" aria-label="Bộ lọc nguyên liệu">
+        <form (ngSubmit)="ingApplySearch()">
+          <div class="panel-search__grid">
+            <label class="panel-search__field">
+              <span class="type-label-sm">Tìm kiếm nguyên liệu</span>
+              <input
+                class="type-body-md"
+                name="ingSearchString"
+                type="text"
+                [(ngModel)]="ingSearchFilters.searchString"
+                (ngModelChange)="ingOnFiltersChanged()"
+                placeholder="Nhập mã hoặc tên..."
+                autocomplete="off"
+              />
+            </label>
+            <label class="panel-search__field">
+              <span class="type-label-sm">Trạng thái</span>
+              <select
+                class="type-body-md"
+                name="ingActive"
+                [(ngModel)]="ingSearchFilters.isActive"
+                (ngModelChange)="ingOnFiltersChanged()"
+              >
+                @for (o of activeStatusOptions; track o.value) {
+                  <option [ngValue]="o.value">{{ o.label }}</option>
+                }
+              </select>
+            </label>
+          </div>
+          <div class="panel-search__actions">
+            <button tuiButton type="submit" class="btn btn--primary btn--small type-label-md">
+              <span class="material-symbols-outlined">search</span> Tìm kiếm
+            </button>
+            <button
+              tuiButton
+              type="button"
+              class="btn btn--ghost btn--small type-label-md"
+              (click)="ingResetSearch()"
+            >
+              <span class="material-symbols-outlined">refresh</span> Làm mới
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Grid -->
+      @if (ingState$ | async; as state) {
+        @if (state.isLoading) {
+          <div class="panel-loading" aria-live="polite">Đang tải danh sách nguyên liệu...</div>
+        }
+        @if (state.error) {
+          <div class="panel-error" role="alert">{{ state.error }}</div>
+        }
+        <div class="panel-grid-wrap">
+          <ag-grid-angular
+            class="panel-grid ag-theme-quartz"
+            [columnDefs]="ingColumnDefs"
+            [defaultColDef]="defaultColDef"
+            [rowData]="state.rowData"
+            [pagination]="false"
+            [loading]="state.isLoading"
+            [overlayLoadingTemplate]="'Đang tải dữ liệu...'"
+            [overlayNoRowsTemplate]="'Không có nguyên liệu nào'"
+            [suppressCellFocus]="true"
+            [headerHeight]="46"
+            [rowHeight]="46"
+            (gridReady)="onIngGridReady($event)"
+            (gridSizeChanged)="onIngGridSizeChanged($event)"
+            (cellClicked)="onIngCellClicked($event)"
+            (rowDoubleClicked)="onIngRowDoubleClicked($event)"
+          ></ag-grid-angular>
+        </div>
+        <footer class="panel-pagination">
+          <div class="panel-pagination__info type-body-sm">
+            <span>Tổng: {{ state.totalElements }} bản ghi</span>
+            <label for="ing-page-size" class="type-label-md"> – Hiển thị </label>
+            <select
+              id="ing-page-size"
+              class="type-label-md"
+              [ngModel]="state.pageSize"
+              (ngModelChange)="ingSetPageSize($event)"
+            >
+              @for (s of pageSizeOptions; track s) {
+                <option [ngValue]="s">{{ s }}</option>
+              }
+            </select>
+            <span> / trang</span>
+          </div>
+          <div class="panel-pagination__nav">
+            <button
+              tuiButton
+              type="button"
+              class="btn btn--ghost btn--icon"
+              [disabled]="!ingCanPrev(state)"
+              (click)="ingPrev()"
+              aria-label="Trang trước"
+            >
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <span class="panel-pagination__indicator type-label-md">{{ pageSummary(state) }}</span>
+            <button
+              tuiButton
+              type="button"
+              class="btn btn--ghost btn--icon"
+              [disabled]="!ingCanNext(state)"
+              (click)="ingNext()"
+              aria-label="Trang sau"
+            >
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
+        </footer>
+      }
+    </div>
+  }
+</div>

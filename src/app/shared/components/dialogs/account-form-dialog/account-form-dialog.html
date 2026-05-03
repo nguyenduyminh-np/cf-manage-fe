@@ -1,0 +1,165 @@
+<div class="af-dialog">
+  <header class="af-dialog__header">
+    <div class="af-dialog__header-left">
+      <span class="material-symbols-outlined af-dialog__header-icon">
+        {{ isEdit ? 'edit' : 'account_circle' }}
+      </span>
+      <h2 class="af-dialog__title">
+        {{ isEdit ? 'Chỉnh sửa tài khoản' : 'Thêm tài khoản mới' }}
+      </h2>
+    </div>
+    <button type="button" class="af-dialog__close" (click)="cancel()" aria-label="Đóng">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </header>
+
+  <form class="af-dialog__form" (ngSubmit)="submit()">
+    <div class="af-dialog__body">
+      <div class="af-row">
+        <label class="af-field">
+          <span class="af-field__label">Mã tài khoản</span>
+          <input
+            class="af-field__input"
+            name="accountCode"
+            type="text"
+            [(ngModel)]="formData.accountCode"
+            placeholder="VD: ACC-001"
+            autocomplete="off"
+          />
+        </label>
+        <label class="af-field">
+          <span class="af-field__label">Tên đăng nhập <span class="af-field__req">*</span></span>
+          <input
+            class="af-field__input"
+            name="username"
+            type="text"
+            [(ngModel)]="formData.username"
+            placeholder="Nhập tên đăng nhập"
+            autocomplete="off"
+            required
+          />
+        </label>
+      </div>
+
+      <div class="af-row">
+        <label class="af-field">
+          <span class="af-field__label">Họ và tên <span class="af-field__req">*</span></span>
+          <input
+            class="af-field__input"
+            name="fullName"
+            type="text"
+            [(ngModel)]="formData.fullName"
+            placeholder="Nhập họ và tên"
+            autocomplete="off"
+            required
+          />
+        </label>
+        <label class="af-field">
+          <span class="af-field__label">
+            Mật khẩu
+            @if (!isEdit) {
+              <span class="af-field__req">*</span>
+            }
+          </span>
+          <input
+            class="af-field__input"
+            name="password"
+            type="password"
+            [(ngModel)]="formData.password"
+            placeholder="Nhập mật khẩu"
+            autocomplete="new-password"
+            [required]="!isEdit"
+          />
+        </label>
+      </div>
+
+      <div class="af-row">
+        <label class="af-field">
+          <span class="af-field__label">Email</span>
+          <input
+            class="af-field__input"
+            name="email"
+            type="email"
+            [(ngModel)]="formData.email"
+            placeholder="email@example.com"
+            autocomplete="off"
+          />
+        </label>
+        <label class="af-field">
+          <span class="af-field__label">Số điện thoại</span>
+          <input
+            class="af-field__input"
+            name="phoneNumber"
+            type="tel"
+            [(ngModel)]="formData.phoneNumber"
+            placeholder="Nhập số điện thoại"
+            autocomplete="off"
+          />
+        </label>
+      </div>
+
+      <div class="af-row">
+        <label class="af-field">
+          <span class="af-field__label">
+            Ngày sinh
+            @if (!isEdit) {
+              <span class="af-field__req">*</span>
+            }
+          </span>
+          <input
+            class="af-field__input"
+            name="dateOfBirth"
+            type="date"
+            [(ngModel)]="formData.dateOfBirth"
+            [required]="!isEdit"
+          />
+        </label>
+        <label class="af-field">
+          <span class="af-field__label">
+            Role ID
+            @if (!isEdit) {
+              <span class="af-field__req">*</span>
+            }
+          </span>
+          <input
+            class="af-field__input"
+            name="roleId"
+            type="number"
+            min="1"
+            [(ngModel)]="formData.roleId"
+            placeholder="VD: 1"
+            [required]="!isEdit"
+          />
+        </label>
+      </div>
+
+      @if (isEdit) {
+        <div class="af-field">
+          <span class="af-field__label">Trạng thái</span>
+          <label class="af-toggle" [class.af-toggle--on]="formData.isActive">
+            <input
+              type="checkbox"
+              name="isActive"
+              [(ngModel)]="formData.isActive"
+              class="af-toggle__input"
+            />
+            <span class="af-toggle__track"><span class="af-toggle__thumb"></span></span>
+            <span class="af-toggle__text">
+              {{ formData.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
+            </span>
+          </label>
+        </div>
+      }
+    </div>
+
+    <footer class="af-dialog__footer">
+      <button tuiButton type="button" class="af-btn af-btn--ghost" (click)="cancel()">
+        Hủy bỏ
+      </button>
+      <button tuiButton type="submit" class="af-btn af-btn--primary" [disabled]="!isValid">
+        <span class="material-symbols-outlined">{{ isEdit ? 'save' : 'add' }}</span>
+        {{ isEdit ? 'Lưu thay đổi' : 'Thêm mới' }}
+      </button>
+    </footer>
+  </form>
+</div>

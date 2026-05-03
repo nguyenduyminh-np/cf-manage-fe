@@ -11,8 +11,7 @@ import {
   output,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TuiDialogService } from '@taiga-ui/core';
-import { TuiButton, TuiDialogContext } from '@taiga-ui/core';
+import { TuiAlertService, TuiButton, TuiDialogContext, TuiDialogService } from '@taiga-ui/core';
 import { AgGridAngular } from 'ag-grid-angular';
 import {
   ColDef,
@@ -27,6 +26,7 @@ import { injectContext } from '@taiga-ui/polymorpheus';
 import {
   BehaviorSubject,
   catchError,
+  finalize,
   map,
   Observable,
   of,
@@ -35,6 +35,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import {
   TableBookingHistoryItem,
@@ -46,8 +47,8 @@ import { PosTableBookingDialogResult } from '../../../../core/models/table-booki
 
 import { PosTableBooking } from '../pos-table-booking/pos-table-booking';
 
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TableBookingHistoryService } from '../../../../core/services/table-booking-history/table-booking-history.service';
+import { downloadBlobFile } from '../../../utils/file-download.utils';
 import { TableBookingDetail } from '../table-booking-detail/table-booking-detail';
 import { ActionCellRender } from '../../action-cell-render/action-cell-render';
 
@@ -118,6 +119,7 @@ export class TableBookingHistory {
   // Input: Angular/Taiga injection context.
   // Output: handles used for data loading and dialog completion.
   private readonly tableBookingHistoryService = inject(TableBookingHistoryService);
+  private readonly alertService = inject(TuiAlertService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
   private readonly dialogService = inject(TuiDialogService);
@@ -138,6 +140,7 @@ export class TableBookingHistory {
   private fitGridRafId: number | null = null;
   private filterDebounceTimerId: number | null = null;
   private hasPendingAdvancedFilterChanges = false;
+  protected isExporting = false;
 
   // Dialog metadata.
   // Input: injected dialog payload.
@@ -545,6 +548,53 @@ export class TableBookingHistory {
   // Output: re-emits current query state.
   protected retry(): void {
     this.querySubject.next(this.querySubject.getValue());
+  }
+
+  protected exportExcel(): void {
+    if (this.isExporting) {
+      return;
+    }
+
+    const currentQuery = this.querySubject.getValue();
+    const request: TableBookingSearchRequest = {
+      page: 0,
+      limit: Math.max(1, this.latestState?.totalElements ?? currentQuery.limit),
+      sortField: currentQuery.filters.sortField,
+      sortDir: currentQuery.filters.sortDir,
+      tableId: this.tableId ?? undefined,
+      ...(currentQuery.filters.bookingStatus
+        ? { bookingStatus: currentQuery.filters.bookingStatus }
+        : {}),
+      ...(currentQuery.filters.customerName
+        ? { customerName: currentQuery.filters.customerName }
+        : {}),
+      ...(currentQuery.filters.phoneNumber
+        ? { phoneNumber: currentQuery.filters.phoneNumber }
+        : {}),
+      ...(currentQuery.filters.active !== ''
+        ? { active: currentQuery.filters.active === 'true' }
+        : {}),
+      ...(currentQuery.filters.checkInAt ? { checkInAt: currentQuery.filters.checkInAt } : {}),
+      ...(currentQuery.filters.checkOutAt ? { checkOutAt: currentQuery.filters.checkOutAt } : {}),
+    };
+
+    this.isExporting = true;
+    this.tableBookingHistoryService
+      .exportExcel(request)
+      .pipe(
+        finalize(() => (this.isExporting = false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (blob) =>
+          downloadBlobFile(blob, `LICH_SU_DAT_BAN_${Date.now()}.xlsx`, this.alertService),
+        error: (error) =>
+          this.alertService
+            .open('Không thể xuất Excel lịch sử đặt bàn. Vui lòng thử lại.', {
+              appearance: 'error',
+            })
+            .subscribe(),
+      });
   }
 
   // Page size selector.

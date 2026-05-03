@@ -1,1 +1,152 @@
-<p>warehouse works!</p>
+<div class="wh-page">
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <header class="wh-page__header">
+    <div class="wh-page__title-wrap">
+      <span class="material-symbols-outlined" aria-hidden="true">warehouse</span>
+      <div>
+        <h1 class="wh-page__title type-headline-lg">Quản lý nhà kho</h1>
+        <p class="wh-page__subtitle type-body-sm">
+          Quản lý danh sách, vị trí và trạng thái các nhà kho lưu trữ.
+        </p>
+      </div>
+    </div>
+    <div class="wh-page__actions">
+      <button
+        type="button"
+        class="btn btn--export type-label-md"
+        [disabled]="isExporting()"
+        (click)="exportExcel()"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">download</span>
+        <span>{{ isExporting() ? 'Đang xuất...' : 'Xuất Excel' }}</span>
+      </button>
+      <button
+        tuiButton
+        type="button"
+        class="btn btn--primary type-label-md"
+        (click)="openCreateDialog()"
+      >
+        <span class="material-symbols-outlined">add</span>
+        Thêm nhà kho
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Search / Filters ─────────────────────────────────────────────────── -->
+  <section class="panel-search" aria-label="Bộ lọc nhà kho">
+    <form (ngSubmit)="applySearch()">
+      <div class="panel-search__grid">
+        <label class="panel-search__field">
+          <span class="type-label-sm">Tìm kiếm</span>
+          <input
+            class="type-body-md"
+            name="searchString"
+            type="text"
+            [(ngModel)]="searchFilters.searchString"
+            (ngModelChange)="onFiltersChanged()"
+            placeholder="Tìm theo mã hoặc tên nhà kho..."
+            autocomplete="off"
+          />
+        </label>
+
+        <label class="panel-search__field">
+          <span class="type-label-sm">Trạng thái</span>
+          <select
+            class="type-body-md"
+            name="whActive"
+            [(ngModel)]="searchFilters.isActive"
+            (ngModelChange)="onFiltersChanged()"
+          >
+            @for (o of activeStatusOptions; track o.value) {
+              <option [ngValue]="o.value">{{ o.label }}</option>
+            }
+          </select>
+        </label>
+      </div>
+      <div class="panel-search__actions">
+        <button tuiButton type="submit" class="btn btn--primary btn--small type-label-md">
+          <span class="material-symbols-outlined">search</span> Tìm kiếm
+        </button>
+        <button
+          tuiButton
+          type="button"
+          class="btn btn--ghost btn--small type-label-md"
+          (click)="resetSearch()"
+        >
+          <span class="material-symbols-outlined">refresh</span> Làm mới
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ── Grid ─────────────────────────────────────────────────────────────── -->
+  @if (state$ | async; as state) {
+    @if (state.isLoading) {
+      <div class="panel-loading" aria-live="polite">Đang tải danh sách nhà kho...</div>
+    }
+    @if (state.error) {
+      <div class="panel-error" role="alert">{{ state.error }}</div>
+    }
+
+    <div class="panel-grid-wrap">
+      <ag-grid-angular
+        class="panel-grid ag-theme-quartz"
+        [columnDefs]="columnDefs"
+        [defaultColDef]="defaultColDef"
+        [rowData]="state.rowData"
+        [pagination]="false"
+        [loading]="state.isLoading"
+        [overlayLoadingTemplate]="'Đang tải dữ liệu...'"
+        [overlayNoRowsTemplate]="'Không có nhà kho nào'"
+        [suppressCellFocus]="true"
+        [headerHeight]="46"
+        [rowHeight]="46"
+        (gridReady)="onGridReady($event)"
+        (gridSizeChanged)="onGridSizeChanged($event)"
+        (cellClicked)="onCellClicked($event)"
+        (rowDoubleClicked)="onRowDoubleClicked($event)"
+      ></ag-grid-angular>
+    </div>
+
+    <footer class="panel-pagination">
+      <div class="panel-pagination__info type-body-sm">
+        <span>Tổng: {{ state.totalElements }} nhà kho</span>
+        <label for="wh-page-size" class="type-label-md"> – Hiển thị </label>
+        <select
+          id="wh-page-size"
+          class="type-label-md"
+          [ngModel]="state.pageSize"
+          (ngModelChange)="setPageSize($event)"
+        >
+          @for (s of pageSizeOptions; track s) {
+            <option [ngValue]="s">{{ s }}</option>
+          }
+        </select>
+        <span> / trang</span>
+      </div>
+      <div class="panel-pagination__nav">
+        <button
+          tuiButton
+          type="button"
+          class="btn btn--ghost btn--icon"
+          [disabled]="!canPrev(state)"
+          (click)="prevPage()"
+          aria-label="Trang trước"
+        >
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <span class="panel-pagination__indicator type-label-md">{{ pageSummary(state) }}</span>
+        <button
+          tuiButton
+          type="button"
+          class="btn btn--ghost btn--icon"
+          [disabled]="!canNext(state)"
+          (click)="nextPage()"
+          aria-label="Trang sau"
+        >
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
+    </footer>
+  }
+</div>

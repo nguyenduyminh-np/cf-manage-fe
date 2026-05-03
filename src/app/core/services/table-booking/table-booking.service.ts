@@ -77,6 +77,16 @@ export class TableBookingService {
       .pipe(map((response) => this.normalizeSearchResponse(response)));
   }
 
+  exportExcel(request: TableBookingSearchRequest): Observable<Blob> {
+    return this.http.post(
+      `${this.baseUrl}/table-booking-history/export`,
+      this.normalizeSearchRequest(request),
+      {
+        responseType: 'blob',
+      },
+    );
+  }
+
   updateStatus(
     request: TableBookingUpdateStatusRequest,
   ): Observable<TableBookingUpdateStatusResponse> {

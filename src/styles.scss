@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use 'assets/styles/color-kit' as *;
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
@@ -33,6 +34,11 @@
 
   --reading-max: 72ch;
   --reading-max-hard: 80ch;
+
+  --color-export-excel: #107c41;
+  --color-export-excel-accent: #21a366;
+  --color-export-excel-hover: #0e6d37;
+  --color-export-excel-hover-accent: #1b8a51;
 }
 
 @media (max-width: 768px) {
@@ -180,4 +186,75 @@ button[tuiButton] {
   font-size: var(--label-md-size);
   line-height: var(--label-md-line);
   font-weight: var(--font-weight-semibold);
+}
+
+.btn--export {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.35rem;
+  padding: 0 1.25rem;
+  border: none;
+  border-radius: 0.75rem;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--color-export-excel) 0%, var(--color-export-excel-accent) 100%);
+  text-decoration: none;
+  outline: none;
+  box-shadow: 0 4px 10px -2px rgba(16, 124, 65, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .material-symbols-outlined {
+    font-size: 1.15rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  span:not(.material-symbols-outlined) {
+    position: relative;
+    z-index: 1;
+    font-weight: 600;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px -2px rgba(16, 124, 65, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+    
+    &::after {
+      opacity: 1;
+    }
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(16, 124, 65, 0.2);
+  }
+
+  &:disabled {
+    opacity: 0.75;
+    cursor: wait;
+    transform: none;
+    box-shadow: none;
+    background: var(--color-export-excel);
+
+    .material-symbols-outlined {
+      animation: export-bounce 1s infinite alternate ease-in-out;
+    }
+  }
+}
+
+@keyframes export-bounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-4px); }
 }

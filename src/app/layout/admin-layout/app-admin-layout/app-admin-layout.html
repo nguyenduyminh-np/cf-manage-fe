@@ -36,47 +36,16 @@
           <span class="label">{{ item.name }}</span>
         </a>
       }
-
-      <button
-        type="button"
-        class="nav-item nav-item--button"
-        [class.active]="isDialogRoute"
-        [attr.aria-expanded]="shouldShowDialogMenu"
-        aria-controls="dialog-submenu"
-        title="Dialog"
-        (click)="toggleDialogMenu()"
-      >
-        <span class="material-symbols-outlined icon">dialogs</span>
-        <span class="label">Dialog</span>
-        <span class="material-symbols-outlined chevron">{{
-          shouldShowDialogMenu ? 'expand_less' : 'expand_more'
-        }}</span>
-      </button>
-
-      @if (shouldShowDialogMenu) {
-        <div id="dialog-submenu" class="nav-submenu" role="group" aria-label="Danh sách dialog">
-          @for (dialogItem of dialogMenuItems; track dialogItem.key) {
-            <a
-              [routerLink]="dialogItem.route"
-              routerLinkActive="active"
-              class="nav-subitem"
-              [attr.title]="dialogItem.name"
-            >
-              <span class="material-symbols-outlined subitem-icon">open_in_new</span>
-              <span class="label">{{ dialogItem.name }}</span>
-            </a>
-          }
-        </div>
-      }
     </nav>
 
     <div class="shift-card-wrapper">
       <div class="shift-card">
-        <p class="shift-title">Shift Status</p>
+        <p class="shift-title">Ca làm hiện tại</p>
         <div class="shift-status">
           <span class="dot"></span>
-          <span class="text">Open • AM Shift</span>
+          <span class="text">Đang mở • {{ shiftLabel }}</span>
         </div>
+        <p class="shift-time">{{ currentTimeLabel }}</p>
       </div>
     </div>
   </aside>

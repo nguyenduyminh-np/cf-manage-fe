@@ -1,1 +1,178 @@
-<p>supplier works!</p>
+<div class="sup-page">
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <header class="sup-page__header">
+    <div class="sup-page__title-wrap">
+      <span class="material-symbols-outlined" aria-hidden="true">local_shipping</span>
+      <div>
+        <h1 class="sup-page__title type-headline-lg">Quản lý nhà cung cấp</h1>
+        <p class="sup-page__subtitle type-body-sm">
+          Quản lý thông tin và trạng thái các nhà cung cấp nguyên liệu.
+        </p>
+      </div>
+    </div>
+    <div class="sup-page__actions">
+      <button
+        type="button"
+        class="btn btn--export type-label-md"
+        [disabled]="isExporting()"
+        (click)="exportExcel()"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">download</span>
+        <span>{{ isExporting() ? 'Đang xuất...' : 'Xuất Excel' }}</span>
+      </button>
+      <button
+        tuiButton
+        type="button"
+        class="btn btn--primary type-label-md"
+        (click)="openCreateDialog()"
+      >
+        <span class="material-symbols-outlined">add</span>
+        Thêm nhà cung cấp
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Search / Filters ─────────────────────────────────────────────────── -->
+  <section class="panel-search" aria-label="Bộ lọc nhà cung cấp">
+    <form (ngSubmit)="applySearch()">
+      <div class="panel-search__grid">
+        <label class="panel-search__field">
+          <span class="type-label-sm">Mã nhà cung cấp</span>
+          <input
+            class="type-body-md"
+            name="supCode"
+            type="text"
+            [(ngModel)]="searchFilters.supplierCode"
+            (ngModelChange)="onFiltersChanged()"
+            placeholder="Tìm mã..."
+            autocomplete="off"
+          />
+        </label>
+
+        <label class="panel-search__field">
+          <span class="type-label-sm">Tên nhà cung cấp</span>
+          <input
+            class="type-body-md"
+            name="supName"
+            type="text"
+            [(ngModel)]="searchFilters.supplierName"
+            (ngModelChange)="onFiltersChanged()"
+            placeholder="Tìm tên..."
+            autocomplete="off"
+          />
+        </label>
+
+        <label class="panel-search__field">
+          <span class="type-label-sm">Thông tin liên hệ</span>
+          <input
+            class="type-body-md"
+            name="contactInfo"
+            type="text"
+            [(ngModel)]="searchFilters.contactInfo"
+            (ngModelChange)="onFiltersChanged()"
+            placeholder="SĐT / Email..."
+            autocomplete="off"
+          />
+        </label>
+
+        <label class="panel-search__field">
+          <span class="type-label-sm">Trạng thái</span>
+          <select
+            class="type-body-md"
+            name="supActive"
+            [(ngModel)]="searchFilters.isActive"
+            (ngModelChange)="onFiltersChanged()"
+          >
+            @for (o of activeStatusOptions; track o.value) {
+              <option [ngValue]="o.value">{{ o.label }}</option>
+            }
+          </select>
+        </label>
+      </div>
+      <div class="panel-search__actions">
+        <button tuiButton type="submit" class="btn btn--primary btn--small type-label-md">
+          <span class="material-symbols-outlined">search</span> Tìm kiếm
+        </button>
+        <button
+          tuiButton
+          type="button"
+          class="btn btn--ghost btn--small type-label-md"
+          (click)="resetSearch()"
+        >
+          <span class="material-symbols-outlined">refresh</span> Làm mới
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ── Grid ─────────────────────────────────────────────────────────────── -->
+  @if (state$ | async; as state) {
+    @if (state.isLoading) {
+      <div class="panel-loading" aria-live="polite">Đang tải danh sách nhà cung cấp...</div>
+    }
+    @if (state.error) {
+      <div class="panel-error" role="alert">{{ state.error }}</div>
+    }
+
+    <div class="panel-grid-wrap">
+      <ag-grid-angular
+        class="panel-grid ag-theme-quartz"
+        [columnDefs]="columnDefs"
+        [defaultColDef]="defaultColDef"
+        [rowData]="state.rowData"
+        [pagination]="false"
+        [loading]="state.isLoading"
+        [overlayLoadingTemplate]="'Đang tải dữ liệu...'"
+        [overlayNoRowsTemplate]="'Không có nhà cung cấp nào'"
+        [suppressCellFocus]="true"
+        [headerHeight]="46"
+        [rowHeight]="46"
+        (gridReady)="onGridReady($event)"
+        (gridSizeChanged)="onGridSizeChanged($event)"
+        (cellClicked)="onCellClicked($event)"
+        (rowDoubleClicked)="onRowDoubleClicked($event)"
+      ></ag-grid-angular>
+    </div>
+
+    <footer class="panel-pagination">
+      <div class="panel-pagination__info type-body-sm">
+        <span>Tổng: {{ state.totalElements }} nhà cung cấp</span>
+        <label for="sup-page-size" class="type-label-md"> – Hiển thị </label>
+        <select
+          id="sup-page-size"
+          class="type-label-md"
+          [ngModel]="state.pageSize"
+          (ngModelChange)="setPageSize($event)"
+        >
+          @for (s of pageSizeOptions; track s) {
+            <option [ngValue]="s">{{ s }}</option>
+          }
+        </select>
+        <span> / trang</span>
+      </div>
+      <div class="panel-pagination__nav">
+        <button
+          tuiButton
+          type="button"
+          class="btn btn--ghost btn--icon"
+          [disabled]="!canPrev(state)"
+          (click)="prevPage()"
+          aria-label="Trang trước"
+        >
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <span class="panel-pagination__indicator type-label-md">{{ pageSummary(state) }}</span>
+        <button
+          tuiButton
+          type="button"
+          class="btn btn--ghost btn--icon"
+          [disabled]="!canNext(state)"
+          (click)="nextPage()"
+          aria-label="Trang sau"
+        >
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
+    </footer>
+  }
+</div>

@@ -10,7 +10,7 @@ import {
   inject,
 } from '@angular/core';
 
-export interface UiSelectOption<T = string | number> {
+export interface UiSelectOption<T = string | number | null> {
   label: string;
   value: T;
   disabled?: boolean;

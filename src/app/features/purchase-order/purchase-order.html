@@ -1,1 +1,202 @@
-<p>purchase-order works!</p>
+<div class="po-page">
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="po-page__header">
+    <div class="po-page__title-wrap">
+      <span class="material-symbols-outlined" aria-hidden="true">input</span>
+      <div>
+        <h1 class="po-page__title type-headline-lg">Quản lý đơn nhập hàng</h1>
+        <p class="po-page__subtitle type-body-sm">
+          Tạo, theo dõi và quản lý toàn bộ đơn nhập nguyên liệu.
+        </p>
+      </div>
+    </div>
+    <div class="po-page__actions">
+      <button
+        type="button"
+        class="btn btn--export type-label-md"
+        (click)="exportExcel()"
+        [disabled]="isExporting()"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">download</span>
+        <span>{{ isExporting() ? 'Đang xuất...' : 'Xuất Excel' }}</span>
+      </button>
+      <button
+        tuiButton
+        type="button"
+        class="btn btn--primary type-label-md"
+        (click)="openCreateDialog()"
+      >
+        <span class="material-symbols-outlined">add</span>
+        Tạo đơn mới
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Search / Filters ───────────────────────────────────────────────── -->
+  <section class="panel-search" aria-label="Bộ lọc đơn nhập hàng">
+    <form (ngSubmit)="applySearch()">
+      <div class="panel-search__grid">
+        <label class="panel-search__field">
+          <span class="type-label-sm">Mã đơn hàng</span>
+          <input
+            class="type-body-md"
+            name="poCode"
+            type="text"
+            [(ngModel)]="searchFilters.purchaseOrderCode"
+            (ngModelChange)="onFiltersChanged()"
+            placeholder="Tìm mã..."
+            autocomplete="off"
+          />
+        </label>
+
+        <label class="panel-search__field">
+          <span class="type-label-sm">Trạng thái</span>
+          <select
+            class="type-body-md"
+            name="status"
+            [(ngModel)]="searchFilters.paymentStatus"
+            (ngModelChange)="onFiltersChanged()"
+          >
+            @for (o of statusFilterOptions; track o.value) {
+              <option [ngValue]="o.value">{{ o.label }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="panel-search__field">
+          <span class="type-label-sm">Từ ngày</span>
+          <input
+            class="type-body-md"
+            name="fromDate"
+            type="date"
+            [(ngModel)]="searchFilters.fromDate"
+            (ngModelChange)="onFiltersChanged()"
+          />
+        </label>
+
+        <label class="panel-search__field">
+          <span class="type-label-sm">Đến ngày</span>
+          <input
+            class="type-body-md"
+            name="toDate"
+            type="date"
+            [(ngModel)]="searchFilters.toDate"
+            (ngModelChange)="onFiltersChanged()"
+          />
+        </label>
+
+        <label class="panel-search__field">
+          <span class="type-label-sm">Tiền từ (đ)</span>
+          <input
+            class="type-body-md"
+            name="priceFrom"
+            type="number"
+            min="0"
+            [(ngModel)]="searchFilters.totalPriceFrom"
+            (ngModelChange)="onFiltersChanged()"
+            placeholder="0"
+            autocomplete="off"
+          />
+        </label>
+
+        <label class="panel-search__field">
+          <span class="type-label-sm">Tiền đến (đ)</span>
+          <input
+            class="type-body-md"
+            name="priceTo"
+            type="number"
+            min="0"
+            [(ngModel)]="searchFilters.totalPriceTo"
+            (ngModelChange)="onFiltersChanged()"
+            placeholder="Không giới hạn"
+            autocomplete="off"
+          />
+        </label>
+      </div>
+      <div class="panel-search__actions">
+        <button tuiButton type="submit" class="btn btn--primary btn--small type-label-md">
+          <span class="material-symbols-outlined">search</span> Tìm kiếm
+        </button>
+        <button
+          tuiButton
+          type="button"
+          class="btn btn--ghost btn--small type-label-md"
+          (click)="resetSearch()"
+        >
+          <span class="material-symbols-outlined">refresh</span> Làm mới
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ── Grid ──────────────────────────────────────────────────────────── -->
+  @if (state$ | async; as state) {
+    @if (state.isLoading) {
+      <div class="panel-loading" aria-live="polite">Đang tải danh sách đơn hàng...</div>
+    }
+    @if (state.error) {
+      <div class="panel-error" role="alert">{{ state.error }}</div>
+    }
+
+    <div class="panel-grid-wrap">
+      <ag-grid-angular
+        class="panel-grid ag-theme-quartz"
+        [columnDefs]="columnDefs"
+        [defaultColDef]="defaultColDef"
+        [rowData]="state.rowData"
+        [pagination]="false"
+        [loading]="state.isLoading"
+        [overlayLoadingTemplate]="'Đang tải dữ liệu...'"
+        [overlayNoRowsTemplate]="'Không có đơn nhập hàng nào'"
+        [suppressCellFocus]="true"
+        [headerHeight]="46"
+        [rowHeight]="48"
+        (gridReady)="onGridReady($event)"
+        (gridSizeChanged)="onGridSizeChanged($event)"
+        (cellClicked)="onCellClicked($event)"
+        (rowDoubleClicked)="onRowDoubleClicked($event)"
+      ></ag-grid-angular>
+    </div>
+
+    <footer class="panel-pagination">
+      <div class="panel-pagination__info type-body-sm">
+        <span>Tổng: {{ state.totalElements }} đơn hàng</span>
+        <label for="po-page-size" class="type-label-md"> – Hiển thị </label>
+        <select
+          id="po-page-size"
+          class="type-label-md"
+          [ngModel]="state.pageSize"
+          (ngModelChange)="setPageSize($event)"
+        >
+          @for (s of pageSizeOptions; track s) {
+            <option [ngValue]="s">{{ s }}</option>
+          }
+        </select>
+        <span> / trang</span>
+      </div>
+      <div class="panel-pagination__nav">
+        <button
+          tuiButton
+          type="button"
+          class="btn btn--ghost btn--icon"
+          [disabled]="!canPrev(state)"
+          (click)="prevPage()"
+          aria-label="Trang trước"
+        >
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <span class="panel-pagination__indicator type-label-md">{{ pageSummary(state) }}</span>
+        <button
+          tuiButton
+          type="button"
+          class="btn btn--ghost btn--icon"
+          [disabled]="!canNext(state)"
+          (click)="nextPage()"
+          aria-label="Trang sau"
+        >
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
+    </footer>
+  }
+</div>

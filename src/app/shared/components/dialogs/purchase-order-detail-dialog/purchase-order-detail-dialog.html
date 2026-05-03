@@ -1,0 +1,145 @@
+<div class="pod-dialog">
+  <!-- Header -->
+  <header class="pod-dialog__header">
+    <div class="pod-dialog__header-left">
+      <span class="material-symbols-outlined pod-dialog__header-icon">receipt_long</span>
+      <div>
+        <h2 class="pod-dialog__title">Chi tiết đơn nhập hàng</h2>
+
+        <span class="pod-dialog__code">{{ order.purchaseOrderCode ?? '—' }}</span>
+      </div>
+    </div>
+    <button type="button" class="pod-close" (click)="close()" aria-label="Đóng">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </header>
+
+  <div class="pod-dialog__body">
+    <!-- Status banner -->
+    <div
+      class="pod-status-banner"
+      [class]="'pod-status-banner pod-status-banner--' + (order.paymentStatus | lowercase)"
+    >
+      <span class="material-symbols-outlined pod-status-banner__icon">{{
+        statusIcon(order.paymentStatus)
+      }}</span>
+      <div>
+        <span class="pod-status-banner__label">Trạng thái</span>
+        <span class="pod-status-banner__value">{{ statusLabel(order.paymentStatus) }}</span>
+      </div>
+    </div>
+
+    <!-- Info grid -->
+    <section class="pod-info-grid">
+      <div class="pod-info-item">
+        <span class="pod-info-item__label">Nhà cung cấp</span>
+        <span class="pod-info-item__value">{{ order.supplierName ?? '—' }}</span>
+      </div>
+      <div class="pod-info-item">
+        <span class="pod-info-item__label">Kho nhận hàng</span>
+        <span class="pod-info-item__value">{{ order.warehouseName ?? '—' }}</span>
+      </div>
+      <div class="pod-info-item">
+        <span class="pod-info-item__label">Người tạo</span>
+        <span class="pod-info-item__value">{{ order.accountFullName }}</span>
+      </div>
+      <div class="pod-info-item">
+        <span class="pod-info-item__label">Ngày tạo</span>
+        <span class="pod-info-item__value">{{ fmtDT(order.createdTime) }}</span>
+      </div>
+      <div class="pod-info-item">
+        <span class="pod-info-item__label">Ngày nhận dự kiến</span>
+        <span class="pod-info-item__value">{{ fmtDT(order.orderDate) }}</span>
+      </div>
+      <div class="pod-info-item pod-info-item--total">
+        <span class="pod-info-item__label">Tổng tiền</span>
+        <span class="pod-info-item__value pod-info-item__value--price">{{
+          fmtCurrency(order.totalPrice)
+        }}</span>
+      </div>
+    </section>
+
+    <!-- Details table -->
+    @if (order.details && order.details.length > 0) {
+      <section class="pod-table-section">
+        <h3 class="pod-section-title">
+          <span class="material-symbols-outlined">list_alt</span>
+          Chi tiết nguyên liệu
+        </h3>
+        <div class="pod-table-wrap">
+          <table class="pod-table">
+            <thead>
+              <tr>
+                <th class="pod-table__th">#</th>
+                <th class="pod-table__th">Nguyên liệu</th>
+                <th class="pod-table__th pod-table__th--num">Số lượng</th>
+                <th class="pod-table__th pod-table__th--num">Đơn giá</th>
+                <th class="pod-table__th pod-table__th--num">Thành tiền</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (d of order.details; track d.id; let i = $index) {
+                <tr class="pod-table__row">
+                  <td class="pod-table__td pod-table__td--center">{{ i + 1 }}</td>
+                  <td class="pod-table__td pod-table__td--name">{{ d.ingredientName }}</td>
+                  <td class="pod-table__td pod-table__td--num">{{ d.quantity }}</td>
+                  <td class="pod-table__td pod-table__td--num">{{ fmtCurrency(d.unitPrice) }}</td>
+                  <td class="pod-table__td pod-table__td--num pod-table__td--bold">
+                    {{ fmtCurrency(d.lineTotal) }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr class="pod-table__foot">
+                <td colspan="4" class="pod-table__td pod-table__td--foot-label">Tổng cộng</td>
+                <td class="pod-table__td pod-table__td--num pod-table__td--grand">
+                  {{ fmtCurrency(order.totalPrice) }}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+    }
+
+    <!-- Status transition actions -->
+    @if (!isTerminal()) {
+      <section class="pod-actions-section">
+        <h3 class="pod-section-title">
+          <span class="material-symbols-outlined">swap_horiz</span>
+          Chuyển trạng thái
+        </h3>
+
+        @if (error()) {
+          <div class="pod-error" role="alert">{{ error() }}</div>
+        }
+
+        <div class="pod-action-btns">
+          @for (s of allowedTransitions; track s) {
+            <button
+              type="button"
+              class="pod-action-btn {{ actionMeta(s).cls }}"
+              (click)="changeStatus(s)"
+              [disabled]="submitting()"
+            >
+              <span class="material-symbols-outlined">{{ actionMeta(s).icon }}</span>
+              {{ actionMeta(s).label }}
+            </button>
+          }
+        </div>
+      </section>
+    } @else {
+      <div class="pod-terminal-notice">
+        <span class="material-symbols-outlined">lock</span>
+        Đơn hàng đã ở trạng thái kết thúc, không thể thay đổi thêm.
+      </div>
+    }
+  </div>
+  <!-- /body -->
+
+  <!-- Footer -->
+  <footer class="pod-dialog__footer">
+    <button tuiButton type="button" class="pod-btn pod-btn--ghost" (click)="close()">Đóng</button>
+  </footer>
+</div>

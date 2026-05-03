@@ -1,0 +1,26 @@
+<div class="icd-dialog">
+  <header class="icd-dialog__header">
+    <span class="material-symbols-outlined icd-dialog__icon">warning</span>
+    <h2 class="icd-dialog__title">Xác nhận xóa danh mục</h2>
+  </header>
+
+  <div class="icd-dialog__body">
+    <p class="icd-dialog__message">
+      Bạn có chắc chắn muốn xóa danh mục nguyên liệu
+      <strong class="icd-dialog__name">{{ category.ingredientCategoryName }}</strong>?
+    </p>
+    <p class="icd-dialog__note">
+      Thao tác này sẽ vô hiệu hóa danh mục. Dữ liệu liên quan sẽ không bị ảnh hưởng.
+    </p>
+  </div>
+
+  <footer class="icd-dialog__footer">
+    <button tuiButton type="button" class="icd-btn icd-btn--ghost" (click)="cancel()">
+      Hủy bỏ
+    </button>
+    <button tuiButton type="button" class="icd-btn icd-btn--danger" (click)="confirm()">
+      <span class="material-symbols-outlined">delete</span>
+      Xác nhận xóa
+    </button>
+  </footer>
+</div>

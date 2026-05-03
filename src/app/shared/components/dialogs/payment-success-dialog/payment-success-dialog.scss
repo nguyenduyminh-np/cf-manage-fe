@@ -21,7 +21,7 @@ $font-body: 'Work Sans', sans-serif;
 
 :host {
   display: block;
-  width: 38rem;       // same fixed width as PosConfirmPayment dialog
+  width: 38rem; // same fixed width as PosConfirmPayment dialog
 }
 
 .payment-success {
@@ -157,9 +157,15 @@ $font-body: 'Work Sans', sans-serif;
       background: rgba($color-surface-container-lowest, 0.5);
     }
 
-    .text-center { text-align: center; }
-    .text-right { text-align: right; }
-    .font-medium { font-weight: 600; }
+    .text-center {
+      text-align: center;
+    }
+    .text-right {
+      text-align: right;
+    }
+    .font-medium {
+      font-weight: 600;
+    }
   }
 
   // Summary Row

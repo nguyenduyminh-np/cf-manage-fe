@@ -1,1 +1,223 @@
-<p>account works!</p>
+<div class="acc-page">
+  <header class="acc-page__header">
+    <div class="acc-page__title-wrap">
+      <span class="material-symbols-outlined" aria-hidden="true">manage_accounts</span>
+      <div>
+        <h1 class="acc-page__title type-headline-lg">Quản lý tài khoản</h1>
+        <p class="acc-page__subtitle type-body-sm">
+          Quản lý danh sách tài khoản, vai trò và trạng thái hoạt động.
+        </p>
+      </div>
+    </div>
+    <div class="acc-page__actions">
+      <button
+        type="button"
+        class="btn btn--export type-label-md"
+        [disabled]="isExporting()"
+        (click)="exportExcel()"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">download</span>
+        <span>{{ isExporting() ? 'Đang xuất...' : 'Xuất Excel' }}</span>
+      </button>
+      <button
+        tuiButton
+        type="button"
+        class="btn btn--primary type-label-md"
+        (click)="openCreateDialog()"
+      >
+        <span class="material-symbols-outlined">add</span>
+        Thêm tài khoản
+      </button>
+    </div>
+  </header>
+
+  <section class="panel-search" aria-label="Bộ lọc tài khoản">
+    <form (ngSubmit)="applySearch()">
+      <div class="panel-search__grid">
+        <label class="panel-search__field">
+          <span class="type-label-sm">Tên đăng nhập</span>
+          <input
+            class="type-body-md"
+            name="username"
+            type="text"
+            [(ngModel)]="searchFilters.username"
+            (ngModelChange)="onFiltersChanged()"
+            placeholder="Nhập tên đăng nhập"
+            autocomplete="off"
+          />
+        </label>
+
+        <label class="panel-search__field">
+          <span class="type-label-sm">Họ và tên</span>
+          <input
+            class="type-body-md"
+            name="fullName"
+            type="text"
+            [(ngModel)]="searchFilters.fullName"
+            (ngModelChange)="onFiltersChanged()"
+            placeholder="Nhập họ và tên"
+            autocomplete="off"
+          />
+        </label>
+
+        <label class="panel-search__field">
+          <span class="type-label-sm">Email</span>
+          <input
+            class="type-body-md"
+            name="email"
+            type="text"
+            [(ngModel)]="searchFilters.email"
+            (ngModelChange)="onFiltersChanged()"
+            placeholder="Nhập email"
+            autocomplete="off"
+          />
+        </label>
+
+        <label class="panel-search__field">
+          <span class="type-label-sm">Số điện thoại</span>
+          <input
+            class="type-body-md"
+            name="phoneNumber"
+            type="text"
+            [(ngModel)]="searchFilters.phoneNumber"
+            (ngModelChange)="onFiltersChanged()"
+            placeholder="Nhập số điện thoại"
+            autocomplete="off"
+          />
+        </label>
+
+        <label class="panel-search__field">
+          <span class="type-label-sm">Role ID</span>
+          <input
+            class="type-body-md"
+            name="roleId"
+            type="number"
+            min="1"
+            [(ngModel)]="searchFilters.roleId"
+            (ngModelChange)="onFiltersChanged()"
+            placeholder="VD: 1"
+          />
+        </label>
+
+        <label class="panel-search__field">
+          <span class="type-label-sm">Trạng thái</span>
+          <select
+            class="type-body-md"
+            name="isActive"
+            [(ngModel)]="searchFilters.isActive"
+            (ngModelChange)="onFiltersChanged()"
+          >
+            @for (o of activeStatusOptions; track o.value) {
+              <option [ngValue]="o.value">{{ o.label }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="panel-search__field">
+          <span class="type-label-sm">Từ ngày sinh</span>
+          <input
+            class="type-body-md"
+            name="fromBirthDate"
+            type="date"
+            [(ngModel)]="searchFilters.fromBirthDate"
+            (ngModelChange)="onFiltersChanged()"
+          />
+        </label>
+
+        <label class="panel-search__field">
+          <span class="type-label-sm">Đến ngày sinh</span>
+          <input
+            class="type-body-md"
+            name="toBirthDate"
+            type="date"
+            [(ngModel)]="searchFilters.toBirthDate"
+            (ngModelChange)="onFiltersChanged()"
+          />
+        </label>
+      </div>
+      <div class="panel-search__actions">
+        <button tuiButton type="submit" class="btn btn--primary btn--small type-label-md">
+          <span class="material-symbols-outlined">search</span> Tìm kiếm
+        </button>
+        <button
+          tuiButton
+          type="button"
+          class="btn btn--ghost btn--small type-label-md"
+          (click)="resetSearch()"
+        >
+          <span class="material-symbols-outlined">refresh</span> Làm mới
+        </button>
+      </div>
+    </form>
+  </section>
+
+  @if (state$ | async; as state) {
+    @if (state.isLoading) {
+      <div class="panel-loading" aria-live="polite">Đang tải danh sách tài khoản...</div>
+    }
+    @if (state.error) {
+      <div class="panel-error" role="alert">{{ state.error }}</div>
+    }
+
+    <div class="panel-grid-wrap">
+      <ag-grid-angular
+        class="panel-grid ag-theme-quartz"
+        [columnDefs]="columnDefs"
+        [defaultColDef]="defaultColDef"
+        [rowData]="state.rowData"
+        [pagination]="false"
+        [loading]="state.isLoading"
+        [overlayLoadingTemplate]="'Đang tải dữ liệu...'"
+        [overlayNoRowsTemplate]="'Không có tài khoản nào'"
+        [suppressCellFocus]="true"
+        [headerHeight]="46"
+        [rowHeight]="46"
+        (gridReady)="onGridReady($event)"
+        (gridSizeChanged)="onGridSizeChanged($event)"
+        (cellClicked)="onCellClicked($event)"
+        (rowDoubleClicked)="onRowDoubleClicked($event)"
+      ></ag-grid-angular>
+    </div>
+
+    <footer class="panel-pagination">
+      <div class="panel-pagination__info type-body-sm">
+        <span>Tổng: {{ state.totalElements }} tài khoản</span>
+        <label for="acc-page-size" class="type-label-md"> – Hiển thị </label>
+        <select
+          id="acc-page-size"
+          class="type-label-md"
+          [ngModel]="state.pageSize"
+          (ngModelChange)="setPageSize($event)"
+        >
+          @for (s of pageSizeOptions; track s) {
+            <option [ngValue]="s">{{ s }}</option>
+          }
+        </select>
+        <span> / trang</span>
+      </div>
+      <div class="panel-pagination__nav">
+        <button
+          tuiButton
+          type="button"
+          class="btn btn--ghost btn--icon"
+          [disabled]="!canPrev(state)"
+          (click)="prevPage()"
+          aria-label="Trang trước"
+        >
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <span class="panel-pagination__indicator type-label-md">{{ pageSummary(state) }}</span>
+        <button
+          tuiButton
+          type="button"
+          class="btn btn--ghost btn--icon"
+          [disabled]="!canNext(state)"
+          (click)="nextPage()"
+          aria-label="Trang sau"
+        >
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
+    </footer>
+  }
+</div>

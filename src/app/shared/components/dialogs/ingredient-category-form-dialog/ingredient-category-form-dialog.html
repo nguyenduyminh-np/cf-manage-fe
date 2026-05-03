@@ -1,0 +1,81 @@
+<div class="icf-dialog">
+  <!-- Header -->
+  <header class="icf-dialog__header">
+    <div class="icf-dialog__header-left">
+      <span class="material-symbols-outlined icf-dialog__header-icon">
+        {{ isEdit ? 'edit' : 'add_circle' }}
+      </span>
+      <h2 class="icf-dialog__title">
+        {{ isEdit ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới' }}
+      </h2>
+    </div>
+    <button type="button" class="icf-dialog__close" (click)="cancel()" aria-label="Đóng">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </header>
+
+  <form class="icf-dialog__form" (ngSubmit)="submit()">
+    <div class="icf-dialog__body">
+
+      @if (loading()) {
+        <div class="icf-skeleton-wrap">
+          <div class="icf-skeleton"></div>
+          <div class="icf-skeleton icf-skeleton--short"></div>
+        </div>
+      } @else {
+        <!-- Row 1: Mã + Tên -->
+        <div class="icf-row">
+          <label class="icf-field">
+            <span class="icf-field__label">Mã danh mục</span>
+            <input class="icf-field__input" name="ingredientCategoryCode" type="text"
+              [(ngModel)]="formData.ingredientCategoryCode" placeholder="Tự động sinh nếu để trống" autocomplete="off" />
+          </label>
+          <label class="icf-field">
+            <span class="icf-field__label">Tên danh mục <span class="icf-field__req">*</span></span>
+            <input class="icf-field__input" name="ingredientCategoryName" type="text"
+              [(ngModel)]="formData.ingredientCategoryName" placeholder="Nhập tên danh mục"
+              autocomplete="off" required />
+          </label>
+        </div>
+
+        <!-- Danh mục cha -->
+        <label class="icf-field">
+          <span class="icf-field__label">Danh mục cha</span>
+          <select class="icf-field__select" name="parentCategoryId"
+            [(ngModel)]="formData.parentCategoryId">
+            <option [ngValue]="0">-- Không có danh mục cha --</option>
+            @for (c of parentCategories(); track c.id) {
+              <option [ngValue]="c.id">{{ c.ingredientCategoryName }}</option>
+            }
+          </select>
+        </label>
+
+        <!-- Toggle trạng thái (chỉ khi edit) -->
+        @if (isEdit) {
+          <div class="icf-field">
+            <span class="icf-field__label">Trạng thái</span>
+            <label class="icf-toggle" [class.icf-toggle--on]="formData.active">
+              <input type="checkbox" name="active" [(ngModel)]="formData.active" class="icf-toggle__input" />
+              <span class="icf-toggle__track"><span class="icf-toggle__thumb"></span></span>
+              <span class="icf-toggle__text">
+                {{ formData.active ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
+              </span>
+            </label>
+          </div>
+        }
+      }
+    </div>
+
+    <!-- Footer -->
+    <footer class="icf-dialog__footer">
+      <button tuiButton type="button" class="icf-btn icf-btn--ghost" (click)="cancel()">
+        Hủy bỏ
+      </button>
+      <button tuiButton type="submit" class="icf-btn icf-btn--primary"
+        [disabled]="!isValid || loading()">
+        <span class="material-symbols-outlined">{{ isEdit ? 'save' : 'add_circle' }}</span>
+        {{ isEdit ? 'Lưu thay đổi' : 'Thêm danh mục' }}
+      </button>
+    </footer>
+  </form>
+</div>

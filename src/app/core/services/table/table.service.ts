@@ -26,6 +26,14 @@ export class TableService {
     return this.http.post<TableSearchResponse>(`${this.baseUrl}/search`, normalizedRequest);
   }
 
+  exportExcel(request: TableSearchRequest): Observable<Blob> {
+    const normalizedRequest = this.normalizeSearchRequest(request);
+
+    return this.http.post(`${this.baseUrl}/grid/export`, normalizedRequest, {
+      responseType: 'blob',
+    });
+  }
+
   detail(request: TableDetailRequest): Observable<TableDetailResponse> {
     return this.http.post<TableDetailResponse>(`${this.baseUrl}/detail`, request);
   }

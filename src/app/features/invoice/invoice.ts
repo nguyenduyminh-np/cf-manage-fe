@@ -1,5 +1,12 @@
 import { AsyncPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, Injector } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  inject,
+  Injector,
+  signal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AgGridAngular } from 'ag-grid-angular';
 import {
@@ -13,11 +20,12 @@ import {
   ValueFormatterParams,
   ValueGetterParams,
 } from 'ag-grid-community';
-import { TuiButton, TuiDialogService } from '@taiga-ui/core';
+import { TuiAlertService, TuiButton, TuiDialogService } from '@taiga-ui/core';
 import { PolymorpheusComponent } from '@taiga-ui/polymorpheus';
 import {
   BehaviorSubject,
   catchError,
+  finalize,
   map,
   Observable,
   of,
@@ -33,6 +41,7 @@ import {
   InvoiceDetailDialog,
   InvoiceDetailDialogInput,
 } from '../../shared/components/dialogs/invoice-detail-dialog/invoice-detail-dialog';
+import { downloadBlobFile } from '../../shared/utils/file-download.utils';
 
 // ----- View State -----
 interface InvoiceViewState {
@@ -74,8 +83,10 @@ interface InvoiceQuery {
 export class Invoice {
   private readonly invoiceService = inject(InvoiceService);
   private readonly dialogService = inject(TuiDialogService);
+  private readonly alertService = inject(TuiAlertService);
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly isExporting = signal(false);
 
   // ---- Reactive Query Hub ----
   private readonly querySubject = new BehaviorSubject<InvoiceQuery>({
@@ -322,6 +333,30 @@ export class Invoice {
     this.applySearch();
   }
 
+  protected exportExcel(): void {
+    if (this.isExporting()) {
+      return;
+    }
+
+    this.isExporting.set(true);
+    this.invoiceService
+      .exportExcel(this.buildSearchRequest(this.querySubject.getValue()))
+      .pipe(
+        finalize(() => this.isExporting.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (blob) =>
+          downloadBlobFile(blob, `DANH_SACH_HOA_DON_${Date.now()}.xlsx`, this.alertService),
+        error: (error) =>
+          this.alertService
+            .open('Không thể xuất Excel danh sách hóa đơn. Vui lòng thử lại.', {
+              appearance: 'error',
+            })
+            .subscribe(),
+      });
+  }
+
   // -------------------------
   // Pagination
   // -------------------------
@@ -406,17 +441,7 @@ export class Invoice {
   // API Call
   // -------------------------
   private fetchInvoices(query: InvoiceQuery): Observable<InvoiceViewState> {
-    const request: InvoiceSearchRequest = {
-      page: query.page,
-      limit: query.limit,
-      sortField: query.sortField,
-      sortDir: query.sortDir,
-      invoiceCode: query.filters.invoiceCode || undefined,
-      paymentStatus: query.filters.paymentStatus || undefined,
-      paymentMethod: query.filters.paymentMethod || undefined,
-      totalAmountFrom: query.filters.totalAmountFrom ?? undefined,
-      totalAmountTo: query.filters.totalAmountTo ?? undefined,
-    };
+    const request = this.buildSearchRequest(query);
 
     return this.invoiceService.search(request).pipe(
       map((response) => ({
@@ -449,6 +474,20 @@ export class Invoice {
         }),
       ),
     );
+  }
+
+  private buildSearchRequest(query: InvoiceQuery): InvoiceSearchRequest {
+    return {
+      page: query.page,
+      limit: query.limit,
+      sortField: query.sortField,
+      sortDir: query.sortDir,
+      invoiceCode: query.filters.invoiceCode || undefined,
+      paymentStatus: query.filters.paymentStatus || undefined,
+      paymentMethod: query.filters.paymentMethod || undefined,
+      totalAmountFrom: query.filters.totalAmountFrom ?? undefined,
+      totalAmountTo: query.filters.totalAmountTo ?? undefined,
+    };
   }
 
   // -------------------------

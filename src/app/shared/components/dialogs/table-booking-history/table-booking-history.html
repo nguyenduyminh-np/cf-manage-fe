@@ -10,10 +10,22 @@
         </div>
       </div>
 
-      <button tuiButton type="button" class="btn btn--primary" (click)="openCreateBooking()">
-        <span class="material-symbols-outlined" aria-hidden="true">calendar_add_on</span>
-        <span>Đặt bàn</span>
-      </button>
+      <div class="table-booking-history__header-actions">
+        <button
+          type="button"
+          class="btn btn--export type-label-md"
+          [disabled]="isExporting"
+          (click)="exportExcel()"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">download</span>
+          <span>{{ isExporting ? 'Đang xuất...' : 'Xuất Excel' }}</span>
+        </button>
+
+        <button tuiButton type="button" class="btn btn--primary" (click)="openCreateBooking()">
+          <span class="material-symbols-outlined" aria-hidden="true">calendar_add_on</span>
+          <span>Đặt bàn</span>
+        </button>
+      </div>
     </header>
 
     <!-- Search bar: nhập/chọn filter để tự động gọi lại API danh sách lịch sử. Input: filter state. Output: query mới. -->

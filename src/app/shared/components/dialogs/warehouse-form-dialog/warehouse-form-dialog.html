@@ -1,0 +1,103 @@
+<div class="sf-dialog">
+  <!-- Header -->
+  <header class="sf-dialog__header">
+    <div class="sf-dialog__header-left">
+      <span class="material-symbols-outlined sf-dialog__header-icon">
+        {{ isEdit ? 'edit' : 'warehouse' }}
+      </span>
+      <h2 class="sf-dialog__title">
+        {{ isEdit ? 'Chỉnh sửa nhà kho' : 'Thêm nhà kho mới' }}
+      </h2>
+    </div>
+    <button type="button" class="sf-dialog__close" (click)="cancel()" aria-label="Đóng">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </header>
+
+  <form class="sf-dialog__form" (ngSubmit)="submit()">
+    <div class="sf-dialog__body">
+
+      <!-- Row 1: Mã + Tên -->
+      <div class="sf-row">
+        <label class="sf-field">
+          <span class="sf-field__label">Mã nhà kho</span>
+          <input
+            class="sf-field__input"
+            name="warehouseCode"
+            type="text"
+            [(ngModel)]="formData.warehouseCode"
+            placeholder="VD: KHO-001"
+            autocomplete="off"
+          />
+        </label>
+        <label class="sf-field">
+          <span class="sf-field__label">Tên nhà kho <span class="sf-field__req">*</span></span>
+          <input
+            class="sf-field__input"
+            name="warehouseName"
+            type="text"
+            [(ngModel)]="formData.warehouseName"
+            placeholder="Nhập tên nhà kho"
+            autocomplete="off"
+            required
+          />
+        </label>
+      </div>
+
+      <!-- Location -->
+      <label class="sf-field">
+        <span class="sf-field__label">Vị trí</span>
+        <input
+          class="sf-field__input"
+          name="location"
+          type="text"
+          [(ngModel)]="formData.location"
+          placeholder="Ví dụ: Tầng 1, Khu A"
+          autocomplete="off"
+        />
+      </label>
+
+      <!-- Note -->
+      <label class="sf-field">
+        <span class="sf-field__label">Ghi chú</span>
+        <input
+          class="sf-field__input"
+          name="note"
+          type="text"
+          [(ngModel)]="formData.note"
+          placeholder="Mô tả hoặc lưu ý thêm"
+          autocomplete="off"
+        />
+      </label>
+
+      <!-- Toggle: only in edit mode -->
+      @if (isEdit) {
+        <div class="sf-field">
+          <span class="sf-field__label">Trạng thái</span>
+          <label class="sf-toggle" [class.sf-toggle--on]="formData.active">
+            <input
+              type="checkbox"
+              name="active"
+              [(ngModel)]="formData.active"
+              class="sf-toggle__input"
+            />
+            <span class="sf-toggle__track"><span class="sf-toggle__thumb"></span></span>
+            <span class="sf-toggle__text">
+              {{ formData.active ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
+            </span>
+          </label>
+        </div>
+      }
+
+    </div><!-- /body -->
+
+    <!-- Footer -->
+    <footer class="sf-dialog__footer">
+      <button tuiButton type="button" class="sf-btn sf-btn--ghost" (click)="cancel()">Hủy bỏ</button>
+      <button tuiButton type="submit" class="sf-btn sf-btn--primary" [disabled]="!isValid">
+        <span class="material-symbols-outlined">{{ isEdit ? 'save' : 'add' }}</span>
+        {{ isEdit ? 'Lưu thay đổi' : 'Thêm mới' }}
+      </button>
+    </footer>
+  </form>
+</div>

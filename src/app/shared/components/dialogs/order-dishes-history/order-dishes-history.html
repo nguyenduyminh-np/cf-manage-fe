@@ -8,17 +8,14 @@
           <p>{{ displayTableName(state) }}</p>
         </div>
       </div>
-            <!-- Always visible: Export Excel on far right -->
       <button
-        tuiButton
         type="button"
-        class="btn btn--outline"
-        [disabled]="isBulkUpdating"
+        class="btn btn--export type-label-md"
+        [disabled]="isBulkUpdating || isExporting"
         (click)="exportExcel()"
-        title="Xuất file Excel"
       >
-        <span class="material-symbols-outlined">download</span>
-        <span>Xuất Excel</span>
+        <span class="material-symbols-outlined" aria-hidden="true">download</span>
+        <span>{{ isExporting ? 'Đang xuất...' : 'Xuất Excel' }}</span>
       </button>
     </header>
 
@@ -246,7 +243,6 @@
           </button>
         }
       </div>
-    
     </section>
 
     @if (state.isLoading) {

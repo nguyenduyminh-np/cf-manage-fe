@@ -55,10 +55,6 @@ export const routes: Routes = [
         loadComponent: () => import('./features/purchase-order/purchase-order').then(m => m.PurchaseOrder),
       },
       {
-        path: 'stock-level',
-        loadComponent: () => import('./features/stock-level/stock-level').then(m => m.StockLevel),
-      },
-      {
         path: 'supplier',
         loadComponent: () => import('./features/supplier/supplier').then(m => m.Supplier),
       },

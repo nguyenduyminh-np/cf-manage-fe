@@ -1,0 +1,369 @@
+@use 'sass:color';
+@use '../../../assets/styles/color-kit' as *;
+
+@import 'ag-grid-community/styles/ag-grid.css';
+@import 'ag-grid-community/styles/ag-theme-quartz.css';
+
+// ── Host ──────────────────────────────────────────────────────────────────────
+:host {
+  display: block;
+}
+
+// ── Page shell ────────────────────────────────────────────────────────────────
+.sup-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  color: $color-primary;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+.sup-page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  @media (max-width: 680px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.sup-page__title-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+
+  > .material-symbols-outlined {
+    width: 2.35rem;
+    height: 2.35rem;
+    display: grid;
+    place-items: center;
+    border-radius: 0.8rem;
+    color: #ffffff;
+    background: linear-gradient(145deg, $color-primary-container, $color-primary);
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+
+  h1 {
+    margin: 0;
+    color: $color-primary;
+  }
+  p {
+    margin: 0.15rem 0 0;
+    color: rgba($color-secondary, 0.9);
+  }
+}
+
+.sup-page__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+// ── Search bar ────────────────────────────────────────────────────────────────
+.panel-search {
+  padding: 0.85rem;
+  border: 1px solid rgba($color-outline-variant, 0.6);
+  border-radius: 0.9rem;
+  background: rgba($color-surface-container-low, 0.7);
+}
+
+.panel-search__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.panel-search__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  span {
+    color: rgba($color-secondary, 0.9);
+  }
+
+  input,
+  select {
+    height: 2.5rem;
+    width: 100%;
+    padding: 0 0.8rem;
+    border: 1px solid rgba($color-outline-variant, 0.74);
+    border-radius: 0.7rem;
+    color: $color-primary;
+    background: rgba($color-surface, 0.96);
+    outline: none;
+    transition: all 0.2s ease;
+
+    &::placeholder {
+      color: rgba($color-secondary, 0.58);
+    }
+    &:focus-visible {
+      border-color: rgba($color-primary, 0.78);
+      box-shadow: 0 0 0 2px rgba($color-primary, 0.14);
+    }
+  }
+  select {
+    padding-right: 2rem;
+    cursor: pointer;
+  }
+}
+
+.panel-search__actions {
+  display: flex;
+  gap: 0.65rem;
+  margin-top: 1rem;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+// ── Grid ──────────────────────────────────────────────────────────────────────
+.panel-grid-wrap {
+  width: 100%;
+}
+
+.panel-grid {
+  width: 100%;
+  height: calc((46px * 12) + 2px);
+  border-radius: 0.85rem;
+  overflow: hidden;
+  border: 1px solid rgba($color-outline-variant, 0.5);
+
+  --ag-font-family: var(--font-family-primary);
+  --ag-background-color: #{$color-surface};
+  --ag-header-background-color: #{$color-surface-container};
+  --ag-header-foreground-color: #{rgba($color-secondary, 0.9)};
+  --ag-header-column-separator-color: #{rgba($color-outline-variant, 0.7)};
+  --ag-row-border-color: #{rgba($color-outline-variant, 0.52)};
+  --ag-odd-row-background-color: #{rgba($color-surface-container-low, 0.88)};
+  --ag-selected-row-background-color: #{rgba($color-primary-container, 0.12)};
+  --ag-border-color: #{rgba($color-outline-variant, 0.45)};
+  --ag-foreground-color: #{$color-primary};
+}
+
+// ── Pagination ────────────────────────────────────────────────────────────────
+.panel-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.95rem 1.35rem;
+  background: $color-surface-container-low;
+  border-top: 1px solid rgba($color-outline-variant, 0.58);
+  border-radius: 0 0 0.85rem 0.85rem;
+  @media (max-width: 680px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.panel-pagination__info {
+  margin: 0;
+  color: rgba($color-secondary, 0.92);
+  label {
+    margin: 0 0.45rem;
+  }
+  select {
+    height: 2rem;
+    border-radius: 0.55rem;
+    border: 1px solid rgba($color-outline-variant, 0.75);
+    background: rgba($color-surface, 0.95);
+    color: $color-primary;
+    padding: 0 1rem 0 0.55rem;
+    outline: none;
+    &:focus-visible {
+      border-color: rgba($color-primary, 0.75);
+      box-shadow: 0 0 0 2px rgba($color-primary, 0.16);
+    }
+  }
+}
+
+.panel-pagination__nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.panel-pagination__indicator {
+  min-width: 6.9rem;
+  text-align: center;
+  color: rgba($color-primary, 0.92);
+}
+
+// ── State messages ────────────────────────────────────────────────────────────
+.panel-loading,
+.panel-error {
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  font-size: var(--type-body-md-size);
+}
+.panel-loading {
+  background: rgba($color-surface-container-low, 0.8);
+  color: rgba($color-secondary, 0.9);
+}
+.panel-error {
+  background: rgba(#ba1a1a, 0.08);
+  color: #ba1a1a;
+  border: 1px solid rgba(#ba1a1a, 0.2);
+}
+
+// ── Buttons ───────────────────────────────────────────────────────────────────
+button.btn[tuiButton] {
+  border: none;
+  box-shadow: none;
+}
+
+.btn {
+  min-height: 2.35rem;
+  border-radius: 0.66rem;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
+}
+.btn--small {
+  min-height: 2.5rem;
+  padding: 0 1rem;
+}
+
+.btn--primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #ffffff;
+  background-color: $color-primary;
+  padding: 0 1.08rem;
+  &:hover {
+    background-color: color.adjust($color-primary, $lightness: -5%);
+  }
+  .material-symbols-outlined {
+    font-size: 1.1rem;
+  }
+}
+.btn--primary.btn--small,
+.btn--ghost.btn--small {
+  box-shadow: 0 10px 24px -18px rgba($color-primary, 0.45);
+}
+.btn--ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: $color-primary;
+  background-color: rgba($color-surface, 0.95);
+  border: 1px solid rgba($color-outline-variant, 0.68);
+  padding: 0 1.08rem;
+  &:hover {
+    background-color: rgba($color-surface-container-highest, 0.95);
+  }
+  .material-symbols-outlined {
+    font-size: 1.1rem;
+  }
+}
+.btn--ghost.btn--small {
+  background-color: rgba($color-surface, 0.98);
+}
+
+.btn--icon {
+  width: 2.2rem;
+  min-width: 2.2rem;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  .material-symbols-outlined {
+    font-size: 1.1rem;
+  }
+}
+
+// ── AG Grid cell overrides ────────────────────────────────────────────────────
+:host ::ng-deep {
+  .ag-header-cell-label {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: var(--type-label-sm-size);
+    font-weight: var(--font-weight-bold);
+  }
+
+  .ag-cell {
+    display: inline-flex;
+    align-items: center;
+    font-size: var(--type-body-md-size);
+  }
+  .ag-cell.cell-center {
+    justify-content: center;
+  }
+  .ag-cell.cell-right {
+    justify-content: flex-end;
+  }
+  .ag-cell.cell-bold {
+    font-weight: var(--font-weight-bold);
+  }
+  .ag-cell.cell-actions {
+    gap: 0.4rem;
+    cursor: default;
+  }
+
+  // Supplier code pill
+  .sup-code-cell {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: $color-primary;
+    background: rgba($color-primary-container, 0.12);
+    padding: 0.16rem 0.5rem;
+    border-radius: 0.35rem;
+    border: 1px solid rgba($color-primary-container, 0.28);
+    letter-spacing: 0.03em;
+  }
+
+  // Status badges
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.24rem 0.58rem;
+    font-size: var(--type-label-sm-size);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    border: 1px solid transparent;
+
+    &--active {
+      color: #1e6f24;
+      background: rgba(#9ae3a0, 0.28);
+      border-color: rgba(#5fbe67, 0.34);
+    }
+    &--inactive {
+      color: #6e4707;
+      background: rgba(#f4c27e, 0.3);
+      border-color: rgba(#d1933b, 0.34);
+    }
+  }
+
+  // Action icons
+  .action-icon {
+    font-size: 1.15rem;
+    border-radius: 0.4rem;
+    padding: 0.22rem;
+    cursor: pointer;
+    transition:
+      background 0.14s,
+      color 0.14s;
+    &--edit {
+      color: rgba($color-primary, 0.75);
+      &:hover {
+        background: rgba($color-primary-container, 0.25);
+        color: $color-primary;
+      }
+    }
+    &--delete {
+      color: rgba(#ba1a1a, 0.72);
+      &:hover {
+        background: rgba(#ba1a1a, 0.12);
+        color: #ba1a1a;
+      }
+    }
+  }
+}

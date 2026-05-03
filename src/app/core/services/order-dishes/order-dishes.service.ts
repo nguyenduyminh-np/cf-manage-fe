@@ -17,6 +17,12 @@ export class OrderDishesHistoryService {
     return this.http.post<OrderHistorySearchResponse>(`${this.baseUrl}/order-history`, request);
   }
 
+  exportExcel(request: OrderHistorySearchRequest): Observable<Blob> {
+    return this.http.post(`${this.baseUrl}/order-history/export`, request, {
+      responseType: 'blob',
+    });
+  }
+
   // service
   updateStatusBulk(body: BulkUpdateStatusRequest): Observable<BulkUpdateStatusResponse> {
     return this.http.post<BulkUpdateStatusResponse>(`${this.baseUrl}/update-status`, body);

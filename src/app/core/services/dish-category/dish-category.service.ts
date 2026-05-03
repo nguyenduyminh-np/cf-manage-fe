@@ -10,7 +10,7 @@ import {
   DishCategoryDetailApiResponse,
   DishCategoryDeleteApiResponse,
   DishCategoryOptionsApiResponse,
-} from '../../models/dish-category/dish-category.model'; 
+} from '../../models/dish-category/dish-category.model';
 
 @Injectable({ providedIn: 'root' })
 export class DishCategoryService {
@@ -22,6 +22,12 @@ export class DishCategoryService {
    */
   search(request: DishCategorySearchRequest): Observable<DishCategorySearchApiResponse> {
     return this.http.post<DishCategorySearchApiResponse>(`${this.baseUrl}/search`, request);
+  }
+
+  exportExcel(request: DishCategorySearchRequest): Observable<Blob> {
+    return this.http.post(`${this.baseUrl}/export`, request, {
+      responseType: 'blob',
+    });
   }
 
   /**
@@ -52,7 +58,7 @@ export class DishCategoryService {
     return this.http.post<DishCategoryDetailApiResponse>(`${this.baseUrl}/detail`, { id });
   }
 
-    /**
+  /**
    * Lấy danh sách danh mục active để làm dropdown.
    */
   getOptions(): Observable<DishCategoryOptionsApiResponse> {

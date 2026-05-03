@@ -228,9 +228,10 @@
     padding-right: 1rem;
 
     .shift-card {
-      background-color: rgba($color-primary, 0.05);
-      border-radius: 0.75rem;
-      padding: 1rem;
+      background-color: rgba($color-surface, 0.6);
+      border-radius: 0.7rem;
+      padding: 0.85rem 0.9rem;
+      border: 1px solid rgba($color-outline-variant, 0.3);
 
       .shift-title {
         font-size: 0.625rem; // 10px
@@ -238,7 +239,7 @@
         color: rgba($color-primary, 0.4);
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.4rem;
       }
 
       .shift-status {
@@ -246,16 +247,23 @@
         gap: 0.5rem;
 
         .dot {
-          width: 0.5rem;
-          height: 0.5rem;
+          width: 0.45rem;
+          height: 0.45rem;
           border-radius: 50%;
-          background-color: $color-tertiary-container;
+          background-color: $color-primary;
         }
         .text {
-          font-size: 0.75rem;
+          font-size: 0.78rem;
           font-weight: 600;
           color: $color-primary;
         }
+      }
+
+      .shift-time {
+        margin: 0.4rem 0 0;
+        font-size: 0.7rem;
+        font-weight: 500;
+        color: rgba($color-secondary, 0.85);
       }
     }
   }

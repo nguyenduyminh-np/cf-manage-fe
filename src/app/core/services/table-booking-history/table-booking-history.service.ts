@@ -23,6 +23,10 @@ export class TableBookingHistoryService {
     return this.tableBookingService.searchPendingAndConfirmedBookings(request);
   }
 
+  exportExcel(request: TableBookingSearchRequest): Observable<Blob> {
+    return this.tableBookingService.exportExcel(request);
+  }
+
   delete(request: DeleteTableBookingRequest): Observable<DeleteTableBookingResponse> {
     return this.tableBookingService.delete(request);
   }

@@ -7,6 +7,7 @@ import {
   inject,
   Injector,
   OnDestroy,
+  signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AgGridAngular } from 'ag-grid-angular';
@@ -21,11 +22,12 @@ import {
   ValueFormatterParams,
   ValueGetterParams,
 } from 'ag-grid-community';
-import { TuiButton, TuiDialogService } from '@taiga-ui/core';
+import { TuiAlertService, TuiButton, TuiDialogService } from '@taiga-ui/core';
 import { PolymorpheusComponent } from '@taiga-ui/polymorpheus';
 import {
   BehaviorSubject,
   catchError,
+  finalize,
   map,
   Observable,
   of,
@@ -55,6 +57,7 @@ import {
 import { DishService } from '../../core/services/dish/dish.service';
 import { DishFormDialog } from '../../shared/components/dialogs/dish-form-dialog/dish-form-dialog';
 import { DishDeleteDialog } from '../../shared/components/dialogs/dish-delete-dialog/dish-delete-dialog';
+import { downloadBlobFile } from '../../shared/utils/file-download.utils';
 
 // ─── Tab ──────────────────────────────────────────────────────────────────────
 export type ActiveTab = 'category' | 'dish';
@@ -110,11 +113,13 @@ export class Dish implements OnDestroy {
   private readonly dishCategoryService = inject(DishCategoryService);
   private readonly dishService = inject(DishService);
   private readonly dialogService = inject(TuiDialogService);
+  private readonly alertService = inject(TuiAlertService);
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
 
   // ── Tab state ──────────────────────────────────────────────────────────────
   protected activeTab: ActiveTab = 'category';
+  protected readonly isExporting = signal(false);
 
   protected switchTab(tab: ActiveTab): void {
     if (this.activeTab === tab) return;
@@ -295,6 +300,39 @@ export class Dish implements OnDestroy {
   protected catResetSearch(): void {
     this.catSearchFilters = { dishCategoryCode: '', dishCategoryName: '', isActive: '' };
     this.catApplySearch();
+  }
+
+  protected exportExcel(): void {
+    if (this.isExporting()) {
+      return;
+    }
+
+    const activeTab = this.activeTab;
+    this.isExporting.set(true);
+
+    const export$ =
+      activeTab === 'category'
+        ? this.dishCategoryService.exportExcel(this.buildCategoryExportRequest())
+        : this.dishService.exportExcel(this.buildDishExportRequest());
+
+    export$
+      .pipe(
+        finalize(() => this.isExporting.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (blob) => {
+          const fileName =
+            activeTab === 'category'
+              ? `DANH_SACH_DANH_MUC_MON_${Date.now()}.xlsx`
+              : `DANH_SACH_MON_AN_${Date.now()}.xlsx`;
+          downloadBlobFile(blob, fileName, this.alertService);
+        },
+        error: (error) =>
+          this.alertService
+            .open('Không thể xuất Excel danh sách thực đơn.', { appearance: 'error' })
+            .subscribe(),
+      });
   }
 
   // ── Category pagination ────────────────────────────────────────────────────
@@ -592,6 +630,38 @@ export class Dish implements OnDestroy {
   protected dishResetSearch(): void {
     this.dishSearchFilters = { dishCode: '', dishName: '', isActive: '' };
     this.dishApplySearch();
+  }
+
+  private buildCategoryExportRequest(): DishCategorySearchRequest {
+    const q = this.catQuerySubject.getValue();
+    const isActive =
+      q.filters.isActive === 'true' ? true : q.filters.isActive === 'false' ? false : undefined;
+
+    return {
+      page: 0,
+      limit: Math.max(1, this.catLatestState?.totalElements ?? q.limit),
+      sortField: q.sortField,
+      sortDir: q.sortDir,
+      dishCategoryCode: q.filters.dishCategoryCode || undefined,
+      dishCategoryName: q.filters.dishCategoryName || undefined,
+      isActive,
+    };
+  }
+
+  private buildDishExportRequest(): DishSearchRequest {
+    const q = this.dishQuerySubject.getValue();
+    const isActive =
+      q.filters.isActive === 'true' ? true : q.filters.isActive === 'false' ? false : undefined;
+
+    return {
+      page: 0,
+      limit: Math.max(1, this.dishLatestState?.totalElements ?? q.limit),
+      sortField: q.sortField,
+      sortDir: q.sortDir,
+      dishCode: q.filters.dishCode || undefined,
+      dishName: q.filters.dishName || undefined,
+      isActive,
+    };
   }
 
   // ── Dish pagination ────────────────────────────────────────────────────────

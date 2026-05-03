@@ -27,9 +27,18 @@
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
   padding: 1.1rem 1.35rem;
   border-bottom: 1px solid rgba($color-outline-variant, 0.58);
   background: rgba(#ffffff, 0.88);
+}
+
+.table-booking-history__header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 // Title: icon, heading, and table name subtitle.
@@ -160,7 +169,7 @@
     }
   }
 
-  input[type="date"] {
+  input[type='date'] {
     position: relative;
     cursor: pointer;
     text-transform: uppercase;

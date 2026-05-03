@@ -25,33 +25,41 @@
 
     <div class="booking-field">
       <label class="type-label-md" for="booking-seats">Số chỗ</label>
-      <select id="booking-seats" formControlName="seats">
-        @for (option of seatOptions; track option.value) {
-          <option [ngValue]="option.value">{{ option.label }}</option>
-        }
-      </select>
+      <app-ui-select
+        name="booking-seats"
+        ariaLabel="Số chỗ"
+        placeholder="Tất cả"
+        [options]="seatOptions"
+        [value]="searchForm.controls.seats.value"
+        (valueChange)="setSeatFilter($event)"
+      ></app-ui-select>
     </div>
 
     <div class="booking-field">
       <label class="type-label-md" for="booking-status">Trạng thái</label>
-      <select id="booking-status" formControlName="status">
-        @for (option of statusOptions; track option.value) {
-          <option [ngValue]="option.value">{{ option.label }}</option>
-        }
-      </select>
+      <app-ui-select
+        name="booking-status"
+        ariaLabel="Trạng thái"
+        placeholder="Tất cả"
+        [options]="statusOptions"
+        [value]="searchForm.controls.status.value"
+        (valueChange)="setStatusFilter($event)"
+      ></app-ui-select>
     </div>
 
     <div class="booking-field">
       <label class="type-label-md" for="booking-floor">Tầng</label>
-      <select id="booking-floor" formControlName="floor">
-        @for (option of floorOptions; track option.value) {
-          <option [ngValue]="option.value">{{ option.label }}</option>
-        }
-      </select>
+      <app-ui-select
+        name="booking-floor"
+        ariaLabel="Tầng"
+        placeholder="Tất cả"
+        [options]="floorOptions"
+        [value]="searchForm.controls.floor.value"
+        (valueChange)="setFloorFilter($event)"
+      ></app-ui-select>
     </div>
 
     <button
-      tuiButton
       type="submit"
       class="booking-button booking-button--search type-label-md"
       [disabled]="isLoading"
@@ -64,7 +72,6 @@
     <div class="booking-floor-tabs" role="tablist" aria-label="Chọn tầng">
       @for (floor of floorTabs; track floor) {
         <button
-          tuiButton
           type="button"
           class="booking-button booking-button--floor type-label-md"
           [class.booking-button--active]="selectedFloor === floor.value"
@@ -76,15 +83,16 @@
       }
     </div>
 
-    <button
-      tuiButton
-      type="button"
-      class="booking-button booking-button--create type-label-md"
-      (click)="openPosTableBookingDialog()"
-    >
-      <span class="booking-button__icon">+</span>
-      <span>Đặt bàn mới</span>
-    </button>
+    <div class="booking-toolbar__actions">
+      <button
+        type="button"
+        class="booking-button booking-button--create type-label-md"
+        (click)="openPosTableBookingDialog()"
+      >
+        <span class="booking-button__icon">+</span>
+        <span>Đặt bàn mới</span>
+      </button>
+    </div>
   </section>
 
   @if (tableActionError(); as tableActionErrorMessage) {
@@ -103,7 +111,6 @@
       <h3 class="type-title-md">{{ loadError }}</h3>
       <p class="type-body-md text-measure">Kiểm tra kết nối hoặc thử tải lại danh sách bàn.</p>
       <button
-        tuiButton
         type="button"
         class="booking-button booking-button--search type-label-md"
         (click)="search()"
@@ -130,7 +137,6 @@
 
             @if (table.tableStatus === 'BOOKED') {
               <button
-                tuiButton
                 type="button"
                 class="booking-button booking-button--check-in type-label-md"
                 [disabled]="isCheckingInTable(table.tableId)"
@@ -143,7 +149,6 @@
               </button>
             } @else if (table.tableStatus === 'OCCUPIED') {
               <button
-                tuiButton
                 type="button"
                 class="booking-button booking-button--order-dishes type-label-md"
                 (click)="onOrderDishesClick($event, table)"
@@ -210,7 +215,6 @@
 
     <nav class="booking-pagination" aria-label="Phân trang">
       <button
-        tuiButton
         type="button"
         class="booking-pagination__button type-label-md"
         [disabled]="currentPageWithinRange === 1"
@@ -222,7 +226,6 @@
 
       @for (page of visiblePageNumbers; track page) {
         <button
-          tuiButton
           type="button"
           class="booking-pagination__button type-label-md"
           [class.booking-pagination__button--active]="currentPageWithinRange === page"
@@ -234,7 +237,6 @@
       }
 
       <button
-        tuiButton
         type="button"
         class="booking-pagination__button type-label-md"
         [disabled]="currentPageWithinRange === totalPages"

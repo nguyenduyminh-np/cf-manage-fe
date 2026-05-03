@@ -13,17 +13,17 @@
 
 .ui-select__trigger {
   width: 100%;
-  min-height: 2.5rem;
-  padding: 0.5rem 0.75rem 0.5rem 1rem;
+  min-height: 3rem;
+  padding: 0.9rem 0.8rem 0.9rem 1rem;
   background-color: $color-surface;
-  border: 1px solid rgba($color-outline-variant, 0.5);
-  border-radius: 0.5rem;
+  border: 1px solid rgba($color-outline-variant, 0.54);
+  border-radius: 0.65rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
   font-family: $font-body;
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: $color-primary;
   cursor: pointer;
   text-align: left;
@@ -34,14 +34,14 @@
     background-color 180ms ease;
 
   &:hover {
-    border-color: rgba($color-primary, 0.48);
+    border-color: rgba($color-primary, 0.5);
     background-color: rgba($color-surface, 0.98);
   }
 
   &:focus-visible,
   .ui-select--open & {
-    border-color: $color-primary-container;
-    box-shadow: 0 0 0 2px rgba($color-primary-container, 0.2);
+    border-color: rgba($color-primary, 0.74);
+    box-shadow: 0 0 0 4px rgba($color-primary, 0.08);
   }
 }
 
@@ -60,7 +60,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   line-height: 1;
   transform: rotate(0deg);
   transform-origin: center;
@@ -76,24 +76,24 @@
 }
 
 .ui-select--open .ui-select__chevron {
-  color: $color-primary-container;
+  color: rgba($color-primary, 0.92);
   transform: rotate(180deg);
 }
 
 .ui-select__menu {
   display: block;
   list-style: none;
-  margin: 0.35rem 0 0;
-  padding: 0.35rem;
+  margin: 0.4rem 0 0;
+  padding: 0.4rem;
   position: absolute;
   top: calc(100% + 0.2rem);
   left: 0;
   right: 0;
   z-index: 20;
-  border-radius: 0.72rem;
-  border: 1px solid rgba($color-outline-variant, 0.72);
+  border-radius: 0.8rem;
+  border: 1px solid rgba($color-outline-variant, 0.66);
   background: rgba($color-surface, 0.99);
-  box-shadow: 0 18px 34px -26px rgba($color-primary, 0.48);
+  box-shadow: 0 20px 34px -26px rgba($color-primary, 0.5);
   max-height: 15rem;
   overflow: auto;
 
@@ -108,23 +108,23 @@
   background: transparent;
   color: $color-primary;
   text-align: left;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   font-weight: 500;
   font-family: $font-body;
   border-radius: 0.52rem;
-  padding: 0.6rem 0.7rem;
+  padding: 0.68rem 0.75rem;
   cursor: pointer;
   transition:
     background-color 140ms ease,
     color 140ms ease;
 
   &:hover {
-    background-color: rgba($color-primary-container, 0.3);
+    background-color: rgba($color-primary, 0.08);
   }
 }
 
 .ui-select__option--selected {
-  background-color: rgba($color-primary-container, 0.45);
+  background-color: rgba($color-primary, 0.14);
   color: color.adjust($color-primary, $lightness: -4%);
 }
 

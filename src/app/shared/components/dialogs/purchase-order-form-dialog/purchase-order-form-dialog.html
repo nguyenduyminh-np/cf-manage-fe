@@ -1,0 +1,190 @@
+<div class="pof-dialog">
+  <!-- Header -->
+  <header class="pof-dialog__header">
+    <div class="pof-dialog__header-left">
+      <span class="material-symbols-outlined pof-dialog__header-icon">
+        {{ isEdit ? 'edit_note' : 'add_shopping_cart' }}
+      </span>
+      <h2 class="pof-dialog__title">
+        {{ isEdit ? 'Chỉnh sửa đơn nhập hàng' : 'Tạo đơn nhập hàng mới' }}
+      </h2>
+    </div>
+    <button type="button" class="pof-dialog__close" (click)="cancel()" aria-label="Đóng">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </header>
+
+  <form class="pof-dialog__form" (ngSubmit)="submit()">
+    <div class="pof-dialog__body">
+
+      @if (loading()) {
+        <div class="pof-skeleton-wrap">
+          <div class="pof-skeleton"></div>
+          <div class="pof-skeleton pof-skeleton--short"></div>
+          <div class="pof-skeleton"></div>
+        </div>
+      } @else {
+
+        <!-- General info section -->
+        <section class="pof-section">
+          <h3 class="pof-section__title">
+            <span class="material-symbols-outlined">info</span>
+            Thông tin chung
+          </h3>
+          <div class="pof-grid-2">
+
+            <!-- Supplier -->
+            <label class="pof-field">
+              <span class="pof-field__label">Nhà cung cấp <span class="pof-field__req">*</span></span>
+              <select class="pof-field__select" name="supplierId" [(ngModel)]="supplierId" required>
+                <option [ngValue]="0" disabled>-- Chọn nhà cung cấp --</option>
+                @for (s of suppliers(); track s.id) {
+                  <option [ngValue]="s.id">{{ s.supplierName }}</option>
+                }
+              </select>
+            </label>
+
+            <!-- Warehouse -->
+            <label class="pof-field">
+              <span class="pof-field__label">Kho nhận hàng <span class="pof-field__req">*</span></span>
+              <select class="pof-field__select" name="warehouseId" [(ngModel)]="warehouseId" required>
+                <option [ngValue]="0" disabled>-- Chọn kho --</option>
+                @for (w of warehouses(); track w.id) {
+                  <option [ngValue]="w.id">{{ w.warehouseName }}</option>
+                }
+              </select>
+            </label>
+
+            <!-- Status -->
+            <label class="pof-field">
+              <span class="pof-field__label">Trạng thái <span class="pof-field__req">*</span></span>
+              <select class="pof-field__select" name="paymentStatus" [(ngModel)]="paymentStatus" required>
+                @for (s of statusOptions; track s.value) {
+                  <option [ngValue]="s.value">{{ s.label }}</option>
+                }
+              </select>
+            </label>
+
+            <!-- Order date -->
+            <label class="pof-field">
+              <span class="pof-field__label">Ngày nhận dự kiến</span>
+              <input class="pof-field__input" name="orderDate" type="date" [(ngModel)]="orderDate" />
+            </label>
+
+          </div>
+        </section>
+
+        <!-- Details table section -->
+        <section class="pof-section">
+          <div class="pof-section__header">
+            <h3 class="pof-section__title">
+              <span class="material-symbols-outlined">list_alt</span>
+              Chi tiết nguyên liệu
+            </h3>
+            <button
+              tuiButton type="button"
+              class="pof-btn pof-btn--outline pof-btn--sm"
+              (click)="addRow()"
+            >
+              <span class="material-symbols-outlined">add</span>
+              Thêm dòng
+            </button>
+          </div>
+
+          <div class="pof-table-wrap">
+            <table class="pof-table">
+              <thead>
+                <tr>
+                  <th class="pof-table__th" style="width:44px">#</th>
+                  <th class="pof-table__th">Nguyên liệu <span class="pof-field__req">*</span></th>
+                  <th class="pof-table__th pof-table__th--num">Số lượng <span class="pof-field__req">*</span></th>
+                  <th class="pof-table__th pof-table__th--num">Đơn giá (đ) <span class="pof-field__req">*</span></th>
+                  <th class="pof-table__th pof-table__th--num">Thành tiền</th>
+                  <th class="pof-table__th" style="width:48px"></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of details; track $index; let i = $index) {
+                  <tr class="pof-table__row">
+                    <td class="pof-table__td pof-table__td--center">{{ i + 1 }}</td>
+                    <td class="pof-table__td">
+                      <select
+                        class="pof-field__select pof-field__select--inline"
+                        [name]="'ing_' + i"
+                        [(ngModel)]="row.ingredientId"
+                        (ngModelChange)="onDetailChange()"
+                        required
+                      >
+                        <option [ngValue]="0" disabled>-- Chọn --</option>
+                        @for (ing of ingredients(); track ing.id) {
+                          <option [ngValue]="ing.id">{{ ing.ingredientName }}</option>
+                        }
+                      </select>
+                    </td>
+                    <td class="pof-table__td">
+                      <input
+                        class="pof-field__input pof-field__input--num"
+                        [name]="'qty_' + i"
+                        type="number" min="1"
+                        [(ngModel)]="row.quantity"
+                        (ngModelChange)="onDetailChange()"
+                        required
+                      />
+                    </td>
+                    <td class="pof-table__td">
+                      <input
+                        class="pof-field__input pof-field__input--num"
+                        [name]="'price_' + i"
+                        type="number" min="1"
+                        [(ngModel)]="row.unitPrice"
+                        (ngModelChange)="onDetailChange()"
+                        required
+                      />
+                    </td>
+                    <td class="pof-table__td pof-table__td--total">
+                      {{ fmtCurrency(row.quantity * row.unitPrice) }}
+                    </td>
+                    <td class="pof-table__td pof-table__td--center">
+                      <button
+                        type="button"
+                        class="pof-remove-btn"
+                        (click)="removeRow(i)"
+                        [disabled]="details.length <= 1"
+                        title="Xóa dòng"
+                      >
+                        <span class="material-symbols-outlined">delete</span>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr class="pof-table__foot-row">
+                  <td colspan="4" class="pof-table__td pof-table__td--foot-label">
+                    Tổng cộng
+                  </td>
+                  <td class="pof-table__td pof-table__td--total pof-table__td--grand">
+                    {{ fmtCurrency(calcTotal()) }}
+                  </td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </section>
+
+      }
+    </div><!-- /body -->
+
+    <!-- Footer -->
+    <footer class="pof-dialog__footer">
+      <button tuiButton type="button" class="pof-btn pof-btn--ghost" (click)="cancel()">
+        Hủy bỏ
+      </button>
+      <button tuiButton type="submit" class="pof-btn pof-btn--primary" [disabled]="!isValid || loading()">
+        <span class="material-symbols-outlined">{{ isEdit ? 'save' : 'add_shopping_cart' }}</span>
+        {{ isEdit ? 'Lưu thay đổi' : 'Tạo đơn hàng' }}
+      </button>
+    </footer>
+  </form>
+</div>
