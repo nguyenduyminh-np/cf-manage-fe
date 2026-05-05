@@ -15,20 +15,19 @@ import {
 @Injectable({ providedIn: 'root' })
 export class PurchaseOrderService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/v1/purchase-order';
 
   /**
    * Tìm kiếm đơn nhập hàng (phân trang, lọc, sắp xếp).
    */
   search(request: PurchaseOrderSearchRequest): Observable<PurchaseOrderSearchApiResponse> {
-    return this.http.post<PurchaseOrderSearchApiResponse>(`${this.baseUrl}/search`, request);
+    return this.http.post<PurchaseOrderSearchApiResponse>('/purchase-order/search', request);
   }
 
   /**
    * Xuất danh sách đơn nhập hàng ra Excel (tải file).
    */
   exportExcel(request: PurchaseOrderSearchRequest): Observable<Blob> {
-    return this.http.post(`${this.baseUrl}/export`, request, {
+    return this.http.post('/purchase-order/export', request, {
       responseType: 'blob',
     });
   }
@@ -37,14 +36,14 @@ export class PurchaseOrderService {
    * Tạo mới đơn nhập hàng.
    */
   create(request: PurchaseOrderCreateRequest): Observable<PurchaseOrderDetailApiResponse> {
-    return this.http.post<PurchaseOrderDetailApiResponse>(`${this.baseUrl}/create`, request);
+    return this.http.post<PurchaseOrderDetailApiResponse>('/purchase-order/create', request);
   }
 
   /**
    * Cập nhật đơn nhập hàng (trước khi hoàn thành/hủy).
    */
   update(request: PurchaseOrderUpdateRequest): Observable<PurchaseOrderDetailApiResponse> {
-    return this.http.post<PurchaseOrderDetailApiResponse>(`${this.baseUrl}/update`, request);
+    return this.http.post<PurchaseOrderDetailApiResponse>('/purchase-order/update', request);
   }
 
   /**
@@ -53,13 +52,13 @@ export class PurchaseOrderService {
   updateStatus(
     request: PurchaseOrderStatusUpdateRequest,
   ): Observable<PurchaseOrderVoidApiResponse> {
-    return this.http.post<PurchaseOrderVoidApiResponse>(`${this.baseUrl}/status`, request);
+    return this.http.post<PurchaseOrderVoidApiResponse>('/purchase-order/status', request);
   }
 
   /**
    * Xem chi tiết đơn nhập hàng.
    */
   getDetail(id: number): Observable<PurchaseOrderDetailApiResponse> {
-    return this.http.post<PurchaseOrderDetailApiResponse>(`${this.baseUrl}/detail`, { id });
+    return this.http.post<PurchaseOrderDetailApiResponse>('/purchase-order/detail', { id });
   }
 }

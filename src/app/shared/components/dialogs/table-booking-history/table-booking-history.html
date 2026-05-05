@@ -13,7 +13,7 @@
       <div class="table-booking-history__header-actions">
         <button
           type="button"
-          class="btn btn--export type-label-md"
+          class="btn--export type-label-md"
           [disabled]="isExporting"
           (click)="exportExcel()"
         >
@@ -21,7 +21,12 @@
           <span>{{ isExporting ? 'Đang xuất...' : 'Xuất Excel' }}</span>
         </button>
 
-        <button tuiButton type="button" class="btn btn--primary" (click)="openCreateBooking()">
+        <button
+          tuiButton
+          type="button"
+          class="table-booking-history__button table-booking-history__button--primary"
+          (click)="openCreateBooking()"
+        >
           <span class="material-symbols-outlined" aria-hidden="true">calendar_add_on</span>
           <span>Đặt bàn</span>
         </button>
@@ -116,20 +121,29 @@
           <button
             tuiButton
             type="button"
-            class="btn btn--ghost btn--small"
-            [class.btn--advanced-active]="hasAdvancedFiltersApplied"
+            class="table-booking-history__button table-booking-history__button--ghost table-booking-history__button--compact"
+            [class.table-booking-history__button--active]="hasAdvancedFiltersApplied"
             (click)="toggleAdvancedSearch(); $event.stopPropagation()"
           >
             <span class="material-symbols-outlined" aria-hidden="true">tune</span>
             <span>Advanced search</span>
           </button>
 
-          <button tuiButton type="button" class="btn btn--ghost btn--small" (click)="resetSearch()">
+          <button
+            tuiButton
+            type="button"
+            class="table-booking-history__button table-booking-history__button--ghost table-booking-history__button--compact"
+            (click)="resetSearch()"
+          >
             <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
             <span>Làm mới</span>
           </button>
 
-          <button tuiButton type="submit" class="btn btn--primary btn--small">
+          <button
+            tuiButton
+            type="submit"
+            class="table-booking-history__button table-booking-history__button--primary table-booking-history__button--compact"
+          >
             <span class="material-symbols-outlined" aria-hidden="true">search</span>
             <span>Tìm kiếm</span>
           </button>
@@ -137,7 +151,7 @@
           <button
             tuiButton
             type="button"
-            class="btn btn--primary btn--small"
+            class="table-booking-history__button table-booking-history__button--primary table-booking-history__button--compact"
             (click)="searchPendingJob()"
           >
             <span class="material-symbols-outlined" aria-hidden="true">upcoming</span>
@@ -156,7 +170,7 @@
               <button
                 tuiButton
                 type="button"
-                class="btn btn--ghost btn--small"
+                class="table-booking-history__button table-booking-history__button--ghost table-booking-history__button--compact"
                 (click)="closeAdvancedSearch()"
               >
                 Đóng
@@ -357,7 +371,7 @@
         <button
           tuiButton
           type="button"
-          class="btn btn--ghost btn--icon"
+          class="table-booking-history__button table-booking-history__button--ghost table-booking-history__button--icon"
           [disabled]="!canGoPrevious(state)"
           (click)="previousPage()"
           aria-label="Trang trước"
@@ -370,7 +384,7 @@
         <button
           tuiButton
           type="button"
-          class="btn btn--ghost btn--icon"
+          class="table-booking-history__button table-booking-history__button--ghost table-booking-history__button--icon"
           [disabled]="!canGoNext(state)"
           (click)="nextPage()"
           aria-label="Trang sau"
@@ -382,7 +396,14 @@
 
     <!-- Actions: đóng dialog. Input: click. Output: complete dialog and emit close event. -->
     <div class="table-booking-history__actions">
-      <button tuiButton type="button" class="btn btn--ghost" (click)="close()">Đóng</button>
+      <button
+        tuiButton
+        type="button"
+        class="table-booking-history__button table-booking-history__button--ghost"
+        (click)="close()"
+      >
+        Đóng
+      </button>
     </div>
   } @else {
     <!-- Initial loading state: dùng khi dialog chưa nhận đủ data state. Input: no state. Output: placeholder. -->

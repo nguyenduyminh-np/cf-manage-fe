@@ -17,35 +17,52 @@
   border-right: none;
 }
 
-.search-well {
-  @include flex-center(flex-start);
-  background-color: $color-surface-container-low;
+button.search-well {
+  @include flex-center(space-between);
+  background-color: rgba($color-surface-container-low, 0.6);
+  border: 1px solid rgba($color-outline-variant, 0.4);
   border-radius: 9999px;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
   width: 24rem;
-  transition: box-shadow 0.2s ease;
+  transition: all 0.2s ease;
+  cursor: pointer;
 
-  &:focus-within {
-    box-shadow: 0 0 0 1px rgba($color-outline-variant, 0.3);
+  &:hover {
+    background-color: rgba($color-surface-container-low, 1);
+    border-color: rgba($color-outline-variant, 0.8);
+    box-shadow: 0 4px 12px rgba($color-primary, 0.05);
   }
 
-  .icon {
-    color: $color-secondary;
-    opacity: 0.5;
-    margin-right: 0.5rem;
+  &:active {
+    transform: scale(0.99);
   }
 
-  input {
-    background: transparent;
-    border: none;
-    outline: none;
-    width: 100%;
-    font-size: 0.875rem;
-    color: $color-primary;
+  .search-trigger-content {
+    @include flex-center(flex-start);
 
-    &::placeholder {
-      color: rgba($color-secondary, 0.5);
+    .icon {
+      color: $color-secondary;
+      opacity: 0.7;
+      margin-right: 0.5rem;
+      font-size: 1.25rem;
     }
+
+    .placeholder-text {
+      font-size: 0.875rem;
+      color: rgba($color-secondary, 0.8);
+      font-family: $font-body;
+    }
+  }
+
+  .shortcut-badge {
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: $color-secondary;
+    background-color: $color-surface;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    border: 1px solid rgba($color-outline-variant, 0.6);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
   }
 }
 

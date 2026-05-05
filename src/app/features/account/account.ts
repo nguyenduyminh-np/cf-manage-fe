@@ -46,6 +46,7 @@ import {
 import { AccountService } from '../../core/services/account/account.service';
 import { AccountFormDialog } from '../../shared/components/dialogs/account-form-dialog/account-form-dialog';
 import { AccountDeleteDialog } from '../../shared/components/dialogs/account-delete-dialog/account-delete-dialog';
+import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
 
 interface PageViewState<T> {
   isLoading: boolean;
@@ -79,7 +80,7 @@ interface AccountQuery {
 @Component({
   standalone: true,
   selector: 'app-account',
-  imports: [AsyncPipe, AgGridAngular, FormsModule, TuiButton],
+  imports: [AsyncPipe, AgGridAngular, FormsModule, TuiButton, UiSelectComponent],
   templateUrl: './account.html',
   styleUrl: './account.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -101,6 +102,10 @@ export class Account implements OnDestroy {
     { label: 'Ngừng hoạt động', value: 'false' },
   ];
   protected readonly pageSizeOptions = [10, 20, 50];
+  protected readonly pageSizeSelectOptions = this.pageSizeOptions.map((s) => ({
+    label: String(s),
+    value: s,
+  }));
 
   private readonly querySubject = new BehaviorSubject<AccountQuery>({
     page: 0,
@@ -138,6 +143,21 @@ export class Account implements OnDestroy {
     fromBirthDate: '',
     toBirthDate: '',
   };
+
+  protected setActiveStatus(value: string | number | null): void {
+    this.searchFilters = {
+      ...this.searchFilters,
+      isActive: value === null ? '' : String(value),
+    };
+    this.onFiltersChanged();
+  }
+
+  protected setPageSizeFromSelect(value: string | number | null): void {
+    if (value === null) return;
+    const size = typeof value === 'number' ? value : Number(value);
+    if (!Number.isFinite(size)) return;
+    this.setPageSize(size);
+  }
 
   protected readonly columnDefs: ColDef<AccountListItem>[] = [
     {

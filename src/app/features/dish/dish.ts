@@ -22,7 +22,7 @@ import {
   ValueFormatterParams,
   ValueGetterParams,
 } from 'ag-grid-community';
-import { TuiAlertService, TuiButton, TuiDialogService } from '@taiga-ui/core';
+import { TuiAlertService, TuiDialogService } from '@taiga-ui/core';
 import { PolymorpheusComponent } from '@taiga-ui/polymorpheus';
 import {
   BehaviorSubject,
@@ -47,6 +47,7 @@ import {
 import { DishCategoryService } from '../../core/services/dish-category/dish-category.service';
 import { DishCategoryFormDialog } from '../../shared/components/dialogs/dish-category-form-dialog/dish-category-form-dialog';
 import { DishCategoryDeleteDialog } from '../../shared/components/dialogs/dish-category-delete-dialog/dish-category-delete-dialog';
+import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
 
 import {
   DishListItem,
@@ -104,7 +105,7 @@ interface DishQuery {
 @Component({
   standalone: true,
   selector: 'app-dish',
-  imports: [AsyncPipe, AgGridAngular, FormsModule, TuiButton],
+  imports: [AsyncPipe, AgGridAngular, FormsModule, UiSelectComponent],
   templateUrl: './dish.html',
   styleUrl: './dish.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -300,6 +301,11 @@ export class Dish implements OnDestroy {
   protected catResetSearch(): void {
     this.catSearchFilters = { dishCategoryCode: '', dishCategoryName: '', isActive: '' };
     this.catApplySearch();
+  }
+
+  protected catSetActiveStatus(value: string | number | null): void {
+    this.catSearchFilters.isActive = typeof value === 'string' ? value : '';
+    this.catOnFiltersChanged();
   }
 
   protected exportExcel(): void {
@@ -630,6 +636,11 @@ export class Dish implements OnDestroy {
   protected dishResetSearch(): void {
     this.dishSearchFilters = { dishCode: '', dishName: '', isActive: '' };
     this.dishApplySearch();
+  }
+
+  protected dishSetActiveStatus(value: string | number | null): void {
+    this.dishSearchFilters.isActive = typeof value === 'string' ? value : '';
+    this.dishOnFiltersChanged();
   }
 
   private buildCategoryExportRequest(): DishCategorySearchRequest {

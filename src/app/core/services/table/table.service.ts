@@ -2,7 +2,6 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 
-import { environment } from '../../../../environments/environment';
 import { ApiResponse } from '../../models/base/api-response.model';
 import { TableDetailRequest } from '../../models/table-detail/table-detail-request.model';
 import { TableDetailResponse } from '../../models/table-detail/table-detail-response.model';
@@ -18,24 +17,23 @@ import {
 })
 export class TableService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/table`;
 
   search(request: TableSearchRequest): Observable<TableSearchResponse> {
     const normalizedRequest = this.normalizeSearchRequest(request);
 
-    return this.http.post<TableSearchResponse>(`${this.baseUrl}/search`, normalizedRequest);
+    return this.http.post<TableSearchResponse>('/table/search', normalizedRequest);
   }
 
   exportExcel(request: TableSearchRequest): Observable<Blob> {
     const normalizedRequest = this.normalizeSearchRequest(request);
 
-    return this.http.post(`${this.baseUrl}/grid/export`, normalizedRequest, {
+    return this.http.post('/table/grid/export', normalizedRequest, {
       responseType: 'blob',
     });
   }
 
   detail(request: TableDetailRequest): Observable<TableDetailResponse> {
-    return this.http.post<TableDetailResponse>(`${this.baseUrl}/detail`, request);
+    return this.http.post<TableDetailResponse>('/table/detail', request);
   }
 
   getAvailableTables(
@@ -44,9 +42,7 @@ export class TableService {
     const normalizedRequest = this.normalizeAvailableTableRequest(request);
 
     return this.http
-      .post<
-        ApiResponse<TableAvailableResponseDTO[]>
-      >(`${this.baseUrl}/available`, normalizedRequest)
+      .post<ApiResponse<TableAvailableResponseDTO[]>>('/table/available', normalizedRequest)
       .pipe(
         map((response) => ({
           ...response,

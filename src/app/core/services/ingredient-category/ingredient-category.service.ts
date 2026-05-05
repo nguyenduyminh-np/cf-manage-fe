@@ -16,7 +16,6 @@ import {
 @Injectable({ providedIn: 'root' })
 export class IngredientCategoryService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/v1/ingredient-category';
 
   /**
    * Tìm kiếm danh mục nguyên liệu (phân trang, lọc, sắp xếp).
@@ -24,14 +23,17 @@ export class IngredientCategoryService {
   search(
     request: IngredientCategorySearchRequest,
   ): Observable<IngredientCategorySearchApiResponse> {
-    return this.http.post<IngredientCategorySearchApiResponse>(`${this.baseUrl}/search`, request);
+    return this.http.post<IngredientCategorySearchApiResponse>(
+      '/ingredient-category/search',
+      request,
+    );
   }
 
   /**
    * Xuất danh sách danh mục ra file Excel.
    */
   exportExcel(request: IngredientCategorySearchRequest): Observable<Blob> {
-    return this.http.post(`${this.baseUrl}/export`, request, { responseType: 'blob' });
+    return this.http.post('/ingredient-category/export', request, { responseType: 'blob' });
   }
 
   /**
@@ -40,7 +42,10 @@ export class IngredientCategoryService {
   create(
     request: IngredientCategoryCreateRequest,
   ): Observable<IngredientCategoryDetailApiResponse> {
-    return this.http.post<IngredientCategoryDetailApiResponse>(`${this.baseUrl}/create`, request);
+    return this.http.post<IngredientCategoryDetailApiResponse>(
+      '/ingredient-category/create',
+      request,
+    );
   }
 
   /**
@@ -49,7 +54,10 @@ export class IngredientCategoryService {
   update(
     request: IngredientCategoryUpdateRequest,
   ): Observable<IngredientCategoryDetailApiResponse> {
-    return this.http.post<IngredientCategoryDetailApiResponse>(`${this.baseUrl}/update`, request);
+    return this.http.post<IngredientCategoryDetailApiResponse>(
+      '/ingredient-category/update',
+      request,
+    );
   }
 
   /**
@@ -58,7 +66,7 @@ export class IngredientCategoryService {
    */
   delete(id: number): Observable<IngredientCategoryDeleteApiResponse> {
     const body: IngredientCategoryIdRequest = { id };
-    return this.http.post<IngredientCategoryDeleteApiResponse>(`${this.baseUrl}/delete`, body);
+    return this.http.post<IngredientCategoryDeleteApiResponse>('/ingredient-category/delete', body);
   }
 
   /**
@@ -66,13 +74,13 @@ export class IngredientCategoryService {
    */
   getDetail(id: number): Observable<IngredientCategoryDetailApiResponse> {
     const body: IngredientCategoryIdRequest = { id };
-    return this.http.post<IngredientCategoryDetailApiResponse>(`${this.baseUrl}/detail`, body);
+    return this.http.post<IngredientCategoryDetailApiResponse>('/ingredient-category/detail', body);
   }
 
   /**
    * Lấy danh sách danh mục dạng options (cho dropdown, chỉ trả về các danh mục active).
    */
   getOptions(): Observable<IngredientCategoryOptionsApiResponse> {
-    return this.http.post<IngredientCategoryOptionsApiResponse>(`${this.baseUrl}/options`, {});
+    return this.http.post<IngredientCategoryOptionsApiResponse>('/ingredient-category/options', {});
   }
 }

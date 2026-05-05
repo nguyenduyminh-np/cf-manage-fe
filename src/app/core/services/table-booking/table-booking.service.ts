@@ -33,16 +33,15 @@ const DEFAULT_SORT_DIR: TableBookingSortDir = 'desc';
 @Injectable({ providedIn: 'root' })
 export class TableBookingService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/v1/table-booking';
 
   delete(request: DeleteTableBookingRequest): Observable<DeleteTableBookingResponse> {
-    return this.http.post<DeleteTableBookingResponse>(`${this.baseUrl}/delete`, request);
+    return this.http.post<DeleteTableBookingResponse>('/table-booking/delete', request);
   }
 
   create(request: TableBookingCreateRequest): Observable<TableBookingCreateResponse> {
     return this.http
       .post<TableBookingCreateResponse>(
-        `${this.baseUrl}/create`,
+        '/table-booking/create',
         this.normalizeCreateRequest(request),
       )
       .pipe(map((response) => this.normalizeSingleResponse(response)));
@@ -51,7 +50,7 @@ export class TableBookingService {
   update(request: TableBookingUpdateRequest): Observable<TableBookingUpdateResponse> {
     return this.http
       .post<TableBookingUpdateResponse>(
-        `${this.baseUrl}/update`,
+        '/table-booking/update',
         this.normalizeUpdateRequest(request),
       )
       .pipe(map((response) => this.normalizeSingleResponse(response)));
@@ -60,7 +59,7 @@ export class TableBookingService {
   search(request: TableBookingSearchRequest): Observable<TableBookingSearchResponse> {
     return this.http
       .post<TableBookingSearchResponse>(
-        `${this.baseUrl}/search`,
+        '/table-booking/search',
         this.normalizeSearchRequest(request),
       )
       .pipe(map((response) => this.normalizeSearchResponse(response)));
@@ -71,7 +70,7 @@ export class TableBookingService {
   ): Observable<TableBookingSearchResponse> {
     return this.http
       .post<TableBookingSearchResponse>(
-        `${this.baseUrl}/pending-job`,
+        '/table-booking/pending-job',
         this.normalizeSearchRequest(request),
       )
       .pipe(map((response) => this.normalizeSearchResponse(response)));
@@ -79,7 +78,7 @@ export class TableBookingService {
 
   exportExcel(request: TableBookingSearchRequest): Observable<Blob> {
     return this.http.post(
-      `${this.baseUrl}/table-booking-history/export`,
+      '/table-booking/table-booking-history/export',
       this.normalizeSearchRequest(request),
       {
         responseType: 'blob',
@@ -92,7 +91,7 @@ export class TableBookingService {
   ): Observable<TableBookingUpdateStatusResponse> {
     return this.http
       .post<TableBookingUpdateStatusResponse>(
-        `${this.baseUrl}/update-status`,
+        '/table-booking/update-status',
         this.normalizeUpdateStatusRequest(request),
       )
       .pipe(map((response) => this.normalizeSingleResponse(response)));
@@ -101,7 +100,7 @@ export class TableBookingService {
   checkIn(request: TableBookingCheckInRequest): Observable<TableBookingCheckInResponse> {
     return this.http
       .post<TableBookingCheckInResponse>(
-        `${this.baseUrl}/check-in`,
+        '/table-booking/check-in',
         this.normalizeCheckInRequest(request),
       )
       .pipe(map((response) => this.normalizeSingleResponse(response)));
@@ -110,7 +109,7 @@ export class TableBookingService {
   checkOut(request: TableBookingCheckOutRequest): Observable<TableBookingCheckOutResponse> {
     return this.http
       .post<TableBookingCheckOutResponse>(
-        `${this.baseUrl}/check-out`,
+        '/table-booking/check-out',
         this.normalizeCheckOutRequest(request),
       )
       .pipe(map((response) => this.normalizeCheckOutResponse(response)));
@@ -119,7 +118,7 @@ export class TableBookingService {
   getBookingDetail(request: TableBookingDetailRequest): Observable<TableBookingDetailResponse> {
     return this.http
       .post<TableBookingDetailResponse>(
-        `${this.baseUrl}/detail`,
+        '/table-booking/detail',
         this.normalizeDetailRequest(request),
       )
       .pipe(map((response) => this.normalizeDetailResponse(response)));

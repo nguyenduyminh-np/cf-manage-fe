@@ -2,7 +2,6 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { environment } from '../../../../../environments/environment';
 import {
   DishOrderCreateRequest,
   DishOrderResponse,
@@ -14,13 +13,9 @@ import { ApiResponse } from '../../../models/base/api-response.model';
 @Injectable({ providedIn: 'root' })
 export class PosOrderDishesService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/dish-order`;
 
   searchDishes(request: DishSearchRequest): Observable<DishSearchResponse> {
-    return this.http.post<DishSearchResponse>(
-      `${this.baseUrl}/dishes-for-pos-order-dishes`,
-      request,
-    );
+    return this.http.post<DishSearchResponse>('/dish-order/dishes-for-pos-order-dishes', request);
   }
 
   /**
@@ -29,6 +24,6 @@ export class PosOrderDishesService {
    * @returns Observable chứa ApiResponse<DishOrderResponse>
    */
   createDishOrder(request: DishOrderCreateRequest): Observable<ApiResponse<DishOrderResponse>> {
-    return this.http.post<ApiResponse<DishOrderResponse>>(`${this.baseUrl}/create`, request);
+    return this.http.post<ApiResponse<DishOrderResponse>>('/dish-order/create', request);
   }
 }

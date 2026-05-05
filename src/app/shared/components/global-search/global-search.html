@@ -1,0 +1,72 @@
+@if (isOpen | async) {
+  <div class="global-search-overlay" (click)="close()">
+    <div class="command-palette" (click)="$event.stopPropagation()">
+      <div class="search-header">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input
+          #searchInput
+          type="text"
+          class="search-input"
+          placeholder="Tìm kiếm chức năng, món ăn, hóa đơn..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchChange($event)"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button class="close-btn" (click)="close()" title="Đóng (Esc)">
+          <span class="badge">ESC</span>
+        </button>
+      </div>
+
+      <div class="results-container">
+        @if (filteredItems().length > 0) {
+          <div class="results-group">
+            <h4 class="group-title">Module chức năng</h4>
+            <div class="results-list">
+              @for (item of filteredItems(); track item.id; let i = $index) {
+                <div
+                  class="result-item"
+                  [class.selected]="i === selectedIndex()"
+                  (click)="navigate(item)"
+                  (mouseenter)="selectedIndex.set(i)"
+                >
+                  <div class="item-icon">
+                    <span class="material-symbols-outlined">{{ item.icon }}</span>
+                  </div>
+                  <div class="item-content">
+                    <span class="item-title">{{ item.title }}</span>
+                  </div>
+                  <div class="item-action">
+                    <span class="material-symbols-outlined">keyboard_return</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        } @else {
+          <div class="empty-state">
+            <span class="material-symbols-outlined empty-icon">search_off</span>
+            <p class="empty-text">Không tìm thấy kết quả nào cho "{{ searchTerm() }}"</p>
+            <p class="empty-hint">Vui lòng thử lại với từ khóa khác.</p>
+          </div>
+        }
+      </div>
+
+      <div class="search-footer">
+        <div class="footer-hint">
+          <span class="material-symbols-outlined">keyboard_arrow_up</span>
+          <span class="material-symbols-outlined">keyboard_arrow_down</span>
+          <span>để di chuyển</span>
+        </div>
+        <div class="footer-hint">
+          <span class="material-symbols-outlined">keyboard_return</span>
+          <span>để chọn</span>
+        </div>
+        <div class="footer-hint">
+          <span class="badge">ESC</span>
+          <span>để đóng</span>
+        </div>
+      </div>
+    </div>
+  </div>
+}

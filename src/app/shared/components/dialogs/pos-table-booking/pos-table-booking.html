@@ -19,290 +19,303 @@
     </button>
   </header>
 
-  <form class="pos-table-booking__body" [formGroup]="bookingForm" (ngSubmit)="submitBooking()">
-    <section class="pos-table-booking__section" aria-label="Tìm kiếm bàn">
-      <div class="pos-table-booking__section-head">
-        <h3>Tìm kiếm bàn</h3>
-        <p>Bộ lọc sẽ tự động tìm các bàn có trạng thái AVAILABLE</p>
-      </div>
-
-      <div class="pos-table-booking__search-grid" [formGroup]="tableSearchForm">
-        <label class="field">
-          <span>Chọn tầng</span>
-          <div class="field__select-wrap">
-            <select formControlName="floor">
-              @for (option of floorOptions; track option.label) {
-                <option [ngValue]="option.value">{{ option.label }}</option>
-              }
-            </select>
-            <span class="field__chevron" aria-hidden="true"></span>
+  <form id="pos-booking-form" class="pos-table-booking__body" [formGroup]="bookingForm" (ngSubmit)="submitBooking()">
+    
+    <!-- THÊM WRAPPER CHIA 2 CỘT TẠI ĐÂY -->
+    <div class="pos-table-booking__columns">
+      
+      <!-- CỘT 1: Tìm kiếm & Danh sách bàn -->
+      <div class="pos-table-booking__column">
+        <section class="pos-table-booking__section" aria-label="Tìm kiếm bàn">
+          <div class="pos-table-booking__section-head">
+            <h3>Tìm kiếm bàn</h3>
+            <p>Bộ lọc sẽ tự động tìm các bàn có trạng thái AVAILABLE</p>
           </div>
-        </label>
 
-        <label class="field">
-          <span>Chọn số người</span>
-          <div class="field__select-wrap">
-            <select formControlName="seat">
-              @for (option of seatOptions; track option.label) {
-                <option [ngValue]="option.value">{{ option.label }}</option>
-              }
-            </select>
-            <span class="field__chevron" aria-hidden="true"></span>
+          <div class="pos-table-booking__search-grid" [formGroup]="tableSearchForm">
+            <label class="field">
+              <span>Chọn tầng</span>
+              <div class="field__select-wrap">
+                <select formControlName="floor">
+                  @for (option of floorOptions; track option.label) {
+                    <option [ngValue]="option.value">{{ option.label }}</option>
+                  }
+                </select>
+                <span class="field__chevron" aria-hidden="true"></span>
+              </div>
+            </label>
+
+            <label class="field">
+              <span>Chọn số người</span>
+              <div class="field__select-wrap">
+                <select formControlName="seat">
+                  @for (option of seatOptions; track option.label) {
+                    <option [ngValue]="option.value">{{ option.label }}</option>
+                  }
+                </select>
+                <span class="field__chevron" aria-hidden="true"></span>
+              </div>
+            </label>
+
+            <label class="field field--full-if-needed">
+              <span>Chọn bàn</span>
+              <input
+                type="text"
+                formControlName="keyword"
+                placeholder="Nhập tên bàn hoặc mã bàn..."
+                autocomplete="off"
+              />
+            </label>
           </div>
-        </label>
+        </section>
 
-        <label class="field">
-          <span>Chọn bàn</span>
-          <input
-            type="text"
-            formControlName="keyword"
-            placeholder="Nhập tên bàn hoặc mã bàn..."
-            autocomplete="off"
-          />
-        </label>
+        <section class="pos-table-booking__section" aria-label="Danh sách bàn">
+          <div class="pos-table-booking__section-head pos-table-booking__section-head--inline">
+            <h3>Danh sách bàn trống</h3>
+            <p>{{ availableTableCards().length }} bàn ĐANG TRỐNG</p>
+          </div>
+
+          @if (isSearchingTables()) {
+            <div class="pos-table-booking__state pos-table-booking__state--loading" aria-live="polite">
+              Đang tìm danh sách bàn trống...
+            </div>
+          }
+
+          @if (searchError(); as errorMessage) {
+            <div class="pos-table-booking__state pos-table-booking__state--error" role="alert">
+              {{ errorMessage }}
+            </div>
+          }
+
+          @if (!isSearchingTables() && !availableTableCards().length) {
+            <div class="pos-table-booking__state">Không có bàn trống phù hợp với bộ lọc hiện tại.</div>
+          } @else {
+            <div
+              class="pos-table-booking__table-scroll"
+              role="listbox"
+              aria-label="Danh sách bàn trống"
+            >
+              <div class="pos-table-booking__table-grid">
+                @for (table of availableTableCards(); track table.tableId) {
+                  <button
+                    type="button"
+                    class="pos-table-booking__table-card"
+                    [attr.data-table-id]="table.tableId"
+                    [class.pos-table-booking__table-card--selected]="isTableSelected(table.tableId)"
+                    [attr.aria-selected]="isTableSelected(table.tableId)"
+                    [disabled]="isSubmitting()"
+                    (click)="selectTable(table)"
+                  >
+                    <span class="pos-table-booking__table-code">{{ table.tableCode }}</span>
+                    <strong class="pos-table-booking__table-name">{{ table.tableName }}</strong>
+                    <span class="pos-table-booking__table-meta">{{ floorLabel(table.floor) }}</span>
+                    <span class="pos-table-booking__table-meta">{{ table.slot }} người</span>
+
+                    @if (isTableSelected(table.tableId)) {
+                      <span
+                        class="pos-table-booking__table-selected-icon material-symbols-outlined"
+                        aria-hidden="true"
+                      >
+                        task_alt
+                      </span>
+                    }
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          @if (tableSelectionRequiredError()) {
+            <p class="field-error">Vui lòng chọn 1 bàn trước khi lưu lịch hẹn.</p>
+          }
+        </section>
       </div>
-    </section>
 
-    <section class="pos-table-booking__section" aria-label="Danh sách bàn">
-      <div class="pos-table-booking__section-head pos-table-booking__section-head--inline">
-        <h3>Danh sách bàn trống</h3>
-        <p>{{ availableTableCards().length }} bàn ĐANG TRỐNG</p>
-      </div>
+      <!-- CỘT 2: Đặt lịch, Trạng thái & Info khách -->
+      <div class="pos-table-booking__column">
+        <section class="pos-table-booking__section" aria-label="Đặt lịch">
+          <div class="pos-table-booking__section-head">
+            <h3>Đặt lịch / Lên lịch hẹn</h3>
+          </div>
 
-      @if (isSearchingTables()) {
-        <div class="pos-table-booking__state pos-table-booking__state--loading" aria-live="polite">
-          Đang tìm danh sách bàn trống...
-        </div>
-      }
+          <div class="pos-table-booking__schedule-grid">
+            <label class="field">
+              <span>Ngày đến dự kiến</span>
+              <input type="date" formControlName="expectedArriveDate" />
+              @if (showControlError('expectedArriveDate')) {
+                <small class="field-error">Vui lòng chọn ngày đến dự kiến.</small>
+              }
+            </label>
 
-      @if (searchError(); as errorMessage) {
-        <div class="pos-table-booking__state pos-table-booking__state--error" role="alert">
-          {{ errorMessage }}
-        </div>
-      }
+            <label class="field">
+              <span>Giờ đến dự kiến</span>
+              <div class="field__select-wrap">
+                <select class="pos-table-booking__hour-dropdown" formControlName="expectedArriveHour">
+                  <option [ngValue]="null" disabled>Chọn giờ đến</option>
+                  @for (option of expectedArriveHourOptions; track option.value) {
+                    <option [ngValue]="option.value">{{ option.label }}</option>
+                  }
+                </select>
+                <span class="field__chevron" aria-hidden="true"></span>
+              </div>
+              @if (showControlError('expectedArriveHour')) {
+                <small class="field-error">Vui lòng chọn giờ (06:00 - 20:00).</small>
+              }
+            </label>
 
-      @if (!isSearchingTables() && !availableTableCards().length) {
-        <div class="pos-table-booking__state">Không có bàn trống phù hợp với bộ lọc hiện tại.</div>
-      } @else {
-        <div
-          class="pos-table-booking__table-scroll"
-          role="listbox"
-          aria-label="Danh sách bàn trống"
-        >
-          <div class="pos-table-booking__table-grid">
-            @for (table of availableTableCards(); track table.tableId) {
+            <label class="field field--full-if-needed">
+              <span>Thời lượng (giờ)</span>
+              <div class="field__select-wrap">
+                <select formControlName="durationHours">
+                  @for (option of durationOptions; track option.label) {
+                    <option [ngValue]="option.value">{{ option.label }}</option>
+                  }
+                </select>
+                <span class="field__chevron" aria-hidden="true"></span>
+              </div>
+              @if (showControlError('durationHours')) {
+                <small class="field-error">Chọn thời lượng 1 - 10 giờ.</small>
+              }
+            </label>
+          </div>
+
+          @if (longUsageWarning()) {
+            <p class="pos-table-booking__message pos-table-booking__message--warning">
+              Ngồi quá 6 tiếng sẽ có thêm phụ phí.
+            </p>
+          }
+
+          @if (expectedCheckOutPreview(); as expectedCheckOutLabel) {
+            <p class="pos-table-booking__message pos-table-booking__message--success">
+              Dự kiến trả bàn: {{ expectedCheckOutLabel }}
+            </p>
+          }
+
+          @if (operatingHoursConflictError()) {
+            <p class="pos-table-booking__message pos-table-booking__message--error">
+              Xung đột giờ hoạt động (06:00 - 24:00).
+            </p>
+          }
+
+          @if (dateTimeConflictError()) {
+            <p class="pos-table-booking__message pos-table-booking__message--error">
+              Thời gian trả bàn phải sau thời gian đến.
+            </p>
+          }
+        </section>
+
+        <section class="pos-table-booking__section" aria-label="Trạng thái đặt bàn">
+          <div class="pos-table-booking__section-head">
+            <h3>Trạng thái</h3>
+          </div>
+
+          <div class="pos-table-booking__status-grid">
+            @for (option of bookingStatusOptions; track option.value) {
               <button
                 type="button"
-                class="pos-table-booking__table-card"
-                [attr.data-table-id]="table.tableId"
-                [class.pos-table-booking__table-card--selected]="isTableSelected(table.tableId)"
-                [attr.aria-selected]="isTableSelected(table.tableId)"
+                class="pos-table-booking__status-card"
+                [class.pos-table-booking__status-card--active]="
+                  bookingForm.controls.bookingStatus.value === option.value
+                "
+                [ngClass]="statusCardClass(option.value)"
                 [disabled]="isSubmitting()"
-                (click)="selectTable(table)"
+                (click)="selectBookingStatus(option.value)"
               >
-                <span class="pos-table-booking__table-code">{{ table.tableCode }}</span>
-                <strong class="pos-table-booking__table-name">{{ table.tableName }}</strong>
-                <span class="pos-table-booking__table-meta">{{ floorLabel(table.floor) }}</span>
-                <span class="pos-table-booking__table-meta">{{ table.slot }} người</span>
-
-                @if (isTableSelected(table.tableId)) {
-                  <span
-                    class="pos-table-booking__table-selected-icon material-symbols-outlined"
-                    aria-hidden="true"
-                  >
-                    task_alt
-                  </span>
-                }
+                <span class="pos-table-booking__status-title">{{ option.label }}</span>
+                <small class="pos-table-booking__status-desc">{{ option.description }}</small>
               </button>
             }
           </div>
-        </div>
-      }
 
-      @if (tableSelectionRequiredError()) {
-        <p class="field-error">Vui lòng chọn 1 bàn trước khi lưu lịch hẹn.</p>
-      }
-    </section>
+          @if (isConfirmedStatus()) {
+            <div class="pos-table-booking__deposit-wrap">
+              <label class="field">
+                <span>Tiền cọc</span>
+                <div class="field__suffix-wrap">
+                  <input
+                    type="number"
+                    min="0"
+                    step="1000"
+                    formControlName="depositAmount"
+                    placeholder="Nhập tiền cọc"
+                  />
+                  <span class="field__suffix">VNĐ</span>
+                </div>
 
-    <section class="pos-table-booking__section" aria-label="Đặt lịch">
-      <div class="pos-table-booking__section-head">
-        <h3>Đặt lịch / Lên lịch hẹn</h3>
-      </div>
-
-      <div class="pos-table-booking__schedule-grid">
-        <label class="field">
-          <span>Ngày đến dự kiến</span>
-          <input type="date" formControlName="expectedArriveDate" />
-          @if (showControlError('expectedArriveDate')) {
-            <small class="field-error">Vui lòng chọn ngày đến dự kiến.</small>
-          }
-        </label>
-
-        <label class="field">
-          <span>Giờ đến dự kiến</span>
-          <div class="field__select-wrap">
-            <select class="pos-table-booking__hour-dropdown" formControlName="expectedArriveHour">
-              <option [ngValue]="null" disabled>Chọn giờ đến dự kiến</option>
-              @for (option of expectedArriveHourOptions; track option.value) {
-                <option [ngValue]="option.value">{{ option.label }}</option>
-              }
-            </select>
-            <span class="field__chevron" aria-hidden="true"></span>
-          </div>
-          @if (showControlError('expectedArriveHour')) {
-            <small class="field-error">Vui lòng chọn giờ đến trong khung 06:00 - 20:00.</small>
-          }
-        </label>
-
-        <label class="field">
-          <span>Thời lượng sử dụng (giờ)</span>
-          <div class="field__select-wrap">
-            <select formControlName="durationHours">
-              @for (option of durationOptions; track option.label) {
-                <option [ngValue]="option.value">{{ option.label }}</option>
-              }
-            </select>
-            <span class="field__chevron" aria-hidden="true"></span>
-          </div>
-          @if (showControlError('durationHours')) {
-            <small class="field-error">Vui lòng chọn thời lượng sử dụng từ 1 - 10 giờ.</small>
-          }
-        </label>
-      </div>
-
-      @if (longUsageWarning()) {
-        <p class="pos-table-booking__message pos-table-booking__message--warning">
-          Ngồi quá 6 tiếng sẽ có thêm phụ phí.
-        </p>
-      }
-
-      @if (expectedCheckOutPreview(); as expectedCheckOutLabel) {
-        <p class="pos-table-booking__message pos-table-booking__message--success">
-          Thời gian dự kiến trả bàn: {{ expectedCheckOutLabel }}
-        </p>
-      }
-
-      @if (operatingHoursConflictError()) {
-        <p class="pos-table-booking__message pos-table-booking__message--error">
-          Mốc thời gian đã chọn xung đột với giờ hoạt động của quán (06:00 - 24:00).
-        </p>
-      }
-
-      @if (dateTimeConflictError()) {
-        <p class="pos-table-booking__message pos-table-booking__message--error">
-          Mốc thời gian bị conflict. Vui lòng chọn số giờ sử dụng hợp lệ để thời gian trả bàn luôn
-          sau thời gian đến.
-        </p>
-      }
-    </section>
-
-    <section class="pos-table-booking__section" aria-label="Trạng thái đặt bàn">
-      <div class="pos-table-booking__section-head">
-        <h3>Trạng thái</h3>
-      </div>
-
-      <div class="pos-table-booking__status-grid">
-        @for (option of bookingStatusOptions; track option.value) {
-          <button
-            type="button"
-            class="pos-table-booking__status-card"
-            [class.pos-table-booking__status-card--active]="
-              bookingForm.controls.bookingStatus.value === option.value
-            "
-            [ngClass]="statusCardClass(option.value)"
-            [disabled]="isSubmitting()"
-            (click)="selectBookingStatus(option.value)"
-          >
-            <span class="pos-table-booking__status-title">{{ option.label }}</span>
-            <small class="pos-table-booking__status-desc">{{ option.description }}</small>
-          </button>
-        }
-      </div>
-
-      @if (isConfirmedStatus()) {
-        <div class="pos-table-booking__deposit-wrap">
-          <label class="field">
-            <span>Tiền cọc</span>
-            <div class="field__suffix-wrap">
-              <input
-                type="number"
-                min="0"
-                step="1000"
-                formControlName="depositAmount"
-                placeholder="Nhập tiền cọc"
-              />
-              <span class="field__suffix">VNĐ</span>
+                @if (showControlError('depositAmount')) {
+                  <small class="field-error">Tiền cọc không được nhỏ hơn 0.</small>
+                }
+              </label>
             </div>
+          }
+        </section>
 
-            @if (showControlError('depositAmount')) {
-              <small class="field-error">Tiền cọc không được nhỏ hơn 0.</small>
-            }
+        <section class="pos-table-booking__section" aria-label="Thông tin khách hàng">
+          <div class="pos-table-booking__section-head">
+            <h3>Thông tin khách hàng</h3>
+          </div>
+
+          <div class="pos-table-booking__customer-grid">
+            <label class="field">
+              <span>Tên khách hàng</span>
+              <input type="text" formControlName="customerName" placeholder="Nhập tên khách hàng" />
+              @if (showControlError('customerName')) {
+                <small class="field-error">Tên khách hàng không được để trống.</small>
+              }
+            </label>
+
+            <label class="field">
+              <span>Số điện thoại</span>
+              <input type="tel" formControlName="phoneNumber" placeholder="0xxx xxx xxx" />
+              @if (showControlError('phoneNumber')) {
+                @if (bookingForm.controls.phoneNumber.hasError('required')) {
+                  <small class="field-error">Số điện thoại không được để trống.</small>
+                } @else {
+                  <small class="field-error">Số điện thoại sai định dạng.</small>
+                }
+              }
+            </label>
+          </div>
+
+          <label class="field">
+            <span>Ghi chú</span>
+            <textarea
+              rows="3"
+              formControlName="note"
+              placeholder="Ví dụ: Đã xác nhận bởi nhân viên username"
+            ></textarea>
           </label>
-        </div>
-      }
-    </section>
-
-    <section class="pos-table-booking__section" aria-label="Thông tin khách hàng">
-      <div class="pos-table-booking__section-head">
-        <h3>Thông tin khách hàng</h3>
+        </section>
       </div>
-
-      <div class="pos-table-booking__customer-grid">
-        <label class="field">
-          <span>Tên khách hàng</span>
-          <input type="text" formControlName="customerName" placeholder="Nhập tên khách hàng" />
-          @if (showControlError('customerName')) {
-            <small class="field-error">Tên khách hàng không được để trống.</small>
-          }
-        </label>
-
-        <label class="field">
-          <span>Số điện thoại</span>
-          <input type="tel" formControlName="phoneNumber" placeholder="0xxx xxx xxx" />
-          @if (showControlError('phoneNumber')) {
-            @if (bookingForm.controls.phoneNumber.hasError('required')) {
-              <small class="field-error">Số điện thoại không được để trống.</small>
-            } @else {
-              <small class="field-error">Số điện thoại không đúng định dạng.</small>
-            }
-          }
-        </label>
-      </div>
-
-      <label class="field">
-        <span>Ghi chú</span>
-        <textarea
-          rows="3"
-          formControlName="note"
-          placeholder="Ví dụ: Đã xác nhận bởi nhân viên username"
-        ></textarea>
-      </label>
-    </section>
-
-    @if (submitError(); as submitErrorMessage) {
-      <p class="pos-table-booking__message pos-table-booking__message--error" role="alert">
-        {{ submitErrorMessage }}
-      </p>
-    }
-
-    <footer class="pos-table-booking__footer">
-      <button
-        tuiButton
-        type="button"
-        class="btn btn--ghost"
-        [disabled]="isSubmitting()"
-        (click)="closeDialog()"
-      >
-        Đóng
-      </button>
-      <button
-        tuiButton
-        type="submit"
-        class="btn btn--primary"
-        [disabled]="disableSaveBookingButton()"
-      >
-        {{ isSubmitting() ? 'Đang lưu...' : 'Lưu lịch đặt' }}
-      </button>
-    </footer>
+    </div>
+    <!-- KẾT THÚC WRAPPER 2 CỘT -->
   </form>
+
+  @if (submitError(); as submitErrorMessage) {
+    <p class="pos-table-booking__message pos-table-booking__message--error pos-table-booking__submit-error" role="alert">
+      {{ submitErrorMessage }}
+    </p>
+  }
+
+  <footer class="pos-table-booking__footer">
+    <button
+      tuiButton
+      type="button"
+      class="btn btn--ghost"
+      [disabled]="isSubmitting()"
+      (click)="closeDialog()"
+    >
+      Đóng
+    </button>
+    <button
+      tuiButton
+      type="submit"
+      form="pos-booking-form"
+      class="btn btn--primary"
+      [disabled]="disableSaveBookingButton()"
+    >
+      {{ isSubmitting() ? 'Đang lưu...' : 'Lưu lịch đặt' }}
+    </button>
+  </footer>
+
 </section>

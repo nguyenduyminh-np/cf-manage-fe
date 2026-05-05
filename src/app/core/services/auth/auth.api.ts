@@ -2,7 +2,6 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { environment } from '../../../../environments/environment';
 import {
   AuthResponse,
   LoginRequest,
@@ -18,21 +17,20 @@ import {
 @Injectable({ providedIn: 'root' })
 export class AuthApi {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/auth`;
 
   login(body: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.baseUrl}/login`, body);
+    return this.http.post<AuthResponse>('/auth/login', body);
   }
 
   register(body: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.baseUrl}/register`, body);
+    return this.http.post<AuthResponse>('/auth/register', body);
   }
 
   refresh(body: RefreshRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.baseUrl}/refresh`, body);
+    return this.http.post<AuthResponse>('/auth/refresh', body);
   }
 
   logout(body: LogoutRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.baseUrl}/logout`, body);
+    return this.http.post<AuthResponse>('/auth/logout', body);
   }
 }

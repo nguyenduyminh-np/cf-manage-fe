@@ -11,20 +11,19 @@ import { Observable } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class OrderDishesHistoryService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/v1/dish-order';
 
   search(request: OrderHistorySearchRequest): Observable<OrderHistorySearchResponse> {
-    return this.http.post<OrderHistorySearchResponse>(`${this.baseUrl}/order-history`, request);
+    return this.http.post<OrderHistorySearchResponse>('/dish-order/order-history', request);
   }
 
   exportExcel(request: OrderHistorySearchRequest): Observable<Blob> {
-    return this.http.post(`${this.baseUrl}/order-history/export`, request, {
+    return this.http.post('/dish-order/order-history/export', request, {
       responseType: 'blob',
     });
   }
 
   // service
   updateStatusBulk(body: BulkUpdateStatusRequest): Observable<BulkUpdateStatusResponse> {
-    return this.http.post<BulkUpdateStatusResponse>(`${this.baseUrl}/update-status`, body);
+    return this.http.post<BulkUpdateStatusResponse>('/dish-order/update-status', body);
   }
 }

@@ -11,17 +11,16 @@ import {
 @Injectable({ providedIn: 'root' })
 export class InvoiceService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/v1/invoice';
 
   /**
    * Tìm kiếm hóa đơn với các điều kiện lọc động.
    */
   search(request: InvoiceSearchRequest): Observable<InvoiceSearchApiResponse> {
-    return this.http.post<InvoiceSearchApiResponse>(`${this.baseUrl}/search`, request);
+    return this.http.post<InvoiceSearchApiResponse>('/invoice/search', request);
   }
 
   exportExcel(request: InvoiceSearchRequest): Observable<Blob> {
-    return this.http.post(`${this.baseUrl}/export`, request, {
+    return this.http.post('/invoice/export', request, {
       responseType: 'blob',
     });
   }
@@ -31,6 +30,6 @@ export class InvoiceService {
    */
   getDetail(invoiceId: number): Observable<InvoiceDetailApiResponse> {
     const body: InvoiceDetailRequest = { invoiceId };
-    return this.http.post<InvoiceDetailApiResponse>(`${this.baseUrl}/get-detail`, body);
+    return this.http.post<InvoiceDetailApiResponse>('/invoice/get-detail', body);
   }
 }

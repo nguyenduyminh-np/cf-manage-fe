@@ -49,19 +49,17 @@
           />
         </label>
 
-        <label class="panel-search__field">
+        <div class="panel-search__field">
           <span class="type-label-sm">Trạng thái</span>
-          <select
-            class="type-body-md"
-            name="status"
-            [(ngModel)]="searchFilters.paymentStatus"
-            (ngModelChange)="onFiltersChanged()"
-          >
-            @for (o of statusFilterOptions; track o.value) {
-              <option [ngValue]="o.value">{{ o.label }}</option>
-            }
-          </select>
-        </label>
+          <app-ui-select
+            name="po-status"
+            ariaLabel="Trạng thái"
+            placeholder="Tất cả"
+            [options]="statusFilterOptions"
+            [value]="searchFilters.paymentStatus"
+            (valueChange)="setPaymentStatus($event)"
+          ></app-ui-select>
+        </div>
 
         <label class="panel-search__field">
           <span class="type-label-sm">Từ ngày</span>
@@ -114,13 +112,13 @@
         </label>
       </div>
       <div class="panel-search__actions">
-        <button tuiButton type="submit" class="btn btn--primary btn--small type-label-md">
+        <button tuiButton type="submit" class="btn btn--primary type-label-md">
           <span class="material-symbols-outlined">search</span> Tìm kiếm
         </button>
         <button
           tuiButton
           type="button"
-          class="btn btn--ghost btn--small type-label-md"
+          class="btn btn--ghost type-label-md"
           (click)="resetSearch()"
         >
           <span class="material-symbols-outlined">refresh</span> Làm mới
@@ -161,17 +159,16 @@
     <footer class="panel-pagination">
       <div class="panel-pagination__info type-body-sm">
         <span>Tổng: {{ state.totalElements }} đơn hàng</span>
-        <label for="po-page-size" class="type-label-md"> – Hiển thị </label>
-        <select
-          id="po-page-size"
-          class="type-label-md"
-          [ngModel]="state.pageSize"
-          (ngModelChange)="setPageSize($event)"
-        >
-          @for (s of pageSizeOptions; track s) {
-            <option [ngValue]="s">{{ s }}</option>
-          }
-        </select>
+        <span class="type-label-md"> – Hiển thị </span>
+        <app-ui-select
+          class="po-pagination__select"
+          name="po-page-size"
+          ariaLabel="Số dòng hiển thị mỗi trang"
+          placeholder="20"
+          [options]="pageSizeSelectOptions"
+          [value]="state.pageSize"
+          (valueChange)="setPageSize($event)"
+        ></app-ui-select>
         <span> / trang</span>
       </div>
       <div class="panel-pagination__nav">

@@ -21,7 +21,7 @@ import {
   ValueFormatterParams,
   ValueGetterParams,
 } from 'ag-grid-community';
-import { TuiButton, TuiDialogService } from '@taiga-ui/core';
+import { TuiDialogService } from '@taiga-ui/core';
 import { PolymorpheusComponent } from '@taiga-ui/polymorpheus';
 import {
   BehaviorSubject,
@@ -46,6 +46,7 @@ import {
 import { SupplierService } from '../../core/services/supplier/supplier.service';
 import { SupplierFormDialog } from '../../shared/components/dialogs/supplier-form-dialog/supplier-form-dialog';
 import { SupplierDeleteDialog } from '../../shared/components/dialogs/supplier-delete-dialog/supplier-delete-dialog';
+import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
 
 // ── View state ────────────────────────────────────────────────────────────────
 interface PageViewState<T> {
@@ -63,7 +64,7 @@ interface SupplierSearchFilters {
   supplierCode: string;
   supplierName: string;
   contactInfo: string;
-  isActive: string;
+  isActive: string | null;
 }
 
 interface SupplierQuery {
@@ -77,7 +78,7 @@ interface SupplierQuery {
 @Component({
   standalone: true,
   selector: 'app-supplier',
-  imports: [AsyncPipe, AgGridAngular, FormsModule, TuiButton],
+  imports: [AsyncPipe, AgGridAngular, FormsModule, UiSelectComponent],
   templateUrl: './supplier.html',
   styleUrl: './supplier.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -107,11 +108,16 @@ export class Supplier implements OnDestroy {
 
   // ── Filter options ────────────────────────────────────────────────────────
   protected readonly activeStatusOptions = [
-    { label: 'Tất cả', value: '' },
+    { label: 'Tất cả', value: null },
     { label: 'Đang hoạt động', value: 'true' },
     { label: 'Ngừng hoạt động', value: 'false' },
-  ];
-  protected readonly pageSizeOptions = [10, 20, 50];
+  ] as const;
+
+  protected readonly pageSizeSelectOptions = [
+    { label: '10', value: 10 },
+    { label: '20', value: 20 },
+    { label: '50', value: 50 },
+  ] as const;
 
   // ── Query subject ─────────────────────────────────────────────────────────
   private readonly querySubject = new BehaviorSubject<SupplierQuery>({
@@ -119,7 +125,7 @@ export class Supplier implements OnDestroy {
     limit: 20,
     sortField: 'createdTime',
     sortDir: 'desc',
-    filters: { supplierCode: '', supplierName: '', contactInfo: '', isActive: '' },
+    filters: { supplierCode: '', supplierName: '', contactInfo: '', isActive: null },
   });
 
   protected readonly state$: Observable<PageViewState<SupplierListItem>> = this.querySubject.pipe(
@@ -135,7 +141,7 @@ export class Supplier implements OnDestroy {
     supplierCode: '',
     supplierName: '',
     contactInfo: '',
-    isActive: '',
+    isActive: null,
   };
 
   // ── Column defs ───────────────────────────────────────────────────────────
@@ -275,8 +281,12 @@ export class Supplier implements OnDestroy {
     if (this.debounceId) clearTimeout(this.debounceId);
     this.debounceId = window.setTimeout(() => this.applySearch(), this.DEBOUNCE_MS);
   }
+  protected setActiveStatus(value: string | number | null): void {
+    this.searchFilters.isActive = value as string | null;
+    this.onFiltersChanged();
+  }
   protected resetSearch(): void {
-    this.searchFilters = { supplierCode: '', supplierName: '', contactInfo: '', isActive: '' };
+    this.searchFilters = { supplierCode: '', supplierName: '', contactInfo: '', isActive: null };
     this.applySearch();
   }
 
@@ -304,7 +314,9 @@ export class Supplier implements OnDestroy {
   }
 
   // ── Pagination ────────────────────────────────────────────────────────────
-  protected setPageSize(s: number): void {
+  protected setPageSize(value: string | number | null): void {
+    const s = typeof value === 'number' ? value : Number(value);
+    if (!Number.isFinite(s)) return;
     const c = this.querySubject.getValue();
     if (c.limit === s) return;
     this.querySubject.next({ ...c, page: 0, limit: s });

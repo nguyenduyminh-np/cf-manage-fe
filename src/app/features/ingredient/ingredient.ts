@@ -21,7 +21,7 @@ import {
   ValueFormatterParams,
   ValueGetterParams,
 } from 'ag-grid-community';
-import { TuiAlertService, TuiButton, TuiDialogService } from '@taiga-ui/core';
+import { TuiAlertService, TuiDialogService } from '@taiga-ui/core';
 import { PolymorpheusComponent } from '@taiga-ui/polymorpheus';
 import {
   BehaviorSubject,
@@ -57,6 +57,7 @@ import { IngredientService } from '../../core/services/ingredient/ingredient.ser
 import { IngredientFormDialog } from '../../shared/components/dialogs/ingredient-form-dialog/ingredient-form-dialog';
 import { IngredientDeleteDialog } from '../../shared/components/dialogs/ingredient-delete-dialog/ingredient-delete-dialog';
 import { downloadBlobFile } from '../../shared/utils/file-download.utils';
+import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
 
 // ─── Tab ──────────────────────────────────────────────────────────────────────
 export type ActiveTab = 'category' | 'ingredient';
@@ -101,7 +102,7 @@ interface IngredientQuery {
 @Component({
   standalone: true,
   selector: 'app-ingredient',
-  imports: [AsyncPipe, AgGridAngular, FormsModule, TuiButton],
+  imports: [AsyncPipe, AgGridAngular, FormsModule, UiSelectComponent],
   templateUrl: './ingredient.html',
   styleUrl: './ingredient.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -315,6 +316,14 @@ export class Ingredient implements OnDestroy {
     this.catApplySearch();
   }
 
+  protected catSetActiveFilter(value: string | number | null): void {
+    this.catSearchFilters = {
+      ...this.catSearchFilters,
+      isActive: value === null ? '' : String(value),
+    };
+    this.catOnFiltersChanged();
+  }
+
   // ── Category pagination ────────────────────────────────────────────────────
   protected catSetPageSize(s: number): void {
     const c = this.catQuerySubject.getValue();
@@ -342,7 +351,12 @@ export class Ingredient implements OnDestroy {
     this.dialogService
       .open<IngredientCategoryCreateRequest | null>(
         new PolymorpheusComponent(IngredientCategoryFormDialog, this.injector),
-        { data: { mode: 'create', category: null }, size: 's', dismissible: true, closeable: false },
+        {
+          data: { mode: 'create', category: null },
+          size: 's',
+          dismissible: true,
+          closeable: false,
+        },
       )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((payload) => {
@@ -390,7 +404,9 @@ export class Ingredient implements OnDestroy {
   }
 
   // ── Category API ───────────────────────────────────────────────────────────
-  private fetchCategories(q: IngredientCategoryQuery): Observable<PageViewState<IngredientCategoryListItem>> {
+  private fetchCategories(
+    q: IngredientCategoryQuery,
+  ): Observable<PageViewState<IngredientCategoryListItem>> {
     const isActive =
       q.filters.isActive === 'true' ? true : q.filters.isActive === 'false' ? false : undefined;
     const req: IngredientCategorySearchRequest = {
@@ -463,17 +479,24 @@ export class Ingredient implements OnDestroy {
     {
       headerName: 'STT',
       valueGetter: (p: ValueGetterParams<IngredientListItem>) =>
-        (p.node?.rowIndex ?? 0) + 1 +
+        (p.node?.rowIndex ?? 0) +
+        1 +
         (this.ingLatestState?.currentPage ?? 0) * (this.ingLatestState?.pageSize ?? 20),
-      flex: 0.5, minWidth: 68, maxWidth: 88,
-      pinned: 'left', sortable: false, filter: false,
+      flex: 0.5,
+      minWidth: 68,
+      maxWidth: 88,
+      pinned: 'left',
+      sortable: false,
+      filter: false,
       cellClass: 'cell-center cell-bold',
     },
     {
       headerName: 'Mã nguyên liệu',
       field: 'ingredientCode',
-      minWidth: 165, flex: 1.2,
-      sortable: true, filter: true,
+      minWidth: 165,
+      flex: 1.2,
+      sortable: true,
+      filter: true,
       valueFormatter: (p: ValueFormatterParams<IngredientListItem>) => p.value || '—',
       cellRenderer: (p: ICellRendererParams<IngredientListItem>) => {
         const code = p.data?.ingredientCode ?? '—';
@@ -483,58 +506,75 @@ export class Ingredient implements OnDestroy {
     {
       headerName: 'Tên nguyên liệu',
       field: 'ingredientName',
-      minWidth: 210, flex: 2,
-      sortable: true, filter: true,
+      minWidth: 210,
+      flex: 2,
+      sortable: true,
+      filter: true,
     },
     {
       headerName: 'Danh mục',
       field: 'ingredientCategoryName',
-      minWidth: 165, flex: 1.4,
-      sortable: false, filter: false,
+      minWidth: 165,
+      flex: 1.4,
+      sortable: false,
+      filter: false,
       valueFormatter: (p: ValueFormatterParams<IngredientListItem>) => p.value || '—',
     },
     {
       headerName: 'Nhà cung cấp',
       field: 'supplierName',
-      minWidth: 175, flex: 1.5,
-      sortable: false, filter: false,
+      minWidth: 175,
+      flex: 1.5,
+      sortable: false,
+      filter: false,
       valueFormatter: (p: ValueFormatterParams<IngredientListItem>) => p.value || '—',
     },
     {
       headerName: 'Đơn vị',
       field: 'unitName',
-      minWidth: 110, flex: 0.8,
-      sortable: false, filter: false,
+      minWidth: 110,
+      flex: 0.8,
+      sortable: false,
+      filter: false,
       cellClass: 'cell-center',
       valueFormatter: (p: ValueFormatterParams<IngredientListItem>) => p.value || '—',
     },
     {
       headerName: 'Tồn kho',
       field: 'currentStock',
-      minWidth: 120, flex: 0.9,
-      sortable: true, filter: false,
+      minWidth: 120,
+      flex: 0.9,
+      sortable: true,
+      filter: false,
       cellClass: 'cell-right cell-bold',
       cellRenderer: (p: ICellRendererParams<IngredientListItem>) => {
         const qty = p.value ?? 0;
-        const cls = qty === 0 ? 'stock-badge stock-badge--empty'
-                  : qty < 10  ? 'stock-badge stock-badge--low'
-                  :              'stock-badge stock-badge--ok';
+        const cls =
+          qty === 0
+            ? 'stock-badge stock-badge--empty'
+            : qty < 10
+              ? 'stock-badge stock-badge--low'
+              : 'stock-badge stock-badge--ok';
         return `<span class="${cls}">${qty}</span>`;
       },
     },
     {
       headerName: 'Giá TB',
       field: 'averagePrice',
-      minWidth: 145, flex: 1.1,
-      sortable: true, filter: false,
+      minWidth: 145,
+      flex: 1.1,
+      sortable: true,
+      filter: false,
       cellClass: 'cell-right cell-bold',
       valueFormatter: (p: ValueFormatterParams<IngredientListItem>) => this.fmtCurrency(p.value),
     },
     {
       headerName: 'HSD (ngày)',
       field: 'selfLife',
-      minWidth: 120, flex: 0.85,
-      sortable: false, filter: false,
+      minWidth: 120,
+      flex: 0.85,
+      sortable: false,
+      filter: false,
       cellClass: 'cell-center',
       valueFormatter: (p: ValueFormatterParams<IngredientListItem>) =>
         p.value != null ? `${p.value} ngày` : '—',
@@ -542,8 +582,10 @@ export class Ingredient implements OnDestroy {
     {
       headerName: 'Trạng thái',
       field: 'active',
-      minWidth: 160, flex: 1.1,
-      sortable: false, filter: false,
+      minWidth: 160,
+      flex: 1.1,
+      sortable: false,
+      filter: false,
       cellRenderer: (p: ICellRendererParams<IngredientListItem>) => {
         const ok = p.value === true;
         return `<span class="status-badge status-badge--${ok ? 'active' : 'inactive'}">${ok ? 'Đang hoạt động' : 'Ngừng hoạt động'}</span>`;
@@ -552,8 +594,10 @@ export class Ingredient implements OnDestroy {
     {
       headerName: 'Ngày tạo',
       field: 'createdTime',
-      minWidth: 155, flex: 1.1,
-      sortable: true, filter: false,
+      minWidth: 155,
+      flex: 1.1,
+      sortable: true,
+      filter: false,
       valueFormatter: (p: ValueFormatterParams<IngredientListItem>) => this.fmtDT(p.value),
     },
     {
@@ -562,9 +606,15 @@ export class Ingredient implements OnDestroy {
       cellRenderer: () =>
         `<span class="material-symbols-outlined action-icon action-icon--edit"   data-action="edit"   title="Chỉnh sửa">edit</span>` +
         `<span class="material-symbols-outlined action-icon action-icon--delete" data-action="delete" title="Xóa">delete</span>`,
-      width: 110, minWidth: 110, maxWidth: 130, flex: 0,
-      pinned: 'right', lockPinned: true, suppressSizeToFit: true,
-      sortable: false, filter: false,
+      width: 110,
+      minWidth: 110,
+      maxWidth: 130,
+      flex: 0,
+      pinned: 'right',
+      lockPinned: true,
+      suppressSizeToFit: true,
+      sortable: false,
+      filter: false,
       cellClass: 'cell-center cell-actions',
     },
   ];
@@ -589,8 +639,9 @@ export class Ingredient implements OnDestroy {
   protected onIngCellClicked(e: CellClickedEvent<IngredientListItem>): void {
     if (e.colDef.colId !== 'ing-actions' || !e.data) return;
     const action = (e.event?.target as HTMLElement)
-      ?.closest('[data-action]')?.getAttribute('data-action');
-    if (action === 'edit')   this.openIngEditDialog(e.data);
+      ?.closest('[data-action]')
+      ?.getAttribute('data-action');
+    if (action === 'edit') this.openIngEditDialog(e.data);
     else if (action === 'delete') this.openIngDeleteDialog(e.data);
   }
   protected onIngRowDoubleClicked(e: RowDoubleClickedEvent<IngredientListItem>): void {
@@ -609,6 +660,14 @@ export class Ingredient implements OnDestroy {
   protected ingResetSearch(): void {
     this.ingSearchFilters = { searchString: '', isActive: '' };
     this.ingApplySearch();
+  }
+
+  protected ingSetActiveFilter(value: string | number | null): void {
+    this.ingSearchFilters = {
+      ...this.ingSearchFilters,
+      isActive: value === null ? '' : String(value),
+    };
+    this.ingOnFiltersChanged();
   }
 
   // ── Ingredient pagination ──────────────────────────────────────────────────
@@ -638,7 +697,12 @@ export class Ingredient implements OnDestroy {
     this.dialogService
       .open<IngredientCreateRequest | null>(
         new PolymorpheusComponent(IngredientFormDialog, this.injector),
-        { data: { mode: 'create', ingredient: null }, size: 's', dismissible: true, closeable: false },
+        {
+          data: { mode: 'create', ingredient: null },
+          size: 's',
+          dismissible: true,
+          closeable: false,
+        },
       )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((payload) => {
@@ -666,10 +730,12 @@ export class Ingredient implements OnDestroy {
   }
   private openIngDeleteDialog(ing: IngredientListItem): void {
     this.dialogService
-      .open<boolean>(
-        new PolymorpheusComponent(IngredientDeleteDialog, this.injector),
-        { data: { ingredient: ing }, size: 's', dismissible: true, closeable: false },
-      )
+      .open<boolean>(new PolymorpheusComponent(IngredientDeleteDialog, this.injector), {
+        data: { ingredient: ing },
+        size: 's',
+        dismissible: true,
+        closeable: false,
+      })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((ok) => {
         if (!ok) return;
@@ -698,7 +764,8 @@ export class Ingredient implements OnDestroy {
 
     return this.ingredientService.search(req).pipe(
       map((r) => ({
-        isLoading: false, error: null,
+        isLoading: false,
+        error: null,
         rowData: r.data.rows,
         currentPage: r.data.pageNo,
         pageSize: r.data.pageSize,
@@ -706,14 +773,25 @@ export class Ingredient implements OnDestroy {
         totalPages: r.data.totalPages,
       })),
       startWith({
-        isLoading: true, error: null, rowData: [],
-        currentPage: 0, pageSize: q.limit, totalElements: 0, totalPages: 1,
+        isLoading: true,
+        error: null,
+        rowData: [],
+        currentPage: 0,
+        pageSize: q.limit,
+        totalElements: 0,
+        totalPages: 1,
       }),
-      catchError(() => of({
-        isLoading: false,
-        error: 'Không thể tải danh sách nguyên liệu.',
-        rowData: [], currentPage: 0, pageSize: q.limit, totalElements: 0, totalPages: 1,
-      })),
+      catchError(() =>
+        of({
+          isLoading: false,
+          error: 'Không thể tải danh sách nguyên liệu.',
+          rowData: [],
+          currentPage: 0,
+          pageSize: q.limit,
+          totalElements: 0,
+          totalPages: 1,
+        }),
+      ),
     );
   }
 
@@ -729,7 +807,8 @@ export class Ingredient implements OnDestroy {
     let export$: Observable<Blob>;
     if (activeTab === 'category') {
       const q = this.catQuerySubject.getValue();
-      const isActive = q.filters.isActive === 'true' ? true : q.filters.isActive === 'false' ? false : undefined;
+      const isActive =
+        q.filters.isActive === 'true' ? true : q.filters.isActive === 'false' ? false : undefined;
       const req: IngredientCategorySearchRequest = {
         page: 0,
         limit: Math.max(1, this.catLatestState?.totalElements ?? q.limit),
@@ -741,7 +820,8 @@ export class Ingredient implements OnDestroy {
       export$ = this.ingredientCategoryService.exportExcel(req);
     } else {
       const q = this.ingQuerySubject.getValue();
-      const isActive = q.filters.isActive === 'true' ? true : q.filters.isActive === 'false' ? false : undefined;
+      const isActive =
+        q.filters.isActive === 'true' ? true : q.filters.isActive === 'false' ? false : undefined;
       const req: IngredientSearchRequest = {
         page: 0,
         limit: Math.max(1, this.ingLatestState?.totalElements ?? q.limit),
@@ -767,9 +847,7 @@ export class Ingredient implements OnDestroy {
           downloadBlobFile(blob, fileName, this.alertService);
         },
         error: () =>
-          this.alertService
-            .open('Không thể xuất Excel.', { appearance: 'error' })
-            .subscribe(),
+          this.alertService.open('Không thể xuất Excel.', { appearance: 'error' }).subscribe(),
       });
   }
 
@@ -780,7 +858,9 @@ export class Ingredient implements OnDestroy {
   }
   private fmtDT(iso: string): string {
     if (!iso) return '—';
-    return new Intl.DateTimeFormat('vi-VN', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(iso));
+    return new Intl.DateTimeFormat('vi-VN', { dateStyle: 'short', timeStyle: 'short' }).format(
+      new Date(iso),
+    );
   }
   private fmtCurrency(v: number): string {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v ?? 0);

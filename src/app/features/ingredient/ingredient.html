@@ -11,12 +11,11 @@
       </div>
     </div>
 
-    <!-- Action button changes per tab -->
     @if (activeTab === 'category') {
       <div class="ing-page__actions">
         <button
           type="button"
-          class="btn btn--export type-label-md"
+          class="btn--export type-label-md"
           [disabled]="isExporting()"
           (click)="exportExcel()"
         >
@@ -24,9 +23,8 @@
           <span>{{ isExporting() ? 'Đang xuất...' : 'Xuất Excel' }}</span>
         </button>
         <button
-          tuiButton
           type="button"
-          class="btn btn--primary type-label-md"
+          class="booking-button booking-button--create type-label-md"
           (click)="openCatCreateDialog()"
         >
           <span class="material-symbols-outlined">add</span>
@@ -37,7 +35,7 @@
       <div class="ing-page__actions">
         <button
           type="button"
-          class="btn btn--export type-label-md"
+          class="btn--export type-label-md"
           [disabled]="isExporting()"
           (click)="exportExcel()"
         >
@@ -45,9 +43,8 @@
           <span>{{ isExporting() ? 'Đang xuất...' : 'Xuất Excel' }}</span>
         </button>
         <button
-          tuiButton
           type="button"
-          class="btn btn--primary type-label-md"
+          class="booking-button booking-button--create type-label-md"
           (click)="openIngCreateDialog()"
         >
           <span class="material-symbols-outlined">add</span>
@@ -91,12 +88,16 @@
   @if (activeTab === 'category') {
     <div id="panel-category" role="tabpanel" aria-labelledby="tab-category" class="ing-panel">
       <!-- Search -->
-      <section class="panel-search" aria-label="Bộ lọc danh mục">
-        <form (ngSubmit)="catApplySearch()">
-          <div class="panel-search__grid">
-            <label class="panel-search__field">
-              <span class="type-label-sm">Tìm kiếm danh mục</span>
+      <section aria-label="Bộ lọc danh mục">
+        <form class="booking-filters" (ngSubmit)="catApplySearch()">
+          <div class="booking-field booking-field--keyword">
+            <label class="type-label-md" for="cat-search-string">Tìm kiếm danh mục</label>
+            <div class="booking-searchbox">
+              <span class="material-symbols-outlined booking-searchbox__icon" aria-hidden="true"
+                >search</span
+              >
               <input
+                id="cat-search-string"
                 class="type-body-md"
                 name="catSearchString"
                 type="text"
@@ -105,34 +106,31 @@
                 placeholder="Nhập mã hoặc tên danh mục..."
                 autocomplete="off"
               />
-            </label>
-            <label class="panel-search__field">
-              <span class="type-label-sm">Trạng thái</span>
-              <select
-                class="type-body-md"
-                name="catActive"
-                [(ngModel)]="catSearchFilters.isActive"
-                (ngModelChange)="catOnFiltersChanged()"
-              >
-                @for (o of activeStatusOptions; track o.value) {
-                  <option [ngValue]="o.value">{{ o.label }}</option>
-                }
-              </select>
-            </label>
+            </div>
           </div>
-          <div class="panel-search__actions">
-            <button tuiButton type="submit" class="btn btn--primary btn--small type-label-md">
-              <span class="material-symbols-outlined">search</span> Tìm kiếm
-            </button>
-            <button
-              tuiButton
-              type="button"
-              class="btn btn--ghost btn--small type-label-md"
-              (click)="catResetSearch()"
-            >
-              <span class="material-symbols-outlined">refresh</span> Làm mới
-            </button>
+          <div class="booking-field">
+            <label class="type-label-md" for="cat-active">Trạng thái</label>
+            <app-ui-select
+              name="cat-active"
+              ariaLabel="Trạng thái"
+              placeholder="Tất cả"
+              [options]="activeStatusOptions"
+              [value]="catSearchFilters.isActive"
+              (valueChange)="catSetActiveFilter($event)"
+            ></app-ui-select>
           </div>
+          <button type="submit" class="booking-button booking-button--search type-label-md">
+            <span class="material-symbols-outlined" aria-hidden="true">search</span>
+            <span>Tìm kiếm</span>
+          </button>
+          <button
+            type="button"
+            class="booking-button booking-button--ghost type-label-md"
+            (click)="catResetSearch()"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+            <span>Làm mới</span>
+          </button>
         </form>
       </section>
 
@@ -180,9 +178,8 @@
           </div>
           <div class="panel-pagination__nav">
             <button
-              tuiButton
               type="button"
-              class="btn btn--ghost btn--icon"
+              class="booking-button booking-button--icon"
               [disabled]="!catCanPrev(state)"
               (click)="catPrev()"
               aria-label="Trang trước"
@@ -191,9 +188,8 @@
             </button>
             <span class="panel-pagination__indicator type-label-md">{{ pageSummary(state) }}</span>
             <button
-              tuiButton
               type="button"
-              class="btn btn--ghost btn--icon"
+              class="booking-button booking-button--icon"
               [disabled]="!catCanNext(state)"
               (click)="catNext()"
               aria-label="Trang sau"
@@ -212,12 +208,16 @@
   @if (activeTab === 'ingredient') {
     <div id="panel-ingredient" role="tabpanel" aria-labelledby="tab-ingredient" class="ing-panel">
       <!-- Search -->
-      <section class="panel-search" aria-label="Bộ lọc nguyên liệu">
-        <form (ngSubmit)="ingApplySearch()">
-          <div class="panel-search__grid">
-            <label class="panel-search__field">
-              <span class="type-label-sm">Tìm kiếm nguyên liệu</span>
+      <section aria-label="Bộ lọc nguyên liệu">
+        <form class="booking-filters" (ngSubmit)="ingApplySearch()">
+          <div class="booking-field booking-field--keyword">
+            <label class="type-label-md" for="ing-search-string">Tìm kiếm nguyên liệu</label>
+            <div class="booking-searchbox">
+              <span class="material-symbols-outlined booking-searchbox__icon" aria-hidden="true"
+                >search</span
+              >
               <input
+                id="ing-search-string"
                 class="type-body-md"
                 name="ingSearchString"
                 type="text"
@@ -226,34 +226,31 @@
                 placeholder="Nhập mã hoặc tên..."
                 autocomplete="off"
               />
-            </label>
-            <label class="panel-search__field">
-              <span class="type-label-sm">Trạng thái</span>
-              <select
-                class="type-body-md"
-                name="ingActive"
-                [(ngModel)]="ingSearchFilters.isActive"
-                (ngModelChange)="ingOnFiltersChanged()"
-              >
-                @for (o of activeStatusOptions; track o.value) {
-                  <option [ngValue]="o.value">{{ o.label }}</option>
-                }
-              </select>
-            </label>
+            </div>
           </div>
-          <div class="panel-search__actions">
-            <button tuiButton type="submit" class="btn btn--primary btn--small type-label-md">
-              <span class="material-symbols-outlined">search</span> Tìm kiếm
-            </button>
-            <button
-              tuiButton
-              type="button"
-              class="btn btn--ghost btn--small type-label-md"
-              (click)="ingResetSearch()"
-            >
-              <span class="material-symbols-outlined">refresh</span> Làm mới
-            </button>
+          <div class="booking-field">
+            <label class="type-label-md" for="ing-active">Trạng thái</label>
+            <app-ui-select
+              name="ing-active"
+              ariaLabel="Trạng thái"
+              placeholder="Tất cả"
+              [options]="activeStatusOptions"
+              [value]="ingSearchFilters.isActive"
+              (valueChange)="ingSetActiveFilter($event)"
+            ></app-ui-select>
           </div>
+          <button type="submit" class="booking-button booking-button--search type-label-md">
+            <span class="material-symbols-outlined" aria-hidden="true">search</span>
+            <span>Tìm kiếm</span>
+          </button>
+          <button
+            type="button"
+            class="booking-button booking-button--ghost type-label-md"
+            (click)="ingResetSearch()"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+            <span>Làm mới</span>
+          </button>
         </form>
       </section>
 
@@ -302,9 +299,8 @@
           </div>
           <div class="panel-pagination__nav">
             <button
-              tuiButton
               type="button"
-              class="btn btn--ghost btn--icon"
+              class="booking-button booking-button--icon"
               [disabled]="!ingCanPrev(state)"
               (click)="ingPrev()"
               aria-label="Trang trước"
@@ -313,9 +309,8 @@
             </button>
             <span class="panel-pagination__indicator type-label-md">{{ pageSummary(state) }}</span>
             <button
-              tuiButton
               type="button"
-              class="btn btn--ghost btn--icon"
+              class="booking-button booking-button--icon"
               [disabled]="!ingCanNext(state)"
               (click)="ingNext()"
               aria-label="Trang sau"

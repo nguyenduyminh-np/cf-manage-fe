@@ -5,11 +5,12 @@ import {
   computed,
   DestroyRef,
   inject,
+  Injector,
   OnInit,
   signal,
 } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { TuiDialogContext, TuiDialogService } from '@taiga-ui/core';
+import { TuiDialogContext, TuiDialogService, TuiAlertService } from '@taiga-ui/core';
 import { POLYMORPHEUS_CONTEXT, PolymorpheusComponent } from '@taiga-ui/polymorpheus';
 import {
   BehaviorSubject,
@@ -32,11 +33,21 @@ import {
   DishSearchRequest,
   DishSearchResponse,
 } from '../../../../core/models/pos-order-dishes/pos-order-dishes.model';
+import { PaymentData } from '../../../../core/models/payment/payment.model';
 import { PosOrderDishesService } from '../../../../core/services/POS/pos-order-dishes/pos-order-dishes.service';
+import { OrderDishesHistoryService } from '../../../../core/services/order-dishes/order-dishes.service';
 import {
   OrderDishesSuccessDialog,
   OrderDishesSuccessDialogInput,
 } from '../order-dishes-success-dialog/order-dishes-success-dialog';
+import {
+  PosConfirmPayment,
+  PosConfirmPaymentResult,
+} from '../pos-confirm-payment/pos-confirm-payment';
+import {
+  PaymentSuccessDialog,
+  PaymentSuccessDialogInput,
+} from '../payment-success-dialog/payment-success-dialog';
 
 export interface PosOrderDishesDialogInput {
   tableId: number;
@@ -78,7 +89,10 @@ export class PosOrderDishes implements OnInit {
     optional: true,
   }) as TuiDialogContext<PosOrderDishesDialogResult | null, PosOrderDishesDialogInput> | null;
   private readonly dishService = inject(PosOrderDishesService);
+  private readonly orderHistoryService = inject(OrderDishesHistoryService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly alert = inject(TuiAlertService);
+  private readonly injector = inject(Injector);
 
   protected readonly tableName = this.dialogContext?.data?.tableName || 'Ban 3';
   protected readonly pax = this.dialogContext?.data?.pax || 6;
@@ -229,6 +243,10 @@ export class PosOrderDishes implements OnInit {
     this.dialogContext?.completeWith(null);
   }
 
+  /**
+   * Luồng A: Lưu tạm đơn đặt món (giữ nguyên luồng cũ)
+   * Tạo dishOrder với trạng thái PROCESSING → mở OrderDishesSuccessDialog
+   */
   protected confirmOrder(): void {
     const tableId = this.dialogContext?.data?.tableId;
     if (!tableId) {
@@ -246,7 +264,7 @@ export class PosOrderDishes implements OnInit {
       dishOrderDetails: this.cartItems().map((item) => ({
         dishId: item.dish.id,
         quantity: item.quantity,
-        note: undefined,
+        note: item.note || undefined,
       })),
     };
 
@@ -262,7 +280,7 @@ export class PosOrderDishes implements OnInit {
           // 2. Chuẩn bị dữ liệu cho dialog thành công
           const successData: OrderDishesSuccessDialogInput = {
             dishOrderId: response.data.dishOrderId,
-            tableName: this.tableName, // lấy từ dialog input hiện tại
+            tableName: this.tableName,
             accountName: response.data.accountName,
             createdTime: response.data.createdTime,
             dishOrderStatusName: response.data.dishOrderStatusName,
@@ -281,20 +299,130 @@ export class PosOrderDishes implements OnInit {
           this.dialogService
             .open<boolean>(new PolymorpheusComponent(OrderDishesSuccessDialog), {
               data: successData,
-              dismissible: true, // cho phép click bên ngoài để đóng
+              dismissible: true,
               size: 'auto',
             })
             .subscribe({
               next: (result) => {
-                // result = true nếu người dùng nhấn "In hóa đơn", false nếu chỉ đóng
                 console.log('Success dialog closed with result:', result);
               },
             });
         },
         error: (err) => {
           console.error('[PosOrderDishes] Create order failed', err);
-          // Hiển thị toast lỗi
+          const message = err?.error?.message || 'Lưu đơn đặt món thất bại. Vui lòng thử lại.';
+          this.alert
+            .open(message, { label: 'Lỗi', appearance: 'negative', autoClose: 5000, closeable: true })
+            .subscribe();
         },
+      });
+  }
+
+  /**
+   * Luồng B: Thanh toán nhanh
+   * Bước 1: Tạo order ngầm (API createDishOrder → PROCESSING)
+   * Bước 2: Cập nhật trạng thái → DONE ngầm (API updateStatusBulk)
+   * Bước 3: Mở PosConfirmPayment dialog (để người dùng chọn PTTT + xác nhận)
+   * Bước 4: Thành công → mở PaymentSuccessDialog
+   */
+  protected orderAndPayNow(): void {
+    const tableId = this.dialogContext?.data?.tableId;
+    if (!tableId) {
+      console.error('[PosOrderDishes] Missing tableId');
+      return;
+    }
+
+    if (this.submitting()) {
+      return;
+    }
+
+    const request: DishOrderCreateRequest = {
+      tableId: tableId,
+      description: this.orderDescription() || undefined,
+      dishOrderDetails: this.cartItems().map((item) => ({
+        dishId: item.dish.id,
+        quantity: item.quantity,
+        note: item.note || undefined,
+      })),
+    };
+
+    this.submitting.set(true);
+
+    // Bước 1: Tạo order → Bước 2: Cập nhật trạng thái DONE (ngầm)
+    this.dishService
+      .createDishOrder(request)
+      .pipe(
+        switchMap((createResponse) => {
+          const orderId = createResponse.data.dishOrderId;
+          // Cập nhật trạng thái sang DONE để hợp lệ cho thanh toán
+          return this.orderHistoryService
+            .updateStatusBulk({ dishOrderIds: [orderId], dishOrderStatus: 'DONE' })
+            .pipe(map(() => orderId));
+        }),
+        finalize(() => this.submitting.set(false)),
+      )
+      .subscribe({
+        next: (orderId) => {
+          // Bước 3: Đóng dialog đặt món + mở PosConfirmPayment
+          this.dialogContext?.completeWith(null);
+          this.openPaymentConfirmDialog(orderId);
+        },
+        error: (err) => {
+          console.error('[PosOrderDishes] Quick checkout failed', err);
+          const message = err?.error?.message || 'Tạo đơn thanh toán thất bại. Vui lòng thử lại.';
+          this.alert
+            .open(message, { label: 'Lỗi', appearance: 'negative', autoClose: 5000, closeable: true })
+            .subscribe();
+        },
+      });
+  }
+
+  /**
+   * Mở PosConfirmPayment dialog để người dùng xác nhận thanh toán.
+   * Giống pattern đã dùng trong OrderDishesHistory.openPaymentFlow()
+   */
+  private openPaymentConfirmDialog(orderId: number): void {
+    this.dialogService
+      .open<PosConfirmPaymentResult>(
+        new PolymorpheusComponent(PosConfirmPayment, this.injector),
+        {
+          data: { orderId },
+          size: 'auto',
+          dismissible: false,
+          closeable: false,
+        },
+      )
+      .subscribe((result: PosConfirmPaymentResult) => {
+        if (result) {
+          // Thanh toán thành công → mở PaymentSuccessDialog
+          this.openPaymentSuccessDialog(result);
+        }
+        // result === null → người dùng đóng/hủy
+      });
+  }
+
+  /**
+   * Mở PaymentSuccessDialog hiển thị hóa đơn sau thanh toán thành công.
+   */
+  private openPaymentSuccessDialog(paymentData: PaymentData): void {
+    const successInput: PaymentSuccessDialogInput = {
+      paymentData,
+      tableName: this.tableName,
+    };
+
+    this.dialogService
+      .open<boolean | null>(
+        new PolymorpheusComponent(PaymentSuccessDialog, this.injector),
+        {
+          data: successInput,
+          size: 'auto',
+          dismissible: true,
+        },
+      )
+      .subscribe(() => {
+        this.alert
+          .open('Thanh toán thành công!', { label: 'Thành công', appearance: 'positive', autoClose: 3000, closeable: true })
+          .subscribe();
       });
   }
 

@@ -15,7 +15,6 @@ import {
 @Injectable({ providedIn: 'root' })
 export class DishService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/v1/dish';
 
   //deprecated
   //   /**
@@ -23,18 +22,18 @@ export class DishService {
   //    * Gửi optional body, nếu không truyền -> lấy mặc định (active = true).
   //    */
   //   list(body?: { active?: boolean }): Observable<DishListApiResponse> {
-  //     return this.http.post<DishListApiResponse>(`${this.baseUrl}/list`, body ?? {});
+  //     return this.http.post<DishListApiResponse>('/dish/list', body ?? {});
   //   }
 
   /**
    * Tìm kiếm món ăn động (phân trang, lọc, sắp xếp).
    */
   search(request: DishSearchRequest): Observable<DishSearchApiResponse> {
-    return this.http.post<DishSearchApiResponse>(`${this.baseUrl}/search`, request);
+    return this.http.post<DishSearchApiResponse>('/dish/search', request);
   }
 
   exportExcel(request: DishSearchRequest): Observable<Blob> {
-    return this.http.post(`${this.baseUrl}/export`, request, {
+    return this.http.post('/dish/export', request, {
       responseType: 'blob',
     });
   }
@@ -43,27 +42,27 @@ export class DishService {
    * Tạo mới món ăn.
    */
   create(request: DishCreateRequest): Observable<DishDetailApiResponse> {
-    return this.http.post<DishDetailApiResponse>(`${this.baseUrl}/create`, request);
+    return this.http.post<DishDetailApiResponse>('/dish/create', request);
   }
 
   /**
    * Cập nhật món ăn.
    */
   update(request: DishUpdateRequest): Observable<DishDetailApiResponse> {
-    return this.http.post<DishDetailApiResponse>(`${this.baseUrl}/update`, request);
+    return this.http.post<DishDetailApiResponse>('/dish/update', request);
   }
 
   /**
    * Xoá mềm món ăn (active = false).
    */
   delete(id: number): Observable<DishDeleteApiResponse> {
-    return this.http.post<DishDeleteApiResponse>(`${this.baseUrl}/delete`, { id });
+    return this.http.post<DishDeleteApiResponse>('/dish/delete', { id });
   }
 
   /**
    * Lấy chi tiết món ăn.
    */
   getDetail(id: number): Observable<DishDetailApiResponse> {
-    return this.http.post<DishDetailApiResponse>(`${this.baseUrl}/detail`, { id });
+    return this.http.post<DishDetailApiResponse>('/dish/detail', { id });
   }
 }

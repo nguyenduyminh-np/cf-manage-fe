@@ -1,13 +1,16 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { PaymentRequest,PaymentApiResponse, PaymentPreviewApiResponse, PaymentPreviewRequest} from '../../../models/payment/payment.model';
-
+import {
+  PaymentRequest,
+  PaymentApiResponse,
+  PaymentPreviewApiResponse,
+  PaymentPreviewRequest,
+} from '../../../models/payment/payment.model';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/v1/payment';
 
   /**
    * Lấy thông tin xem trước thanh toán cho một đơn hàng.
@@ -15,7 +18,7 @@ export class PaymentService {
    */
   getPaymentPreview(orderId: number): Observable<PaymentPreviewApiResponse> {
     const body: PaymentPreviewRequest = { orderId };
-    return this.http.post<PaymentPreviewApiResponse>(`${this.baseUrl}/preview`, body);
+    return this.http.post<PaymentPreviewApiResponse>('/payment/preview', body);
   }
 
   /**
@@ -25,6 +28,6 @@ export class PaymentService {
    */
   processPayment(orderId: number, paymentMethod: string): Observable<PaymentApiResponse> {
     const body: PaymentRequest = { orderId, paymentMethod };
-    return this.http.post<PaymentApiResponse>(`${this.baseUrl}/thanh-toan`, body);
+    return this.http.post<PaymentApiResponse>('/payment/thanh-toan', body);
   }
 }

@@ -1,8 +1,11 @@
 <header class="admin-header">
-  <div class="search-well">
-    <span class="material-symbols-outlined icon"></span>
-    <input type="text" placeholder="Tìm kiếm..." />
-  </div>
+  <button class="search-well" (click)="openSearch()">
+    <div class="search-trigger-content">
+      <span class="material-symbols-outlined icon">search</span>
+      <span class="placeholder-text">Tìm kiếm nhanh</span>
+    </div>
+    <span class="shortcut-badge">Ctrl K</span>
+  </button>
 
   <div class="header-actions">
     <div class="action-buttons">

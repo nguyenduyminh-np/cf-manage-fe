@@ -217,3 +217,4 @@
 3. Hệ thống truy vấn thông tin chi tiết bàn từ cơ sở dữ liệu.
 4. Hệ thống nhận kết quả.
 5. Hệ thống mở hộp thoại "Chi tiết bàn", hiển thị đầy đủ thông tin bàn: mã bàn, tên bàn, số chỗ ngồi, tầng, trạng thái hiện tại và thông tin đơn đặt bàn liên quan (nếu có).
+

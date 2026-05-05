@@ -35,10 +35,10 @@
   --reading-max: 72ch;
   --reading-max-hard: 80ch;
 
-  --color-export-excel: #107c41;
-  --color-export-excel-accent: #21a366;
-  --color-export-excel-hover: #0e6d37;
-  --color-export-excel-hover-accent: #1b8a51;
+  --color-export-excel: #1b6d24;
+  --color-export-excel-accent: #2a8d35;
+  --color-export-excel-hover: #16591d;
+  --color-export-excel-hover-accent: #20702a;
 }
 
 @media (max-width: 768px) {
@@ -148,7 +148,7 @@ input {
   font-size: var(--label-md-size);
   line-height: var(--label-md-line);
   font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.01em;
+  letter-spacing: 0.015em;
 }
 
 .type-label-sm {
@@ -193,68 +193,83 @@ button[tuiButton] {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  min-height: 2.35rem;
+  height: 3rem;
   padding: 0 1.25rem;
-  border: none;
-  border-radius: 0.75rem;
-  color: #ffffff;
-  background: linear-gradient(135deg, var(--color-export-excel) 0%, var(--color-export-excel-accent) 100%);
+  border: 1px solid var(--color-export-excel);
+  border-radius: 0.5rem;
+  color: $color-surface;
+  background-color: var(--color-export-excel);
   text-decoration: none;
   outline: none;
-  box-shadow: 0 4px 10px -2px rgba(16, 124, 65, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.25);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 100%);
-    opacity: 0;
-    transition: opacity 0.2s ease;
-  }
+  box-shadow: 0 4px 12px rgba(27, 109, 36, 0.2);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  box-sizing: border-box;
 
   .material-symbols-outlined {
-    font-size: 1.15rem;
-    position: relative;
-    z-index: 1;
+    font-size: 1.25rem;
+    color: inherit;
+    transition: transform 0.2s ease;
   }
 
   span:not(.material-symbols-outlined) {
-    position: relative;
-    z-index: 1;
-    font-weight: 600;
+    font-weight: inherit;
   }
 
   &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 14px -2px rgba(16, 124, 65, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.35);
-    
-    &::after {
-      opacity: 1;
+    background-color: var(--color-export-excel-hover);
+    border-color: var(--color-export-excel-hover);
+    color: $color-surface;
+    box-shadow: 0 6px 16px rgba(22, 89, 29, 0.24);
+
+    .material-symbols-outlined {
+      transform: translateY(-2px);
     }
   }
 
   &:active:not(:disabled) {
+    background-color: var(--color-export-excel-hover);
+    border-color: var(--color-export-excel-hover);
     transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(16, 124, 65, 0.2);
+    box-shadow: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-export-excel-accent);
+    outline-offset: 2px;
   }
 
   &:disabled {
-    opacity: 0.75;
+    opacity: 0.6;
     cursor: wait;
-    transform: none;
+    border-color: rgba(27, 109, 36, 0.2);
+    color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(27, 109, 36, 0.72);
     box-shadow: none;
-    background: var(--color-export-excel);
 
     .material-symbols-outlined {
       animation: export-bounce 1s infinite alternate ease-in-out;
     }
   }
+
+  /* Responsive breakpoints theo rule */
+  @media (max-width: 960px) {
+    height: 2.875rem;
+    padding: 0 1.125rem;
+  }
+
+  @media (max-width: 720px) {
+    height: 2.75rem;
+    padding: 0 1rem;
+    width: 100%;
+  }
 }
 
 @keyframes export-bounce {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-4px); }
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-4px);
+  }
 }

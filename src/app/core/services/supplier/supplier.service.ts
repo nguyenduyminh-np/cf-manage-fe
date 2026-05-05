@@ -15,13 +15,12 @@ import {
 @Injectable({ providedIn: 'root' })
 export class SupplierService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/v1/supplier';
 
   /**
    * Tìm kiếm nhà cung cấp (phân trang, lọc, sắp xếp).
    */
   search(request: SupplierSearchRequest): Observable<SupplierSearchApiResponse> {
-    return this.http.post<SupplierSearchApiResponse>(`${this.baseUrl}/search`, request);
+    return this.http.post<SupplierSearchApiResponse>('/supplier/search', request);
   }
 
   /**
@@ -34,7 +33,7 @@ export class SupplierService {
       exportRequest.isActive = exportRequest.active;
       delete exportRequest.active;
     }
-    return this.http.post(`${this.baseUrl}/export`, exportRequest, {
+    return this.http.post('/supplier/export', exportRequest, {
       responseType: 'blob',
     });
   }
@@ -43,34 +42,34 @@ export class SupplierService {
    * Tạo mới nhà cung cấp.
    */
   create(request: SupplierCreateRequest): Observable<SupplierDetailApiResponse> {
-    return this.http.post<SupplierDetailApiResponse>(`${this.baseUrl}/create`, request);
+    return this.http.post<SupplierDetailApiResponse>('/supplier/create', request);
   }
 
   /**
    * Cập nhật nhà cung cấp.
    */
   update(request: SupplierUpdateRequest): Observable<SupplierDetailApiResponse> {
-    return this.http.post<SupplierDetailApiResponse>(`${this.baseUrl}/update`, request);
+    return this.http.post<SupplierDetailApiResponse>('/supplier/update', request);
   }
 
   /**
    * Xoá mềm nhà cung cấp (active = false).
    */
   delete(id: number): Observable<SupplierDeleteApiResponse> {
-    return this.http.post<SupplierDeleteApiResponse>(`${this.baseUrl}/delete`, { id });
+    return this.http.post<SupplierDeleteApiResponse>('/supplier/delete', { id });
   }
 
   /**
    * Lấy chi tiết nhà cung cấp.
    */
   getDetail(id: number): Observable<SupplierDetailApiResponse> {
-    return this.http.post<SupplierDetailApiResponse>(`${this.baseUrl}/detail`, { id });
+    return this.http.post<SupplierDetailApiResponse>('/supplier/detail', { id });
   }
 
   /**
    * Lấy danh sách nhà cung cấp dạng options (dropdown).
    */
   getOptions(): Observable<SupplierOptionsApiResponse> {
-    return this.http.post<SupplierOptionsApiResponse>(`${this.baseUrl}/options`, {});
+    return this.http.post<SupplierOptionsApiResponse>('/supplier/options', {});
   }
 }

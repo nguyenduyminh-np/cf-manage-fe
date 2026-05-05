@@ -46,6 +46,7 @@ import {
 import { WarehouseService } from '../../core/services/warehouse/warehouse.service';
 import { WarehouseFormDialog } from '../../shared/components/dialogs/warehouse-form-dialog/warehouse-form-dialog';
 import { WarehouseDeleteDialog } from '../../shared/components/dialogs/warehouse-delete-dialog/warehouse-delete-dialog';
+import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
 
 // ── View state ────────────────────────────────────────────────────────────────
 interface PageViewState<T> {
@@ -75,7 +76,7 @@ interface WarehouseQuery {
 @Component({
   standalone: true,
   selector: 'app-warehouse',
-  imports: [AsyncPipe, AgGridAngular, FormsModule, TuiButton],
+  imports: [AsyncPipe, AgGridAngular, FormsModule, TuiButton, UiSelectComponent],
   templateUrl: './warehouse.html',
   styleUrl: './warehouse.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -110,6 +111,10 @@ export class Warehouse implements OnDestroy {
     { label: 'Ngừng hoạt động', value: 'false' },
   ];
   protected readonly pageSizeOptions = [10, 20, 50];
+  protected readonly pageSizeSelectOptions = this.pageSizeOptions.map((s) => ({
+    label: String(s),
+    value: s,
+  }));
 
   // ── Query subject ─────────────────────────────────────────────────────────
   private readonly querySubject = new BehaviorSubject<WarehouseQuery>({
@@ -288,6 +293,14 @@ export class Warehouse implements OnDestroy {
     this.applySearch();
   }
 
+  protected setActiveStatus(value: string | number | null): void {
+    this.searchFilters = {
+      ...this.searchFilters,
+      isActive: value === null ? '' : String(value),
+    };
+    this.onFiltersChanged();
+  }
+
   protected exportExcel(): void {
     if (this.isExporting()) return;
 
@@ -316,6 +329,13 @@ export class Warehouse implements OnDestroy {
     const c = this.querySubject.getValue();
     if (c.limit === s) return;
     this.querySubject.next({ ...c, page: 0, limit: s });
+  }
+
+  protected setPageSizeFromSelect(value: string | number | null): void {
+    if (value === null) return;
+    const size = typeof value === 'number' ? value : Number(value);
+    if (!Number.isFinite(size)) return;
+    this.setPageSize(size);
   }
   protected prevPage(): void {
     const c = this.querySubject.getValue();

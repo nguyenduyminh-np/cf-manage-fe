@@ -20,7 +20,7 @@ import {
   ValueFormatterParams,
   ValueGetterParams,
 } from 'ag-grid-community';
-import { TuiAlertService, TuiButton, TuiDialogService } from '@taiga-ui/core';
+import { TuiAlertService, TuiDialogService } from '@taiga-ui/core';
 import { PolymorpheusComponent } from '@taiga-ui/polymorpheus';
 import {
   BehaviorSubject,
@@ -41,6 +41,7 @@ import {
   InvoiceDetailDialog,
   InvoiceDetailDialogInput,
 } from '../../shared/components/dialogs/invoice-detail-dialog/invoice-detail-dialog';
+import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
 import { downloadBlobFile } from '../../shared/utils/file-download.utils';
 
 // ----- View State -----
@@ -75,7 +76,7 @@ interface InvoiceQuery {
 @Component({
   standalone: true,
   selector: 'app-invoice',
-  imports: [AsyncPipe, AgGridAngular, FormsModule, TuiButton],
+  imports: [AsyncPipe, AgGridAngular, FormsModule, UiSelectComponent],
   templateUrl: './invoice.html',
   styleUrl: './invoice.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -331,6 +332,16 @@ export class Invoice {
       totalAmountTo: null,
     };
     this.applySearch();
+  }
+
+  protected setPaymentStatus(value: string | number | null): void {
+    this.searchFilters.paymentStatus = typeof value === 'string' ? value : '';
+    this.onFiltersChanged();
+  }
+
+  protected setPaymentMethod(value: string | number | null): void {
+    this.searchFilters.paymentMethod = typeof value === 'string' ? value : '';
+    this.onFiltersChanged();
   }
 
   protected exportExcel(): void {

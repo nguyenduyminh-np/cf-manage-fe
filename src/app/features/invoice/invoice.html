@@ -13,7 +13,7 @@
     <div class="invoice-page__actions">
       <button
         type="button"
-        class="btn btn--export type-label-md"
+        class="btn--export type-label-md"
         [disabled]="isExporting()"
         (click)="exportExcel()"
       >
@@ -24,90 +24,99 @@
   </header>
 
   <!-- Dynamic Search Bar -->
-  <section class="invoice-search" aria-label="Bộ lọc hóa đơn">
-    <form (ngSubmit)="applySearch()">
-      <div class="invoice-search__grid">
-        <label class="invoice-search__field">
-          <span class="type-label-sm">Mã hóa đơn</span>
+  <section class="invoice-filters" aria-label="Bộ lọc hóa đơn">
+    <form class="invoice-filters__form" (ngSubmit)="applySearch()">
+      <div class="invoice-filters__grid">
+        <div class="invoice-field invoice-field--keyword">
+          <label class="type-label-md invoice-field__label" for="invoice-code">Mã hóa đơn</label>
+          <div class="invoice-searchbox">
+            <span class="material-symbols-outlined invoice-searchbox__icon" aria-hidden="true">
+              search
+            </span>
+            <input
+              id="invoice-code"
+              class="invoice-field__control type-body-md"
+              name="invoiceCode"
+              type="text"
+              [(ngModel)]="searchFilters.invoiceCode"
+              (ngModelChange)="onFiltersChanged()"
+              placeholder="Tìm mã..."
+              autocomplete="off"
+            />
+          </div>
+        </div>
+
+        <div class="invoice-field">
+          <label class="type-label-md invoice-field__label" for="invoice-status">Trạng thái</label>
+          <app-ui-select
+            name="invoice-status"
+            ariaLabel="Trạng thái"
+            placeholder="Tất cả"
+            [options]="paymentStatusOptions"
+            [value]="searchFilters.paymentStatus"
+            (valueChange)="setPaymentStatus($event)"
+          ></app-ui-select>
+        </div>
+
+        <div class="invoice-field">
+          <label class="type-label-md invoice-field__label" for="invoice-method">
+            Phương thức
+          </label>
+          <app-ui-select
+            name="invoice-method"
+            ariaLabel="Phương thức"
+            placeholder="Tất cả"
+            [options]="paymentMethodOptions"
+            [value]="searchFilters.paymentMethod"
+            (valueChange)="setPaymentMethod($event)"
+          ></app-ui-select>
+        </div>
+
+        <div class="invoice-field">
+          <label class="type-label-md invoice-field__label" for="invoice-amount-from">
+            Tổng tiền từ
+          </label>
           <input
-            class="type-body-md"
-            name="invoiceCode"
-            type="text"
-            [(ngModel)]="searchFilters.invoiceCode"
-            (ngModelChange)="onFiltersChanged()"
-            placeholder="Tìm mã..."
-            autocomplete="off"
-          />
-        </label>
-
-        <label class="invoice-search__field">
-          <span class="type-label-sm">Trạng thái</span>
-          <select
-            class="type-body-md"
-            name="paymentStatus"
-            [(ngModel)]="searchFilters.paymentStatus"
-            (ngModelChange)="onFiltersChanged()"
-          >
-            @for (opt of paymentStatusOptions; track opt.value) {
-              <option [ngValue]="opt.value">{{ opt.label }}</option>
-            }
-          </select>
-        </label>
-
-        <label class="invoice-search__field">
-          <span class="type-label-sm">Phương thức</span>
-          <select
-            class="type-body-md"
-            name="paymentMethod"
-            [(ngModel)]="searchFilters.paymentMethod"
-            (ngModelChange)="onFiltersChanged()"
-          >
-            @for (opt of paymentMethodOptions; track opt.value) {
-              <option [ngValue]="opt.value">{{ opt.label }}</option>
-            }
-          </select>
-        </label>
-
-        <label class="invoice-search__field">
-          <span class="type-label-sm">Tổng tiền từ</span>
-          <input
-            class="type-body-md"
+            id="invoice-amount-from"
+            class="invoice-field__control type-body-md"
             name="totalAmountFrom"
             type="number"
+            step="50000"
             [(ngModel)]="searchFilters.totalAmountFrom"
             (ngModelChange)="onFiltersChanged()"
             placeholder="Từ"
             min="0"
           />
-        </label>
+        </div>
 
-        <label class="invoice-search__field">
-          <span class="type-label-sm">đến</span>
+        <div class="invoice-field">
+          <label class="type-label-md invoice-field__label" for="invoice-amount-to">Đến</label>
           <input
-            class="type-body-md"
+            id="invoice-amount-to"
+            class="invoice-field__control type-body-md"
             name="totalAmountTo"
             type="number"
+            step="50000"
             [(ngModel)]="searchFilters.totalAmountTo"
             (ngModelChange)="onFiltersChanged()"
             placeholder="Đến"
             min="0"
           />
-        </label>
+        </div>
       </div>
 
-      <div class="invoice-search__actions">
-        <button tuiButton type="submit" class="btn btn--primary btn--small type-label-md">
-          <span class="material-symbols-outlined">search</span>
-          Tìm kiếm
+      <div class="invoice-filters__actions">
+        <button type="submit" class="invoice-button invoice-button--search type-label-md">
+          <span class="material-symbols-outlined" aria-hidden="true">search</span>
+          <span>Tìm kiếm</span>
         </button>
         <button
-          tuiButton
           type="button"
-          class="btn btn--ghost btn--small type-label-md"
+          class="invoice-button invoice-button--ghost type-label-md"
           (click)="resetSearch()"
         >
-          <span class="material-symbols-outlined">refresh</span>
-          Làm mới
+          <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+          <span>Làm mới</span>
         </button>
       </div>
     </form>
@@ -153,7 +162,7 @@
         <label for="invoice-page-size" class="type-label-md"> - Hiển thị </label>
         <select
           id="invoice-page-size"
-          class="type-label-md"
+          class="invoice-pagination__select type-label-md"
           [ngModel]="state.pageSize"
           (ngModelChange)="setPageSize($event)"
         >
@@ -166,9 +175,8 @@
 
       <div class="invoice-pagination__nav">
         <button
-          tuiButton
           type="button"
-          class="btn btn--ghost btn--icon"
+          class="invoice-button invoice-button--icon"
           [disabled]="!canGoPrevious(state)"
           (click)="previousPage()"
           aria-label="Trang trước"
@@ -177,9 +185,8 @@
         </button>
         <span class="invoice-pagination__indicator type-label-md">{{ pageSummary(state) }}</span>
         <button
-          tuiButton
           type="button"
-          class="btn btn--ghost btn--icon"
+          class="invoice-button invoice-button--icon"
           [disabled]="!canGoNext(state)"
           (click)="nextPage()"
           aria-label="Trang sau"

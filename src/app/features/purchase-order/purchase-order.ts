@@ -37,6 +37,8 @@ import {
 } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
+
 import {
   PurchaseOrderListItem,
   PurchaseOrderSearchRequest,
@@ -93,7 +95,7 @@ const STATUS_LABEL: Record<string, string> = {
 @Component({
   standalone: true,
   selector: 'app-purchase-order',
-  imports: [AsyncPipe, AgGridAngular, FormsModule, TuiButton],
+  imports: [AsyncPipe, AgGridAngular, FormsModule, TuiButton, UiSelectComponent],
   templateUrl: './purchase-order.html',
   styleUrl: './purchase-order.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -131,6 +133,12 @@ export class PurchaseOrder implements OnDestroy {
     { label: 'Đã hủy', value: 'CANCELLED' },
   ];
   protected readonly pageSizeOptions = [10, 20, 50];
+
+  protected readonly pageSizeSelectOptions = [
+    { label: '10', value: 10 },
+    { label: '20', value: 20 },
+    { label: '50', value: 50 },
+  ] as const;
 
   // ── Query subject ─────────────────────────────────────────────────────────
   private readonly querySubject = new BehaviorSubject<PoQuery>({
@@ -316,6 +324,11 @@ export class PurchaseOrder implements OnDestroy {
     if (this.debounceId) clearTimeout(this.debounceId);
     this.debounceId = window.setTimeout(() => this.applySearch(), this.DEBOUNCE_MS);
   }
+
+  protected setPaymentStatus(value: string | number | null): void {
+    this.searchFilters.paymentStatus = (value ?? '') as string;
+    this.onFiltersChanged();
+  }
   protected resetSearch(): void {
     this.searchFilters = {
       purchaseOrderCode: '',
@@ -352,7 +365,9 @@ export class PurchaseOrder implements OnDestroy {
   }
 
   // ── Pagination ────────────────────────────────────────────────────────────
-  protected setPageSize(s: number): void {
+  protected setPageSize(value: string | number | null): void {
+    const s = typeof value === 'number' ? value : Number(value);
+    if (!Number.isFinite(s)) return;
     const c = this.querySubject.getValue();
     if (c.limit === s) return;
     this.querySubject.next({ ...c, page: 0, limit: s });

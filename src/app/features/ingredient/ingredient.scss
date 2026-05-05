@@ -7,6 +7,26 @@
 // ── Host ──────────────────────────────────────────────────────────────────────
 :host {
   display: block;
+  --ingredient-action-height: 3rem;
+  --ui-select-control-height: var(--ingredient-action-height);
+  --ui-select-control-padding-y: 0.9rem;
+  --ui-select-control-padding-x: 0.8rem;
+}
+
+@media (max-width: 960px) {
+  :host {
+    --ingredient-action-height: 2.875rem;
+    --ui-select-control-padding-y: 0.8rem;
+    --ui-select-control-padding-x: 0.75rem;
+  }
+}
+
+@media (max-width: 720px) {
+  :host {
+    --ingredient-action-height: 2.75rem;
+    --ui-select-control-padding-y: 0.72rem;
+    --ui-select-control-padding-x: 0.72rem;
+  }
 }
 
 // ── Page shell ────────────────────────────────────────────────────────────────
@@ -62,6 +82,18 @@
   gap: 0.75rem;
   flex-wrap: wrap;
   flex-shrink: 0;
+
+  @media (max-width: 680px) {
+    width: 100%;
+    flex-direction: column;
+
+    > button,
+    > .btn,
+    > .btn--export {
+      width: 100%;
+      justify-content: center;
+    }
+  }
 }
 
 // ── Tab Bar ───────────────────────────────────────────────────────────────────
@@ -133,61 +165,100 @@
   }
 }
 
-// ── Search bar (shared) ───────────────────────────────────────────────────────
-.panel-search {
-  padding: 0.85rem;
-  border: 1px solid rgba($color-outline-variant, 0.6);
-  border-radius: 0.9rem;
-  background: rgba($color-surface-container-low, 0.7);
-}
-
-.panel-search__grid {
+// ── Search bar (booking pattern) ──────────────────────────────────────────────
+.booking-filters {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 0.75rem;
-  align-items: flex-end;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto auto;
+  gap: 1rem;
+  align-items: end;
+  padding: 1.25rem 1.5rem;
+  border-radius: 1rem;
+  background: linear-gradient(
+    180deg,
+    rgba(#ffffff, 0.72) 0%,
+    rgba($color-surface-container-low, 0.95) 100%
+  );
+  box-shadow: 0 14px 40px -20px rgba($color-primary, 0.18);
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 720px) {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 1rem;
+
+    .booking-button {
+      width: 100%;
+    }
+  }
 }
 
-.panel-search__field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
+.booking-field {
+  display: grid;
+  gap: 0.55rem;
 
-  span {
-    color: rgba($color-secondary, 0.9);
+  label {
+    font-size: var(--label-md-size);
+    line-height: var(--label-md-line);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.01em;
+    color: rgba($color-secondary, 0.85);
   }
 
   input,
   select {
-    height: 2.5rem;
     width: 100%;
-    padding: 0 0.8rem;
-    border: 1px solid rgba($color-outline-variant, 0.74);
-    border-radius: 0.7rem;
+    box-sizing: border-box;
+    border: 1px solid rgba($color-outline-variant, 0.42);
+    border-radius: 0.65rem;
+    background-color: $color-surface;
     color: $color-primary;
-    background: rgba($color-surface, 0.96);
+    height: var(--ingredient-action-height);
+    padding: 0.9rem 1rem;
+    font: inherit;
+    font-size: var(--body-md-size);
+    line-height: var(--body-md-line);
     outline: none;
-    transition: all 0.2s ease;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.2s ease;
 
     &::placeholder {
       color: rgba($color-secondary, 0.58);
     }
-    &:focus-visible {
-      border-color: rgba($color-primary, 0.78);
-      box-shadow: 0 0 0 2px rgba($color-primary, 0.14);
+
+    &:focus {
+      border-color: rgba($color-primary, 0.35);
+      box-shadow: 0 0 0 4px rgba($color-primary, 0.06);
     }
   }
+
   select {
     padding-right: 2rem;
   }
 }
 
-.panel-search__actions {
-  display: flex;
-  gap: 0.65rem;
-  margin-top: 1rem;
-  justify-content: flex-end;
-  width: 100%;
+.booking-field--keyword {
+  min-width: 0;
+}
+
+.booking-searchbox {
+  position: relative;
+
+  input {
+    padding-left: 2.8rem;
+  }
+}
+
+.booking-searchbox__icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.15rem;
+  color: rgba($color-secondary, 0.8);
 }
 
 // ── Grid ──────────────────────────────────────────────────────────────────────
@@ -228,6 +299,10 @@
   @media (max-width: 680px) {
     flex-direction: column;
     align-items: flex-start;
+
+    .panel-pagination__nav {
+      align-self: flex-end;
+    }
   }
 }
 
@@ -281,118 +356,149 @@
   border: 1px solid rgba(#ba1a1a, 0.2);
 }
 
-// ── Buttons ───────────────────────────────────────────────────────────────────
-button.btn[tuiButton] {
-  border: none;
-  box-shadow: none;
-}
-
-.btn {
-  min-height: 2.35rem;
-  border-radius: 0.66rem;
-  cursor: pointer;
-  transition:
-    background-color 140ms ease,
-    color 140ms ease;
-}
-.btn--small {
-  min-height: 2.5rem;
-  padding: 0 1rem;
-}
-
-.btn--primary {
+.booking-button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.45rem;
-  color: #ffffff;
-  background-color: $color-primary;
-  padding: 0 1.08rem;
-  &:hover {
-    background-color: color.adjust($color-primary, $lightness: -5%);
+  box-sizing: border-box;
+  border-radius: 0.66rem;
+  border: 1px solid transparent;
+  font: inherit;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.01em;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    transform 140ms ease,
+    background-color 140ms ease,
+    color 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
   }
+
+  &:disabled {
+    opacity: 0.58;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba($color-primary, 0.28);
+    outline-offset: 2px;
+  }
+
   .material-symbols-outlined {
     font-size: 1.1rem;
   }
 }
-.btn--primary.btn--small,
-.btn--ghost.btn--small {
-  box-shadow: 0 10px 24px -18px rgba($color-primary, 0.45);
+
+.booking-button--create,
+.booking-button--search,
+.booking-button--ghost {
+  height: var(--ingredient-action-height);
+  padding: 0 1.08rem;
 }
-.btn--ghost {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
+
+.booking-button--create,
+.booking-button--search {
+  min-width: 7.2rem;
+  color: #ffffff;
+  background-color: $color-primary;
+  box-shadow: 0 10px 24px -18px rgba($color-primary, 0.45);
+
+  &:hover:not(:disabled) {
+    background-color: color.adjust($color-primary, $lightness: -5%);
+    box-shadow: 0 12px 24px -18px rgba($color-primary, 0.5);
+  }
+}
+
+.booking-button--ghost {
   color: $color-primary;
   background-color: rgba($color-surface, 0.95);
   border: 1px solid rgba($color-outline-variant, 0.68);
-  padding: 0 1.08rem;
-  &:hover {
+  box-shadow: 0 10px 24px -18px rgba($color-primary, 0.22);
+
+  &:hover:not(:disabled) {
     background-color: rgba($color-surface-container-highest, 0.95);
+    box-shadow: 0 12px 24px -18px rgba($color-primary, 0.28);
   }
-  .material-symbols-outlined {
-    font-size: 1.1rem;
-  }
-}
-.btn--ghost.btn--small {
-  background-color: rgba($color-surface, 0.98);
 }
 
-.btn--icon {
-  width: 2.2rem;
-  min-width: 2.2rem;
+.booking-button--icon {
+  width: 2.5rem;
+  min-width: 2.5rem;
+  height: 2.5rem;
   padding: 0;
-  display: grid;
-  place-items: center;
-  .material-symbols-outlined {
-    font-size: 1.1rem;
+  border-color: rgba($color-outline-variant, 0.68);
+  background-color: rgba($color-surface, 0.95);
+  box-shadow: 0 10px 24px -18px rgba($color-primary, 0.18);
+
+  &:hover:not(:disabled) {
+    background-color: rgba($color-surface-container-highest, 0.95);
+    box-shadow: 0 12px 24px -18px rgba($color-primary, 0.22);
   }
 }
 
-// ── AG Grid cell overrides ────────────────────────────────────────────────────
+// ── Original Ingredient badges ─────────────────────────────────────
+.ing-code-cell {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: $color-primary;
+  background: rgba($color-primary-container, 0.3);
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.3rem;
+}
+
+.stock-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.2rem;
+  height: 1.4rem;
+  padding: 0 0.4rem;
+  border-radius: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: 'Roboto Mono', monospace;
+
+  &--ok {
+    background: rgba(#16a34a, 0.12);
+    color: #15803d;
+  }
+  &--low {
+    background: rgba(#ca8a04, 0.15);
+    color: #b45309;
+  }
+  &--empty {
+    background: rgba(#dc2626, 0.12);
+    color: #b91c1c;
+  }
+}
+
 :host ::ng-deep {
-  .status-badge {
-    display: inline-flex;
-    align-items: center;
-    border-radius: 999px;
-    padding: 0.24rem 0.58rem;
-    font-size: var(--type-label-sm-size);
-    font-weight: var(--font-weight-semibold);
-    letter-spacing: 0.04em;
-    border: 1px solid transparent;
-
-    &--active {
-      color: #1e6f24;
-      background: rgba(#9ae3a0, 0.28);
-      border-color: rgba(#5fbe67, 0.34);
-    }
-    &--inactive {
-      color: #6e4707;
-      background: rgba(#f4c27e, 0.3);
-      border-color: rgba(#d1933b, 0.34);
-    }
-  }
-
-  .ag-header-cell-label {
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: var(--type-label-sm-size);
-    font-weight: var(--font-weight-bold);
-  }
-
   .ag-cell {
     display: inline-flex;
     align-items: center;
     font-size: var(--type-body-md-size);
   }
+
   .ag-cell.cell-center {
     justify-content: center;
   }
+
   .ag-cell.cell-right {
     justify-content: flex-end;
   }
+
   .ag-cell.cell-bold {
     font-weight: var(--font-weight-bold);
   }
+
   .ag-cell.cell-actions {
     gap: 0.4rem;
     cursor: default;
@@ -406,56 +512,23 @@ button.btn[tuiButton] {
     transition:
       background 0.14s,
       color 0.14s;
+
     &--edit {
       color: rgba($color-primary, 0.75);
+
       &:hover {
         background: rgba($color-primary-container, 0.25);
         color: $color-primary;
       }
     }
+
     &--delete {
       color: rgba(#ba1a1a, 0.72);
+
       &:hover {
         background: rgba(#ba1a1a, 0.12);
         color: #ba1a1a;
       }
-    }
-  }
-
-  // ── Original Ingredient badges ─────────────────────────────────────
-  .ing-code-cell {
-    font-family: 'Roboto Mono', monospace;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: $color-primary;
-    background: rgba($color-primary-container, 0.3);
-    padding: 0.2rem 0.4rem;
-    border-radius: 0.3rem;
-  }
-
-  .stock-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 2.2rem;
-    height: 1.4rem;
-    padding: 0 0.4rem;
-    border-radius: 0.35rem;
-    font-size: 0.8rem;
-    font-weight: 700;
-    font-family: 'Roboto Mono', monospace;
-
-    &--ok {
-      background: rgba(#16a34a, 0.12);
-      color: #15803d;
-    }
-    &--low {
-      background: rgba(#ca8a04, 0.15);
-      color: #b45309;
-    }
-    &--empty {
-      background: rgba(#dc2626, 0.12);
-      color: #b91c1c;
     }
   }
 }

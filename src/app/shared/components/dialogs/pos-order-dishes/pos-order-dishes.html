@@ -258,33 +258,35 @@
       <button
         type="button"
         class="pos-order-dishes__btn pos-order-dishes__btn--ghost"
-        [disabled]="cartItems().length === 0"
         (click)="close()"
       >
         Đóng
       </button>
       <button type="button" class="pos-order-dishes__btn pos-order-dishes__btn--secondary">
         <span class="material-symbols-outlined">print</span>
-        In tạm tính
-      </button>
-      <button type="button" class="pos-order-dishes__btn pos-order-dishes__btn--secondary">
-        <span class="material-symbols-outlined">save</span>
-        Lưu tạm
-      </button>
-      <button type="button" class="pos-order-dishes__btn pos-order-dishes__btn--secondary">
-        <span class="material-symbols-outlined">account_balance_wallet</span>
-        Thanh toán
       </button>
     </div>
 
-    <button
-      type="button"
-      class="pos-order-dishes__btn pos-order-dishes__btn--primary"
-      [disabled]="cartItems().length === 0 || submitting()"
-      (click)="confirmOrder()"
-    >
-      <span class="material-symbols-outlined">check_circle</span>
-      + {{ submitting() ? 'Đang xử lý...' : 'Xác nhận đơn hàng' }}
-    </button>
+    <div class="pos-order-dishes__footer-right">
+      <button
+        type="button"
+        class="pos-order-dishes__btn pos-order-dishes__btn--primary"
+        [disabled]="cartItems().length === 0 || submitting()"
+        (click)="confirmOrder()"
+      >
+        <span class="material-symbols-outlined">save</span>
+        {{ submitting() ? 'Đang xử lý...' : 'Lưu tạm đơn đặt món' }}
+      </button>
+
+      <button
+        type="button"
+        class="pos-order-dishes__btn pos-order-dishes__btn--primary pos-order-dishes__btn--checkout"
+        [disabled]="cartItems().length === 0 || submitting()"
+        (click)="orderAndPayNow()"
+      >
+        <span class="material-symbols-outlined">check_circle</span>
+        {{ submitting() ? 'Đang xử lý...' : 'Thanh toán ngay' }}
+      </button>
+    </div>
   </footer>
 </div>

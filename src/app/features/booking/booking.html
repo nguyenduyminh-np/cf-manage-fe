@@ -86,6 +86,16 @@
     <div class="booking-toolbar__actions">
       <button
         type="button"
+        class="btn--export type-label-md"
+        [disabled]="isExporting()"
+        (click)="exportExcel()"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">download</span>
+        <span>{{ isExporting() ? 'Đang xuất...' : 'Xuất Excel' }}</span>
+      </button>
+
+      <button
+        type="button"
         class="booking-button booking-button--create type-label-md"
         (click)="openPosTableBookingDialog()"
       >

@@ -2,6 +2,8 @@ import { Component, HostListener, OnDestroy, OnInit, inject, signal } from '@ang
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AppHeader } from '../app-header/app-header';
 import { AppFooter } from '../app-footer/app-footer';
+import { GlobalSearchComponent } from '../../../shared/components/global-search/global-search';
+import { GlobalSearchService } from '../../../core/services/global-search/global-search.service';
 
 interface MenuItem {
   name: string;
@@ -11,11 +13,12 @@ interface MenuItem {
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [RouterOutlet, AppHeader, AppFooter, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, AppHeader, AppFooter, RouterLink, RouterLinkActive, GlobalSearchComponent],
   templateUrl: './app-admin-layout.html',
   styleUrl: './app-admin-layout.scss',
 })
 export class AppAdminLayout implements OnInit, OnDestroy {
+  private readonly globalSearchService = inject(GlobalSearchService);
   private readonly autoCollapseViewportWidth = 960;
   private readonly dateTimeFormatter = new Intl.DateTimeFormat('vi-VN', {
     dateStyle: 'medium',
@@ -58,6 +61,15 @@ export class AppAdminLayout implements OnInit, OnDestroy {
   @HostListener('window:resize')
   protected onWindowResize(): void {
     this.applyAutoCollapseByViewport();
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent): void {
+    // Check for Ctrl+K (Windows/Linux) or Cmd+K (Mac)
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault();
+      this.globalSearchService.toggle();
+    }
   }
 
   protected toggleSidebar(): void {

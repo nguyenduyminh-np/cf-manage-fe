@@ -1,6 +1,8 @@
 @use 'sass:color';
 @use '../../../../../assets/styles/color-kit' as *;
 
+$table-booking-history-button-color: #3d2c28;
+
 @import 'ag-grid-community/styles/ag-grid.css';
 @import 'ag-grid-community/styles/ag-theme-quartz.css';
 
@@ -368,16 +370,6 @@
   align-items: center;
   gap: 0.65rem;
   margin-left: auto;
-
-  .btn {
-    min-height: 2.5rem;
-    padding: 0 1.08rem;
-    font-size: 0.84rem;
-  }
-
-  .material-symbols-outlined {
-    font-size: 1.02rem;
-  }
 }
 
 .table-booking-history__error {
@@ -531,36 +523,58 @@
   background-color: rgba($color-surface-container-low, 0.84);
 }
 
-button.btn[tuiButton] {
+button.table-booking-history__button[tuiButton] {
   // Shared reset for Taiga-hosted buttons.
+  height: 3rem;
   border: none;
   box-shadow: none;
 }
 
-.btn {
+.table-booking-history__button {
   // Base button sizing.
-  min-height: 2.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  height: 3rem;
+  min-height: 3rem;
+  padding: 0 1rem;
   border-radius: 0.66rem;
+  box-sizing: border-box;
   font-weight: 700;
   font-size: 0.85rem;
+  line-height: 1;
+  color: $table-booking-history-button-color;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
 }
 
-.btn--small {
+.table-booking-history__button--compact {
   // Smaller button variant used in the search toolbar.
-  min-height: 2.5rem;
+  min-height: 3rem;
   padding: 0 1rem;
 }
 
-.btn--primary {
+.table-booking-history__button--primary {
   // Primary CTA styling.
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
   color: #ffffff;
-  background-color: $color-primary;
+  background-color: $table-booking-history-button-color;
 
   &:hover {
-    background-color: color.adjust($color-primary, $lightness: -5%);
+    background-color: color.adjust($table-booking-history-button-color, $lightness: -5%);
   }
 
   .material-symbols-outlined {
@@ -568,38 +582,39 @@ button.btn[tuiButton] {
   }
 }
 
-.btn--primary.btn--small,
-.btn--ghost.btn--small {
+.table-booking-history__button--primary.table-booking-history__button--compact,
+.table-booking-history__button--ghost.table-booking-history__button--compact {
   // Shared elevation for compact actions.
-  box-shadow: 0 10px 24px -18px rgba($color-primary, 0.45);
+  box-shadow: 0 10px 24px -18px rgba($table-booking-history-button-color, 0.45);
 }
 
-.btn--ghost.btn--small {
+.table-booking-history__button--ghost.table-booking-history__button--compact {
   // Ghost compact action styling.
   background-color: rgba($color-surface, 0.98);
 }
 
-.btn--advanced-active {
-  border-color: rgba($color-primary, 0.64);
-  box-shadow: 0 0 0 1px rgba($color-primary, 0.2) inset;
-  background-color: rgba($color-primary-container, 0.3);
+.table-booking-history__button--active {
+  border-color: rgba($table-booking-history-button-color, 0.64);
+  box-shadow: 0 0 0 1px rgba($table-booking-history-button-color, 0.2) inset;
+  background-color: rgba($table-booking-history-button-color, 0.14);
 }
 
-.btn--ghost {
+.table-booking-history__button--ghost {
   // Neutral secondary action styling.
-  color: $color-primary;
+  color: $table-booking-history-button-color;
   background-color: rgba($color-surface, 0.95);
-  border: 1px solid rgba($color-outline-variant, 0.68);
+  border: 1px solid rgba($table-booking-history-button-color, 0.68);
 
   &:hover {
     background-color: rgba($color-surface-container-highest, 0.95);
   }
 }
 
-.btn--icon {
+.table-booking-history__button--icon {
   // Icon-only button sizing for paging.
   width: 2.2rem;
   min-width: 2.2rem;
+  min-height: 2.2rem;
   padding: 0;
   display: grid;
   place-items: center;
@@ -607,6 +622,18 @@ button.btn[tuiButton] {
   .material-symbols-outlined {
     font-size: 1.1rem;
   }
+}
+
+.table-booking-history__button--ghost.table-booking-history__button--icon {
+  background-color: rgba($color-surface, 0.95);
+}
+
+.table-booking-history__search-actions .table-booking-history__button {
+  height: 3rem;
+}
+
+.table-booking-history__header-actions .table-booking-history__button {
+  height: 3rem;
 }
 
 :host ::ng-deep {
@@ -743,7 +770,17 @@ button.btn[tuiButton] {
     justify-content: stretch;
   }
 
-  .table-booking-history__search-actions .btn {
+  .table-booking-history__search-actions .table-booking-history__button--compact {
+    flex: 1 1 0;
+    justify-content: center;
+  }
+
+  .table-booking-history__header-actions .table-booking-history__button {
+    flex: 1 1 0;
+    justify-content: center;
+  }
+
+  .table-booking-history__header-actions .btn--export {
     flex: 1 1 0;
     justify-content: center;
   }
@@ -752,7 +789,7 @@ button.btn[tuiButton] {
     font-size: 1rem;
   }
 
-  .btn--primary {
+  .table-booking-history__button--primary {
     width: 100%;
     justify-content: center;
   }

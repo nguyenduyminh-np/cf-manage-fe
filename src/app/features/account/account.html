@@ -101,16 +101,14 @@
 
         <label class="panel-search__field">
           <span class="type-label-sm">Trạng thái</span>
-          <select
-            class="type-body-md"
+          <app-ui-select
             name="isActive"
-            [(ngModel)]="searchFilters.isActive"
-            (ngModelChange)="onFiltersChanged()"
-          >
-            @for (o of activeStatusOptions; track o.value) {
-              <option [ngValue]="o.value">{{ o.label }}</option>
-            }
-          </select>
+            ariaLabel="Trạng thái tài khoản"
+            placeholder="Tất cả"
+            [options]="activeStatusOptions"
+            [value]="searchFilters.isActive"
+            (valueChange)="setActiveStatus($event)"
+          ></app-ui-select>
         </label>
 
         <label class="panel-search__field">
@@ -136,13 +134,13 @@
         </label>
       </div>
       <div class="panel-search__actions">
-        <button tuiButton type="submit" class="btn btn--primary btn--small type-label-md">
+        <button tuiButton type="submit" class="btn btn--primary type-label-md">
           <span class="material-symbols-outlined">search</span> Tìm kiếm
         </button>
         <button
           tuiButton
           type="button"
-          class="btn btn--ghost btn--small type-label-md"
+          class="btn btn--ghost type-label-md"
           (click)="resetSearch()"
         >
           <span class="material-symbols-outlined">refresh</span> Làm mới
@@ -183,16 +181,15 @@
       <div class="panel-pagination__info type-body-sm">
         <span>Tổng: {{ state.totalElements }} tài khoản</span>
         <label for="acc-page-size" class="type-label-md"> – Hiển thị </label>
-        <select
-          id="acc-page-size"
-          class="type-label-md"
-          [ngModel]="state.pageSize"
-          (ngModelChange)="setPageSize($event)"
-        >
-          @for (s of pageSizeOptions; track s) {
-            <option [ngValue]="s">{{ s }}</option>
-          }
-        </select>
+        <app-ui-select
+          class="acc-pagination__select"
+          name="acc-page-size"
+          ariaLabel="Số dòng hiển thị mỗi trang"
+          placeholder="20"
+          [options]="pageSizeSelectOptions"
+          [value]="state.pageSize"
+          (valueChange)="setPageSizeFromSelect($event)"
+        ></app-ui-select>
         <span> / trang</span>
       </div>
       <div class="panel-pagination__nav">

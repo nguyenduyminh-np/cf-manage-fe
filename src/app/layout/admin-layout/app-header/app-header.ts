@@ -5,6 +5,7 @@ import { AuthFacade } from '../../../core/facade/auth.facade';
 import { TokenStore } from '../../../core/services/auth/token.store';
 import { JwtPayload } from '../../../core/models/base/auth.model';
 import { decodeJwtPayload } from '../../../shared/utils/jwt.utils';
+import { GlobalSearchService } from '../../../core/services/global-search/global-search.service';
 
 @Component({
   selector: 'app-header',
@@ -15,6 +16,7 @@ import { decodeJwtPayload } from '../../../shared/utils/jwt.utils';
 export class AppHeader {
   private readonly authFacade = inject(AuthFacade);
   protected readonly tokenStore = inject(TokenStore);
+  private readonly globalSearchService = inject(GlobalSearchService);
 
   isProfileMenuOpen = false;
 
@@ -31,6 +33,10 @@ export class AppHeader {
 
   get userRole(): string {
     return this.tokenStore.role() || 'Staff';
+  }
+
+  openSearch(): void {
+    this.globalSearchService.open();
   }
 
   toggleProfileMenu(event: MouseEvent): void {
