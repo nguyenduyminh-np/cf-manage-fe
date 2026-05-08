@@ -1,10 +1,93 @@
 <div class="po-page">
+  <!-- Breadcrumb -->
+  <app-breadcrumb [items]="[
+    { label: 'Trang chủ', routerLink: '/', icon: 'home' },
+    { label: 'Đơn nhập hàng', icon: 'input' }
+  ]" />
+
+  <!-- ── Process Overview Banner ────────────────────────────────────── -->
+  @if (bannerVisible()) {
+    <section class="process-banner" aria-label="Quy trình nhập hàng">
+      <button
+        class="process-banner__close"
+        type="button"
+        aria-label="Ẩn hướng dẫn"
+        (click)="bannerVisible.set(false)"
+      >
+        <span class="material-symbols-outlined">close</span>
+      </button>
+
+      <div class="process-banner__intro">
+        <h2 class="process-banner__heading">Quy trình Nhập hàng và Lưu kho</h2>
+        <p class="process-banner__desc">
+          Tổng quan các bước từ khi đặt hàng đến khi hàng hóa được cập nhật vào kho lưu trữ.
+        </p>
+      </div>
+
+      <div class="process-banner__steps-card">
+        <span class="process-banner__steps-label">Quy trình 4 Bước</span>
+        <div class="process-banner__steps">
+          <div class="process-banner__step">
+            <span class="material-symbols-outlined process-banner__step-icon">add_shopping_cart</span>
+            <strong class="process-banner__step-title">Tạo đơn hàng</strong>
+            <span class="process-banner__step-desc">Tạo đơn đặt hàng từ nhà cung cấp</span>
+          </div>
+          <div class="process-banner__step-arrow">
+            <span class="material-symbols-outlined">arrow_forward</span>
+          </div>
+          <div class="process-banner__step">
+            <span class="material-symbols-outlined process-banner__step-icon">fact_check</span>
+            <strong class="process-banner__step-title">Nhận hàng</strong>
+            <span class="process-banner__step-desc">Kiểm tra và xác nhận hàng đã nhận</span>
+          </div>
+          <div class="process-banner__step-arrow">
+            <span class="material-symbols-outlined">arrow_forward</span>
+          </div>
+          <div class="process-banner__step">
+            <span class="material-symbols-outlined process-banner__step-icon">assignment</span>
+            <strong class="process-banner__step-title">Tạo phiếu nhập kho</strong>
+            <span class="process-banner__step-desc">Chuyển đơn hàng thành phiếu nhập kho</span>
+          </div>
+          <div class="process-banner__step-arrow">
+            <span class="material-symbols-outlined">arrow_forward</span>
+          </div>
+          <div class="process-banner__step">
+            <span class="material-symbols-outlined process-banner__step-icon">sync</span>
+            <strong class="process-banner__step-title">Cập nhật kho</strong>
+            <span class="process-banner__step-desc">Cập nhật số lượng tồn kho</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="process-banner__link-card">
+        <div class="process-banner__link-header">
+          <span class="material-symbols-outlined">link</span>
+          <span>Liên kết Đơn nhập hàng với Quản lý kho</span>
+        </div>
+        <ul class="process-banner__link-list">
+          <li>
+            <span class="material-symbols-outlined process-banner__check">check_circle</span>
+            Tạo phiếu nhập kho tương ứng với các nguyên liệu trong đơn hàng
+          </li>
+          <li>
+            <span class="material-symbols-outlined process-banner__check">check_circle</span>
+            Cập nhật số lượng tồn kho của các nguyên liệu
+          </li>
+          <li>
+            <span class="material-symbols-outlined process-banner__check">check_circle</span>
+            Ghi nhận lịch sử giao dịch nhập kho
+          </li>
+        </ul>
+      </div>
+    </section>
+  }
+
   <!-- ── Header ─────────────────────────────────────────────────────────── -->
   <header class="po-page__header">
     <div class="po-page__title-wrap">
       <span class="material-symbols-outlined" aria-hidden="true">input</span>
       <div>
-        <h1 class="po-page__title type-headline-lg">Quản lý đơn nhập hàng</h1>
+        <h1 class="po-page__title type-headline-lg">Quản lý nhập hàng</h1>
         <p class="po-page__subtitle type-body-sm">
           Tạo, theo dõi và quản lý toàn bộ đơn nhập nguyên liệu.
         </p>

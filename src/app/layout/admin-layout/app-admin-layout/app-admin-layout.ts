@@ -38,8 +38,8 @@ export class AppAdminLayout implements OnInit, OnDestroy {
     { name: 'Nguyên liệu', icon: 'kitchen', route: '/ingredient' },
     { name: 'Đơn đặt hàng', icon: 'input', route: '/purchase-order' },
     { name: 'Nhà cung cấp', icon: 'local_shipping', route: '/supplier' },
-    { name: 'Kho lưu trữ', icon: 'inventory_2', route: '/warehouse' },
-    { name: 'Quản lý tài khoản', icon: 'manage_accounts', route: '/account' },
+    { name: 'Kho hàng', icon: 'inventory_2', route: '/warehouse' },
+    { name: 'Tài khoản', icon: 'manage_accounts', route: '/account' },
   ];
 
   ngOnInit(): void {

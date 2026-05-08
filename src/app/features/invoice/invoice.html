@@ -1,4 +1,10 @@
 <main class="invoice-page">
+  <!-- Breadcrumb -->
+  <app-breadcrumb [items]="[
+    { label: 'Trang chủ', routerLink: '/', icon: 'home' },
+    { label: 'Hóa đơn', icon: 'receipt_long' }
+  ]" />
+
   <!-- Header -->
   <header class="invoice-page__header">
     <div class="invoice-page__title-wrap">

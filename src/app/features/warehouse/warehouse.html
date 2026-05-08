@@ -1,10 +1,16 @@
 <div class="wh-page">
+  <!-- Breadcrumb -->
+  <app-breadcrumb [items]="[
+    { label: 'Trang chủ', routerLink: '/', icon: 'home' },
+    { label: 'Nhà kho', icon: 'warehouse' }
+  ]" />
+
   <!-- ── Header ──────────────────────────────────────────────────────────── -->
   <header class="wh-page__header">
     <div class="wh-page__title-wrap">
       <span class="material-symbols-outlined" aria-hidden="true">warehouse</span>
       <div>
-        <h1 class="wh-page__title type-headline-lg">Quản lý nhà kho</h1>
+        <h1 class="wh-page__title type-headline-lg">Quản lý kho hàng</h1>
         <p class="wh-page__subtitle type-body-sm">
           Quản lý danh sách, vị trí và trạng thái các nhà kho lưu trữ.
         </p>

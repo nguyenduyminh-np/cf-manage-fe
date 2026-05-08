@@ -48,7 +48,7 @@ export type IngredientSearchApiResponse = ApiResponse<PageResponse<IngredientLis
 // Export sử dụng cùng request như search (không cần page/limit), response là Blob (file Excel)
 // Không cần định nghĩa response type riêng, service sẽ trả về Observable<Blob>
 
-// ────────── CREATE / UPDATE / DETAIL ──────────
+// ────────── DETAIL ──────────
 export interface StockLevelDTO {
   id: number;
   warehouseName: string;
@@ -65,38 +65,45 @@ export interface IngredientDetail {
   averagePrice: number;
   createdTime: string;
   active: boolean;
+
   ingredientCategoryId: number;
+  ingredientCategoryCode: string | null;
   ingredientCategoryName: string;
+
   supplierId: number;
+  supplierCode: string | null;
   supplierName: string;
+
   unitId: number;
+  unitCode: string | null;
   unitName: string;
+
   stockLevels: StockLevelDTO[];
 }
 
 export type IngredientDetailApiResponse = ApiResponse<IngredientDetail>;
 
-// ────────── CREATE REQUEST ──────────
+// ────────── CREATE REQUEST (sử dụng *Code thay vì *Id) ──────────
 export interface IngredientCreateRequest {
   ingredientCode?: string;
   ingredientName: string;
   selfLife: number; // >= 1
   averagePrice: number; // >= 0
-  ingredientCategoryId: number;
-  supplierId: number;
-  unitId: number;
+  ingredientCategoryCode: string;
+  supplierCode: string;
+  unitCode: string;
 }
 
-// ────────── UPDATE REQUEST ──────────
+// ────────── UPDATE REQUEST (sử dụng *Code thay vì *Id) ──────────
 export interface IngredientUpdateRequest {
   id: number;
   ingredientCode?: string;
   ingredientName?: string;
   selfLife?: number;
   averagePrice?: number;
-  ingredientCategoryId?: number;
-  supplierId?: number;
-  unitId?: number;
+  ingredientCategoryCode?: string;
+  supplierCode?: string;
+  unitCode?: string;
   active?: boolean;
 }
 

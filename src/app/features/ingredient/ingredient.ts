@@ -58,6 +58,7 @@ import { IngredientFormDialog } from '../../shared/components/dialogs/ingredient
 import { IngredientDeleteDialog } from '../../shared/components/dialogs/ingredient-delete-dialog/ingredient-delete-dialog';
 import { downloadBlobFile } from '../../shared/utils/file-download.utils';
 import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
+import { BreadcrumbComponent } from '../../shared/components/ui-component/breadcrumb/breadcrumb';
 
 // ─── Tab ──────────────────────────────────────────────────────────────────────
 export type ActiveTab = 'category' | 'ingredient';
@@ -102,7 +103,7 @@ interface IngredientQuery {
 @Component({
   standalone: true,
   selector: 'app-ingredient',
-  imports: [AsyncPipe, AgGridAngular, FormsModule, UiSelectComponent],
+  imports: [AsyncPipe, AgGridAngular, FormsModule, UiSelectComponent, BreadcrumbComponent],
   templateUrl: './ingredient.html',
   styleUrl: './ingredient.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -255,15 +256,15 @@ export class Ingredient implements OnDestroy {
       filter: false,
       valueFormatter: (p: ValueFormatterParams<IngredientCategoryListItem>) => this.fmtDT(p.value),
     },
-    {
-      headerName: 'Thao tác',
+    {      headerName: 'Thao tác',
       colId: 'cat-actions',
       cellRenderer: () =>
+        `<span class="material-symbols-outlined action-icon action-icon--view" data-action="view" title="Xem chi tiết">visibility</span>` +
         `<span class="material-symbols-outlined action-icon action-icon--edit" data-action="edit" title="Chỉnh sửa">edit</span>` +
         `<span class="material-symbols-outlined action-icon action-icon--delete" data-action="delete" title="Xóa">delete</span>`,
-      width: 110,
-      minWidth: 110,
-      maxWidth: 130,
+      width: 140,
+      minWidth: 140,
+      maxWidth: 160,
       flex: 0,
       pinned: 'right',
       lockPinned: true,
@@ -298,7 +299,8 @@ export class Ingredient implements OnDestroy {
     const action = (e.event?.target as HTMLElement)
       ?.closest('[data-action]')
       ?.getAttribute('data-action');
-    if (action === 'edit') this.openCatEditDialog(e.data);
+    if (action === 'view') this.openCatViewDialog(e.data);
+    else if (action === 'edit') this.openCatEditDialog(e.data);
     else if (action === 'delete') this.openCatDeleteDialog(e.data);
   }
 
@@ -367,6 +369,17 @@ export class Ingredient implements OnDestroy {
           .subscribe({ next: () => this.catRefresh(), error: (e) => console.error(e) });
       });
   }
+
+  private openCatViewDialog(cat: IngredientCategoryListItem): void {
+    this.dialogService
+      .open<null>(
+        new PolymorpheusComponent(IngredientCategoryFormDialog, this.injector),
+        { data: { mode: 'view', category: cat }, size: 's', dismissible: true, closeable: false },
+      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
+  }
+
   private openCatEditDialog(cat: IngredientCategoryListItem): void {
     this.dialogService
       .open<IngredientCategoryUpdateRequest | null>(
@@ -604,11 +617,12 @@ export class Ingredient implements OnDestroy {
       headerName: 'Thao tác',
       colId: 'ing-actions',
       cellRenderer: () =>
-        `<span class="material-symbols-outlined action-icon action-icon--edit"   data-action="edit"   title="Chỉnh sửa">edit</span>` +
+        `<span class="material-symbols-outlined action-icon action-icon--view" data-action="view" title="Xem chi tiết">visibility</span>` +
+        `<span class="material-symbols-outlined action-icon action-icon--edit" data-action="edit" title="Chỉnh sửa">edit</span>` +
         `<span class="material-symbols-outlined action-icon action-icon--delete" data-action="delete" title="Xóa">delete</span>`,
-      width: 110,
-      minWidth: 110,
-      maxWidth: 130,
+      width: 140,
+      minWidth: 140,
+      maxWidth: 160,
       flex: 0,
       pinned: 'right',
       lockPinned: true,
@@ -641,7 +655,8 @@ export class Ingredient implements OnDestroy {
     const action = (e.event?.target as HTMLElement)
       ?.closest('[data-action]')
       ?.getAttribute('data-action');
-    if (action === 'edit') this.openIngEditDialog(e.data);
+    if (action === 'view') this.openIngViewDialog(e.data);
+    else if (action === 'edit') this.openIngEditDialog(e.data);
     else if (action === 'delete') this.openIngDeleteDialog(e.data);
   }
   protected onIngRowDoubleClicked(e: RowDoubleClickedEvent<IngredientListItem>): void {
@@ -713,11 +728,22 @@ export class Ingredient implements OnDestroy {
           .subscribe({ next: () => this.ingRefresh(), error: (e) => console.error(e) });
       });
   }
+
+  private openIngViewDialog(ing: IngredientListItem): void {
+    this.dialogService
+      .open<null>(
+        new PolymorpheusComponent(IngredientFormDialog, this.injector),
+        { data: { mode: 'view', ingredient: { id: ing.id } }, size: 's', dismissible: true, closeable: false },
+      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
+  }
+
   private openIngEditDialog(ing: IngredientListItem): void {
     this.dialogService
       .open<IngredientUpdateRequest | null>(
         new PolymorpheusComponent(IngredientFormDialog, this.injector),
-        { data: { mode: 'edit', ingredient: ing }, size: 's', dismissible: true, closeable: false },
+        { data: { mode: 'edit', ingredient: { id: ing.id } }, size: 's', dismissible: true, closeable: false },
       )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((payload) => {

@@ -133,7 +133,7 @@
 
 .invoice-filters__grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 1rem;
   align-items: flex-end;
 
@@ -416,8 +416,39 @@
     font-weight: var(--font-weight-bold);
   }
 
-  .ag-cell.cell-clickable {
+  .ag-cell.cell-actions {
+    gap: 0.4rem;
+    cursor: default;
+  }
+
+  .action-icon {
+    font-size: 1.15rem;
+    border-radius: 0.4rem;
+    padding: 0.22rem;
     cursor: pointer;
-    color: color.adjust($color-primary-container, $lightness: 8%);
+    transition:
+      background 0.14s,
+      color 0.14s;
+    &--view {
+      color: rgba($color-primary, 0.7);
+      &:hover {
+        background: rgba($color-primary-container, 0.22);
+        color: $color-primary;
+      }
+    }
+    &--edit {
+      color: rgba($color-primary, 0.7);
+      &:hover {
+        background: rgba($color-primary-container, 0.22);
+        color: $color-primary;
+      }
+    }
+    &--delete {
+      color: rgba(#ba1a1a, 0.72);
+      &:hover {
+        background: rgba(#ba1a1a, 0.12);
+        color: #ba1a1a;
+      }
+    }
   }
 }

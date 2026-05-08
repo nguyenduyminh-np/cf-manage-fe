@@ -32,6 +32,7 @@ export interface PurchaseOrderListItem {
   purchaseOrderCode: string | null;
   totalPrice: number;
   paymentStatus: string;
+  paymentStatusName: string;
   accountFullName: string;
   supplierName: string | null;
   createdTime: string;
@@ -81,9 +82,11 @@ export interface PurchaseOrderStatusUpdateRequest {
 
 // ────────── DETAIL (response chung cho create, update, detail) ──────────
 export interface PurchaseOrderDetailItemResponse {
-  id: number;
+  id: number | null;
   ingredientId: number;
-  ingredientName: string;
+  ingredientCode: string | null;
+  ingredientName: string | null;
+  supplierId: number | null;
   quantity: number;
   unitPrice: number;
   lineTotal: number;
@@ -94,15 +97,42 @@ export interface PurchaseOrderDetail {
   purchaseOrderCode: string | null;
   totalPrice: number;
   paymentStatus: string;
-  accountFullName: string;
+  paymentStatusName: string;
+  accountFullName: string | null;
+  supplierId: number | null;
   supplierName: string | null;
+  warehouseId: number | null;
   warehouseName: string | null;
-  createdTime: string;
+  createdTime: string | null;
   orderDate: string | null;
   details: PurchaseOrderDetailItemResponse[];
 }
 
 export type PurchaseOrderDetailApiResponse = ApiResponse<PurchaseOrderDetail>;
+
+export interface PurchaseOrderWarehouseOption {
+  id: number;
+  warehouseCode: string | null;
+  warehouseName: string;
+}
+
+export interface PurchaseOrderSupplierOption {
+  id: number;
+  supplierCode: string | null;
+  supplierName: string;
+}
+
+export interface PurchaseOrderIngredientOption {
+  ingredientId: number;
+  ingredientCode: string | null;
+  ingredientName: string;
+  supplierId: number | null;
+}
+
+export type PurchaseOrderWarehouseOptionsApiResponse = ApiResponse<PurchaseOrderWarehouseOption[]>;
+export type PurchaseOrderSupplierOptionsApiResponse = ApiResponse<PurchaseOrderSupplierOption[]>;
+export type PurchaseOrderIngredientOptionsApiResponse =
+  ApiResponse<PurchaseOrderIngredientOption[]>;
 
 // ────────── DELETE / STATUS generic void response (dùng cho updateStatus) ──────────
 export type PurchaseOrderVoidApiResponse = ApiResponse<void>;

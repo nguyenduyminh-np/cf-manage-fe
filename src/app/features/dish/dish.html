@@ -1,4 +1,10 @@
 <div class="dish-page">
+  <!-- Breadcrumb -->
+  <app-breadcrumb [items]="[
+    { label: 'Trang chủ', routerLink: '/', icon: 'home' },
+    { label: 'Thực đơn', icon: 'restaurant_menu' }
+  ]" />
+
   <!-- ── Shared Page Header ─────────────────────────────────────────────── -->
   <header class="dish-page__header">
     <div class="dish-page__title-wrap">

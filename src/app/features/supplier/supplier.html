@@ -1,4 +1,10 @@
 <div class="sup-page">
+  <!-- Breadcrumb -->
+  <app-breadcrumb [items]="[
+    { label: 'Trang chủ', routerLink: '/', icon: 'home' },
+    { label: 'Nhà cung cấp', icon: 'local_shipping' }
+  ]" />
+
   <!-- ── Header ──────────────────────────────────────────────────────────── -->
   <header class="sup-page__header">
     <div class="sup-page__title-wrap">

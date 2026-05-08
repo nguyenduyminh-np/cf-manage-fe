@@ -59,6 +59,7 @@ import { DishService } from '../../core/services/dish/dish.service';
 import { DishFormDialog } from '../../shared/components/dialogs/dish-form-dialog/dish-form-dialog';
 import { DishDeleteDialog } from '../../shared/components/dialogs/dish-delete-dialog/dish-delete-dialog';
 import { downloadBlobFile } from '../../shared/utils/file-download.utils';
+import { BreadcrumbComponent } from '../../shared/components/ui-component/breadcrumb/breadcrumb';
 
 // ─── Tab ──────────────────────────────────────────────────────────────────────
 export type ActiveTab = 'category' | 'dish';
@@ -105,7 +106,7 @@ interface DishQuery {
 @Component({
   standalone: true,
   selector: 'app-dish',
-  imports: [AsyncPipe, AgGridAngular, FormsModule, UiSelectComponent],
+  imports: [AsyncPipe, AgGridAngular, FormsModule, UiSelectComponent, BreadcrumbComponent],
   templateUrl: './dish.html',
   styleUrl: './dish.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -246,11 +247,12 @@ export class Dish implements OnDestroy {
       headerName: 'Thao tác',
       colId: 'cat-actions',
       cellRenderer: () =>
+        `<span class="material-symbols-outlined action-icon action-icon--view" data-action="view" title="Xem chi tiết">visibility</span>` +
         `<span class="material-symbols-outlined action-icon action-icon--edit" data-action="edit" title="Chỉnh sửa">edit</span>` +
         `<span class="material-symbols-outlined action-icon action-icon--delete" data-action="delete" title="Xóa">delete</span>`,
-      width: 110,
-      minWidth: 110,
-      maxWidth: 130,
+      width: 140,
+      minWidth: 140,
+      maxWidth: 160,
       flex: 0,
       pinned: 'right',
       lockPinned: true,
@@ -285,7 +287,8 @@ export class Dish implements OnDestroy {
     const action = (e.event?.target as HTMLElement)
       ?.closest('[data-action]')
       ?.getAttribute('data-action');
-    if (action === 'edit') this.openCatEditDialog(e.data);
+    if (action === 'view') this.openCatViewDialog(e.data);
+    else if (action === 'edit') this.openCatEditDialog(e.data);
     else if (action === 'delete') this.openCatDeleteDialog(e.data);
   }
 
@@ -388,6 +391,17 @@ export class Dish implements OnDestroy {
           .subscribe({ next: () => this.catRefresh(), error: (e) => console.error(e) });
       });
   }
+
+  private openCatViewDialog(cat: DishCategoryListItem): void {
+    this.dialogService
+      .open<null>(
+        new PolymorpheusComponent(DishCategoryFormDialog, this.injector),
+        { data: { mode: 'view', category: cat }, size: 's', dismissible: true, closeable: false },
+      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
+  }
+
   private openCatEditDialog(cat: DishCategoryListItem): void {
     this.dialogService
       .open<DishCategoryUpdateRequest | null>(
@@ -580,11 +594,12 @@ export class Dish implements OnDestroy {
       headerName: 'Thao tác',
       colId: 'dish-actions',
       cellRenderer: () =>
+        `<span class="material-symbols-outlined action-icon action-icon--view" data-action="view" title="Xem chi tiết">visibility</span>` +
         `<span class="material-symbols-outlined action-icon action-icon--edit" data-action="edit" title="Chỉnh sửa">edit</span>` +
         `<span class="material-symbols-outlined action-icon action-icon--delete" data-action="delete" title="Xóa">delete</span>`,
-      width: 110,
-      minWidth: 110,
-      maxWidth: 130,
+      width: 140,
+      minWidth: 140,
+      maxWidth: 160,
       flex: 0,
       pinned: 'right',
       lockPinned: true,
@@ -617,7 +632,8 @@ export class Dish implements OnDestroy {
     const action = (e.event?.target as HTMLElement)
       ?.closest('[data-action]')
       ?.getAttribute('data-action');
-    if (action === 'edit') this.openDishEditDialog(e.data);
+    if (action === 'view') this.openDishViewDialog(e.data);
+    else if (action === 'edit') this.openDishEditDialog(e.data);
     else if (action === 'delete') this.openDishDeleteDialog(e.data);
   }
   protected onDishRowDoubleClicked(e: RowDoubleClickedEvent<DishListItem>): void {
@@ -715,6 +731,19 @@ export class Dish implements OnDestroy {
           .subscribe({ next: () => this.dishRefresh(), error: (e) => console.error(e) });
       });
   }
+
+  private openDishViewDialog(dish: DishListItem): void {
+    this.dialogService
+      .open<null>(new PolymorpheusComponent(DishFormDialog, this.injector), {
+        data: { mode: 'view', dish },
+        size: 'auto',
+        dismissible: true,
+        closeable: false,
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
+  }
+
   private openDishEditDialog(dish: DishListItem): void {
     this.dialogService
       .open<DishUpdateRequest | null>(new PolymorpheusComponent(DishFormDialog, this.injector), {

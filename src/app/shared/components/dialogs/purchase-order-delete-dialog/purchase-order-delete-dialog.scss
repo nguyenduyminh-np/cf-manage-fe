@@ -7,7 +7,7 @@
   margin: -1.5rem;
 }
 
-.dd-dialog {
+.sd-dialog {
   display: flex;
   flex-direction: column;
   background: #ffffff;
@@ -16,14 +16,14 @@
   color: $color-primary;
 }
 
-.dd-dialog__header {
+.sd-dialog__header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 1.25rem 1.5rem 1rem;
 }
 
-.dd-dialog__icon {
+.sd-dialog__icon {
   font-size: 1.6rem;
   color: #b45309;
   background: rgba(#b45309, 0.1);
@@ -32,7 +32,7 @@
   flex-shrink: 0;
 }
 
-.dd-dialog__title {
+.sd-dialog__title {
   margin: 0;
   font-family: $font-headline;
   font-size: 1rem;
@@ -40,26 +40,26 @@
   color: $color-primary;
 }
 
-.dd-dialog__body {
+.sd-dialog__body {
   padding: 0 1.5rem 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.dd-dialog__message {
+.sd-dialog__message {
   margin: 0;
   font-size: 0.9rem;
   color: $color-primary;
   line-height: 1.55;
 }
 
-.dd-dialog__name {
+.sd-dialog__name {
   color: #ba1a1a;
   font-weight: 700;
 }
 
-.dd-dialog__note {
+.sd-dialog__note {
   margin: 0;
   font-size: 0.82rem;
   color: rgba($color-secondary, 0.78);
@@ -69,7 +69,7 @@
   border-left: 3px solid rgba($color-outline-variant, 0.55);
 }
 
-.dd-dialog__footer {
+.sd-dialog__footer {
   display: flex;
   justify-content: flex-end;
   gap: 0.65rem;
@@ -78,9 +78,9 @@
   background: rgba($color-surface-container-low, 0.45);
 }
 
-button.dd-btn[tuiButton] { border: none; box-shadow: none; }
+button.sd-btn[tuiButton] { border: none; box-shadow: none; }
 
-.dd-btn {
+.sd-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;

@@ -1,18 +1,26 @@
 <div class="dd-dialog">
-  <div class="dd-dialog__icon-wrap" aria-hidden="true">
-    <span class="material-symbols-outlined dd-dialog__icon">delete_forever</span>
-  </div>
+  <header class="dd-dialog__header">
+    <span class="material-symbols-outlined dd-dialog__icon">warning</span>
+    <h2 class="dd-dialog__title">Xác nhận xóa món ăn</h2>
+  </header>
+
   <div class="dd-dialog__body">
-    <h2 class="dd-dialog__title">Xóa món ăn</h2>
-    <p class="dd-dialog__msg">
-      Bạn có chắc chắn muốn xóa món <strong class="dd-dialog__name">{{ dishName }}</strong>?
-      Món ăn sẽ bị ẩn khỏi thực đơn.
+    <p class="dd-dialog__message">
+      Bạn có chắc chắn muốn xóa món ăn
+      <strong class="dd-dialog__name">{{ dishName }}</strong>?
+    </p>
+    <p class="dd-dialog__note">
+      Món ăn sẽ bị ẩn khỏi thực đơn. Dữ liệu liên quan sẽ không bị xóa vĩnh viễn.
     </p>
   </div>
-  <div class="dd-dialog__footer">
-    <button tuiButton type="button" class="btn btn--ghost" (click)="cancel()">Hủy bỏ</button>
-    <button tuiButton type="button" class="btn btn--danger" (click)="confirm()">
-      <span class="material-symbols-outlined">delete</span> Xóa
+
+  <footer class="dd-dialog__footer">
+    <button tuiButton type="button" class="dd-btn dd-btn--ghost" (click)="cancel()">
+      Hủy bỏ
     </button>
-  </div>
+    <button tuiButton type="button" class="dd-btn dd-btn--danger" (click)="confirm()">
+      <span class="material-symbols-outlined">delete</span>
+      Xác nhận xóa
+    </button>
+  </footer>
 </div>

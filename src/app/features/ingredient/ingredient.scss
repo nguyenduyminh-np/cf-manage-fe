@@ -481,6 +481,13 @@
 }
 
 :host ::ng-deep {
+  .ag-header-cell-label {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: var(--type-label-sm-size);
+    font-weight: var(--font-weight-bold);
+  }
+
   .ag-cell {
     display: inline-flex;
     align-items: center;
@@ -512,6 +519,15 @@
     transition:
       background 0.14s,
       color 0.14s;
+
+    &--view {
+      color: rgba($color-primary, 0.7);
+
+      &:hover {
+        background: rgba($color-primary-container, 0.22);
+        color: $color-primary;
+      }
+    }
 
     &--edit {
       color: rgba($color-primary, 0.75);

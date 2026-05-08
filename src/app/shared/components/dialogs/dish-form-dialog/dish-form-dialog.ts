@@ -14,7 +14,7 @@ import { UiComponentModule } from '../../ui-component/ui-component.module';
 import { UiSelectOption } from '../../ui-component/ui-select/ui-select';
 
 export interface DishFormDialogInput {
-  mode: 'create' | 'edit';
+  mode: 'create' | 'edit' | 'view';
   dish: DishListItem | null;
 }
 
@@ -34,6 +34,7 @@ export class DishFormDialog implements OnInit {
     >();
 
   protected readonly isEdit = this.context.data.mode === 'edit';
+  protected readonly isView = this.context.data.mode === 'view';
   protected readonly categories = signal<DishCategoryOption[]>([]);
   protected readonly catLoading = signal(true);
 
@@ -136,7 +137,7 @@ export class DishFormDialog implements OnInit {
 
   // ── Submit ────────────────────────────────────────────────────────────────
   protected submit(): void {
-    if (!this.isValid) return;
+    if (this.isView || !this.isValid) return;
 
     const prev = this.photoPreview();
     if (prev.startsWith('blob:')) URL.revokeObjectURL(prev);

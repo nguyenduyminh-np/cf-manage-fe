@@ -10,7 +10,7 @@ import {
 } from '../../../../core/models/supplier/supplier.model';
 
 export interface SupplierFormDialogInput {
-  mode: 'create' | 'edit';
+  mode: 'create' | 'edit' | 'view';
   supplier: SupplierListItem | null;
 }
 
@@ -28,6 +28,7 @@ export class SupplierFormDialog {
   >();
 
   protected readonly isEdit = this.context.data.mode === 'edit';
+  protected readonly isView = this.context.data.mode === 'view';
   private readonly src = this.context.data.supplier;
 
   // ── Form data ─────────────────────────────────────────────────────────────
@@ -47,7 +48,7 @@ export class SupplierFormDialog {
 
   // ── Submit ─────────────────────────────────────────────────────────────────
   protected submit(): void {
-    if (!this.isValid) return;
+    if (this.isView || !this.isValid) return;
 
     if (this.isEdit) {
       const payload: SupplierUpdateRequest = {

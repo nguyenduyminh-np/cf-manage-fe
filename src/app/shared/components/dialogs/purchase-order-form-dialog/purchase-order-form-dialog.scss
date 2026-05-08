@@ -184,6 +184,12 @@
 .pof-field__select {
   cursor: pointer;
   padding-right: 0.5rem;
+
+  &:disabled {
+    cursor: not-allowed;
+    background: rgba($color-surface-container-low, 0.8);
+    color: rgba($color-secondary, 0.72);
+  }
 }
 
 .pof-field__select--inline {
@@ -205,6 +211,21 @@
   border: 1px solid rgba($color-outline-variant, 0.5);
   border-radius: 0.75rem;
   overflow: hidden;
+}
+
+.pof-inline-state {
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.6rem;
+  background: rgba($color-surface-container-low, 0.8);
+  color: rgba($color-secondary, 0.9);
+  font-size: 0.86rem;
+  border: 1px solid rgba($color-outline-variant, 0.42);
+}
+
+.pof-inline-state--error {
+  background: rgba(#ba1a1a, 0.08);
+  border-color: rgba(#ba1a1a, 0.2);
+  color: #8f1212;
 }
 
 .pof-table {

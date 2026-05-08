@@ -1,4 +1,4 @@
-import { Component, HostListener, inject } from '@angular/core';
+import { Component, HostListener, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { AuthFacade } from '../../../core/facade/auth.facade';
@@ -17,6 +17,9 @@ export class AppHeader {
   private readonly authFacade = inject(AuthFacade);
   protected readonly tokenStore = inject(TokenStore);
   private readonly globalSearchService = inject(GlobalSearchService);
+
+  /** Nhận trạng thái thu gọn của sidebar từ layout cha */
+  readonly sidebarCollapsed = input(false);
 
   isProfileMenuOpen = false;
 

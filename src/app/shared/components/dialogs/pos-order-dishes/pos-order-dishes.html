@@ -1,6 +1,25 @@
+<!--
+  ============================================================
+  TEMPLATE: PosOrderDishes
+  ============================================================
+  Bố cục 3 vùng chính:
+    [header]   – Tên dialog + thông tin bàn (tên bàn, số khách, giờ mở)
+    [main]     – Chia 2 cột:
+                  Trái: Thực đơn (tìm kiếm + lọc danh mục + lưới món)
+                  Phải: Giỏ hàng (danh sách đã chọn + giảm giá + ghi chú + tổng tiền)
+    [footer]   – Nhóm nút hành động (Đóng | Lưu tạm | Thanh toán ngay)
+  ============================================================
+-->
 <div class="pos-order-dishes">
+
+  <!-- ====================================================
+       HEADER
+       Hiển thị tiêu đề dialog + nút quay lại / đóng.
+       Nhân viên biết đang thao tác trên bàn nào / giờ nào.
+       ==================================================== -->
   <header class="pos-order-dishes__header">
     <div class="pos-order-dishes__header-left">
+      <!-- Nút quay lại: đóng dialog, không lưu bất kỳ dữ liệu nào -->
       <button type="button" class="icon-btn" (click)="close()" aria-label="Quay lại">
         <span class="material-symbols-outlined">arrow_back</span>
       </button>
@@ -8,34 +27,57 @@
     </div>
 
     <div class="pos-order-dishes__header-right">
+      <!-- Nút X: đóng dialog, không lưu -->
       <button type="button" class="icon-btn" (click)="close()" aria-label="Đóng">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
   </header>
 
+  <!-- ====================================================
+       SUBHEADER – Context chips
+       Hiển thị nhanh thông tin ngữ cảnh để nhân viên xác nhận
+       đang phục vụ đúng bàn: Tên bàn | Số khách | Giờ hiện tại
+       ==================================================== -->
   <div class="pos-order-dishes__subheader">
     <div class="pos-order-dishes__chip pos-order-dishes__chip--primary">
       <span class="material-symbols-outlined">restaurant</span>
       Đặt món
     </div>
+    <!-- Tên bàn – truyền vào từ PosOrderDishesDialogInput.tableName -->
     <div class="pos-order-dishes__chip">
       <span class="material-symbols-outlined">table_restaurant</span>
       {{ tableName }}
     </div>
+    <!-- Số lượng khách – từ PosOrderDishesDialogInput.pax -->
     <div class="pos-order-dishes__chip">
       <span class="material-symbols-outlined">groups</span>
       {{ pax }} người
     </div>
+    <!-- Thời điểm mở dialog – giúp nhân viên ghi chú thời gian phục vụ -->
     <div class="pos-order-dishes__chip">
       <span class="material-symbols-outlined">schedule</span>
       {{ currentTime }}
     </div>
   </div>
 
+  <!-- ====================================================
+       MAIN – Bố cục 2 cột
+       Trái: Thực đơn | Phải: Giỏ hàng
+       ==================================================== -->
   <main class="pos-order-dishes__main">
+
+    <!-- =================================================
+         CỘT TRÁI: THỰC ĐƠN
+         Nhân viên tìm kiếm / lọc món → bấm "+ Thêm" để
+         đưa món vào giỏ hàng bên phải.
+         ================================================= -->
     <section class="pos-order-dishes__menu">
+
+      <!-- Thanh tìm kiếm + tab lọc danh mục -->
       <div class="pos-order-dishes__top-actions">
+
+        <!-- Ô tìm kiếm: debounce 300ms, kết hợp với tab danh mục đang chọn -->
         <div class="pos-order-dishes__search-wrapper">
           <span class="material-symbols-outlined pos-order-dishes__search-icon">search</span>
           <input
@@ -45,6 +87,11 @@
             [formControl]="searchControl"
           />
         </div>
+
+        <!-- Tab lọc danh mục:
+             - "Tất cả" (id=null): hiển thị toàn bộ menu
+             - Các tab khác: lọc theo dishCategoryId
+             - Bấm tab → reset ô tìm kiếm để tránh filter chồng chéo -->
         <div class="pos-order-dishes__tabs">
           @if (categories$ | async; as categories) {
             @for (cat of categories; track cat.id) {
@@ -61,16 +108,26 @@
         </div>
       </div>
 
+      <!-- Lưới sản phẩm -->
       <div class="pos-order-dishes__product-list">
+        <!-- Trạng thái đang tải (spinner text) -->
         @if (loading()) {
           <p class="pos-order-dishes__loading">Đang tải danh sách món...</p>
         }
+        <!-- Thông báo khi không có món phù hợp bộ lọc -->
         @if (noDishesFound() && !loading()) {
           <p class="pos-order-dishes__loading">Không tìm thấy món nào</p>
         }
+
         <div class="pos-order-dishes__grid">
           @if (dishes$ | async; as dishes) {
             @for (dish of dishes; track dish.id) {
+              <!-- Card món ăn:
+                   - Ảnh minh họa (fallback về placeholder nếu không có)
+                   - Tên món + giá
+                   - Nút "+ Thêm" → gọi addToCart(dish):
+                       * Nếu món chưa có trong giỏ: thêm mới với qty=1
+                       * Nếu đã có: tăng qty thêm 1 (tối đa 99) -->
               <article class="pos-order-dishes__card">
                 <div class="pos-order-dishes__card-img-wrap">
                   <img
@@ -93,7 +150,13 @@
       </div>
     </section>
 
+    <!-- =================================================
+         CỘT PHẢI: GIỎ HÀNG
+         Tổng hợp các món đã chọn, cho phép chỉnh số lượng /
+         xóa món, áp dụng giảm giá và xem tổng tiền.
+         ================================================= -->
     <aside class="pos-order-dishes__cart">
+      <!-- Header giỏ hàng: hiển thị tên bàn làm mã hóa đơn tạm -->
       <div class="pos-order-dishes__cart-header">
         <h2 class="pos-order-dishes__cart-title">
           <span class="material-symbols-outlined">shopping_cart</span>
@@ -108,6 +171,7 @@
         </div>
       </div>
 
+      <!-- Trạng thái giỏ trống: hướng dẫn nhân viên chọn món -->
       @if (cartItems().length === 0) {
         <div class="pos-order-dishes__cart-body pos-order-dishes__cart-body--empty">
           <div class="pos-order-dishes__cart-empty-icon">
@@ -119,8 +183,18 @@
           </div>
         </div>
       } @else {
+        <!-- Danh sách dòng món trong giỏ hàng -->
         <div class="pos-order-dishes__cart-items">
           @for (item of cartItems(); track item.dish.id) {
+            <!--
+              Mỗi dòng cart-item gồm:
+                - Ảnh thumbnail
+                - Tên món + đơn giá
+                - Nút [-] / [qty] / [+]: tăng/giảm số lượng
+                    * Giảm về 0 → removeFromCart (xóa dòng)
+                    * Tối đa MAX_QTY = 99
+                - Nút xóa (🗑): xóa hoàn toàn món khỏi giỏ
+            -->
             <div class="cart-item">
               <img
                 class="cart-item__img"
@@ -161,7 +235,14 @@
         </div>
       }
 
+      <!-- PHẦN TÓM TẮT: Giảm giá + Ghi chú + Tổng tiền -->
       <div class="pos-order-dishes__summary">
+
+        <!-- Khu vực giảm giá:
+             - Chọn nhanh: 0% / 10% / 15% / 20%
+             - Hoặc nhập mã giảm giá tùy chỉnh
+             - Hai cơ chế không dùng đồng thời
+               (chọn % → reset mã; nhập mã → reset %) -->
         <div class="pos-order-dishes__discount-section">
           <h3 class="pos-order-dishes__discount-title">
             <span class="material-symbols-outlined">sell</span>
@@ -202,6 +283,7 @@
             </button>
             <button type="button" class="pos-order-dishes__discount-tag">Khác</button>
           </div>
+          <!-- Nhập mã giảm giá tùy chỉnh (validate sẽ bổ sung sau) -->
           <div class="pos-order-dishes__discount-input-row">
             <input
               type="text"
@@ -220,6 +302,7 @@
           </div>
         </div>
 
+        <!-- Ghi chú chung cho đơn hàng (gửi lên API qua description) -->
         <div class="pos-order-dishes__note">
           <h3 class="pos-order-dishes__note-title">
             <span class="material-symbols-outlined">edit_note</span>
@@ -235,6 +318,11 @@
           ></textarea>
         </div>
 
+        <!-- Tổng tiền:
+             - Tạm tính = Σ(đơn giá × số lượng)
+             - Giảm giá  = Tạm tính × discountPercent%
+             - Tổng cộng = Tạm tính − Giảm giá
+             Tất cả được tính real-time bằng computed signals -->
         <div class="pos-order-dishes__totals">
           <div class="pos-order-dishes__totals-row">
             <span>Tạm tính</span>
@@ -253,8 +341,14 @@
     </aside>
   </main>
 
+  <!-- ====================================================
+       FOOTER – Nhóm nút hành động
+       Trái: Đóng (hủy) | In tạm
+       Phải: Lưu tạm đơn đặt món (Luồng A) | Thanh toán ngay (Luồng B)
+       ==================================================== -->
   <footer class="pos-order-dishes__footer">
     <div class="pos-order-dishes__footer-left">
+      <!-- Đóng dialog – không lưu dữ liệu -->
       <button
         type="button"
         class="pos-order-dishes__btn pos-order-dishes__btn--ghost"
@@ -262,12 +356,20 @@
       >
         Đóng
       </button>
+      <!-- In tạm (chức năng sẽ bổ sung) -->
       <button type="button" class="pos-order-dishes__btn pos-order-dishes__btn--secondary">
         <span class="material-symbols-outlined">print</span>
       </button>
     </div>
 
     <div class="pos-order-dishes__footer-right">
+      <!--
+        LUỒNG A: Lưu tạm đơn đặt món
+        - Disabled khi giỏ trống HOẶC đang gửi API
+        - Gọi confirmOrder() → API tạo DishOrder (PROCESSING)
+          → mở OrderDishesSuccessDialog
+        - Dùng khi: Khách chưa thanh toán, cần bếp chuẩn bị trước
+      -->
       <button
         type="button"
         class="pos-order-dishes__btn pos-order-dishes__btn--primary"
@@ -275,9 +377,20 @@
         (click)="confirmOrder()"
       >
         <span class="material-symbols-outlined">save</span>
-        {{ submitting() ? 'Đang xử lý...' : 'Lưu tạm đơn đặt món' }}
+        {{ submitting() ? 'Đang xử lý...' : 'Lưu đơn đặt món' }}
       </button>
 
+      <!--
+        LUỒNG B: Thanh toán ngay (Quick Checkout)
+        - Disabled khi giỏ trống HOẶC đang gửi API
+        - Gọi orderAndPayNow() →
+            Bước 1: API tạo DishOrder (PROCESSING)
+            Bước 2: API chuyển trạng thái → DONE (ngầm)
+            Bước 3: Mở PosConfirmPayment
+            Bước 4: Mở PaymentSuccessDialog
+        - Text thay đổi sang "Đang xử lý..." trong lúc chờ API (Bước 1+2)
+        - Dùng khi: Đồ uống nhanh / take-away / thanh toán tại quầy ngay
+      -->
       <button
         type="button"
         class="pos-order-dishes__btn pos-order-dishes__btn--primary pos-order-dishes__btn--checkout"

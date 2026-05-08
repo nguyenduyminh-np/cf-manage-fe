@@ -116,7 +116,7 @@
 
 .supplier-filters__grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
   align-items: flex-end;
 
@@ -254,11 +254,16 @@
   --ui-select-control-height: 2rem;
   --ui-select-control-padding-y: 0;
   --ui-select-control-padding-x: 0.55rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: nowrap;
+  white-space: nowrap;
   margin: 0;
   color: rgba($color-secondary, 0.92);
 
   label {
-    margin: 0 0.45rem;
+    margin: 0;
   }
 }
 
@@ -424,7 +429,6 @@ button.btn[tuiButton] {
     }
   }
 
-  // Action icons
   .action-icon {
     font-size: 1.15rem;
     border-radius: 0.4rem;
@@ -433,6 +437,13 @@ button.btn[tuiButton] {
     transition:
       background 0.14s,
       color 0.14s;
+    &--view {
+      color: rgba($color-primary, 0.7);
+      &:hover {
+        background: rgba($color-primary-container, 0.22);
+        color: $color-primary;
+      }
+    }
     &--edit {
       color: rgba($color-primary, 0.75);
       &:hover {

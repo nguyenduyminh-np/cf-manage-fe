@@ -42,6 +42,7 @@ import {
   InvoiceDetailDialogInput,
 } from '../../shared/components/dialogs/invoice-detail-dialog/invoice-detail-dialog';
 import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
+import { BreadcrumbComponent } from '../../shared/components/ui-component/breadcrumb/breadcrumb';
 import { downloadBlobFile } from '../../shared/utils/file-download.utils';
 
 // ----- View State -----
@@ -76,7 +77,7 @@ interface InvoiceQuery {
 @Component({
   standalone: true,
   selector: 'app-invoice',
-  imports: [AsyncPipe, AgGridAngular, FormsModule, UiSelectComponent],
+  imports: [AsyncPipe, AgGridAngular, FormsModule, UiSelectComponent, BreadcrumbComponent],
   templateUrl: './invoice.html',
   styleUrl: './invoice.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -245,18 +246,19 @@ export class Invoice {
     },
     {
       headerName: 'Thao tác',
-      colId: 'actions',
-      cellRenderer: () => `<span class="material-symbols-outlined">visibility</span>`,
+      colId: 'inv-actions',
+      cellRenderer: () =>
+        `<span class="material-symbols-outlined action-icon action-icon--view" data-action="view" title="Xem chi tiết">visibility</span>`,
       width: 90,
       minWidth: 90,
-      maxWidth: 100,
+      maxWidth: 110,
       flex: 0,
       pinned: 'right',
       lockPinned: true,
       suppressSizeToFit: true,
       sortable: false,
       filter: false,
-      cellClass: 'cell-center cell-clickable',
+      cellClass: 'cell-center cell-actions',
     },
   ];
 
@@ -293,9 +295,11 @@ export class Invoice {
   }
 
   protected onCellClicked(event: CellClickedEvent<InvoiceListItem>): void {
-    if (event.colDef.colId === 'actions' && event.data) {
-      this.openDetail(event.data.id);
-    }
+    if (event.colDef.colId !== 'inv-actions' || !event.data) return;
+    const action = (event.event?.target as HTMLElement)
+      ?.closest('[data-action]')
+      ?.getAttribute('data-action');
+    if (action === 'view') this.openDetail(event.data.id);
   }
 
   protected onRowDoubleClicked(event: RowDoubleClickedEvent<InvoiceListItem>): void {

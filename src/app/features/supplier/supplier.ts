@@ -47,6 +47,7 @@ import { SupplierService } from '../../core/services/supplier/supplier.service';
 import { SupplierFormDialog } from '../../shared/components/dialogs/supplier-form-dialog/supplier-form-dialog';
 import { SupplierDeleteDialog } from '../../shared/components/dialogs/supplier-delete-dialog/supplier-delete-dialog';
 import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
+import { BreadcrumbComponent } from '../../shared/components/ui-component/breadcrumb/breadcrumb';
 
 // ── View state ────────────────────────────────────────────────────────────────
 interface PageViewState<T> {
@@ -78,7 +79,7 @@ interface SupplierQuery {
 @Component({
   standalone: true,
   selector: 'app-supplier',
-  imports: [AsyncPipe, AgGridAngular, FormsModule, UiSelectComponent],
+  imports: [AsyncPipe, AgGridAngular, FormsModule, UiSelectComponent, BreadcrumbComponent],
   templateUrl: './supplier.html',
   styleUrl: './supplier.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -224,11 +225,12 @@ export class Supplier implements OnDestroy {
       headerName: 'Thao tác',
       colId: 'sup-actions',
       cellRenderer: () =>
-        `<span class="material-symbols-outlined action-icon action-icon--edit"   data-action="edit"   title="Chỉnh sửa">edit</span>` +
+        `<span class="material-symbols-outlined action-icon action-icon--view" data-action="view" title="Xem chi tiết">visibility</span>` +
+        `<span class="material-symbols-outlined action-icon action-icon--edit" data-action="edit" title="Chỉnh sửa">edit</span>` +
         `<span class="material-symbols-outlined action-icon action-icon--delete" data-action="delete" title="Xóa">delete</span>`,
-      width: 110,
-      minWidth: 110,
-      maxWidth: 130,
+      width: 140,
+      minWidth: 140,
+      maxWidth: 160,
       flex: 0,
       pinned: 'right',
       lockPinned: true,
@@ -264,7 +266,8 @@ export class Supplier implements OnDestroy {
     const action = (e.event?.target as HTMLElement)
       ?.closest('[data-action]')
       ?.getAttribute('data-action');
-    if (action === 'edit') this.openEditDialog(e.data);
+    if (action === 'view') this.openViewDialog(e.data);
+    else if (action === 'edit') this.openEditDialog(e.data);
     else if (action === 'delete') this.openDeleteDialog(e.data);
   }
 
@@ -361,6 +364,16 @@ export class Supplier implements OnDestroy {
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe({ next: () => this.refresh(), error: (e) => console.error(e) });
       });
+  }
+
+  private openViewDialog(sup: SupplierListItem): void {
+    this.dialogService
+      .open<null>(
+        new PolymorpheusComponent(SupplierFormDialog, this.injector),
+        { data: { mode: 'view', supplier: sup }, size: 's', dismissible: true, closeable: false },
+      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
   }
 
   private openEditDialog(sup: SupplierListItem): void {

@@ -40,12 +40,13 @@ import {
 } from '../../core/facade/booking.facade';
 import { OrderDishesHistory } from '../../shared/components/dialogs/order-dishes-history/order-dishes-history';
 import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
+import { BreadcrumbComponent } from '../../shared/components/ui-component/breadcrumb/breadcrumb';
 import { downloadBlobFile } from '../../shared/utils/file-download.utils';
 
 @Component({
   standalone: true,
   selector: 'app-booking',
-  imports: [ReactiveFormsModule, NgClass, UiSelectComponent],
+  imports: [ReactiveFormsModule, NgClass, UiSelectComponent, BreadcrumbComponent],
   providers: [BookingFacade],
   templateUrl: './booking.html',
   styleUrl: './booking.scss',

@@ -63,7 +63,7 @@ export class PurchaseOrderDetailDialog {
   protected readonly error = signal<string | null>(null);
 
   // For COMPLETED transition: may need warehouseId
-  protected warehouseIdForComplete: number = this.order.id ?? 0;
+  protected warehouseIdForComplete: number = this.order.warehouseId ?? 0;
 
   protected get allowedTransitions(): string[] {
     return ALLOWED[this.order.paymentStatus] ?? [];

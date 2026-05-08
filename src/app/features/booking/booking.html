@@ -1,9 +1,9 @@
 <div class="booking-page">
-  <section class="booking-page__breadcrumb">
-    <span class="type-body-sm">Trang chủ</span>
-    <span class="booking-page__breadcrumb-separator">›</span>
-    <strong class="type-label-md">Đặt bàn</strong>
-  </section>
+  <!-- Breadcrumb -->
+  <app-breadcrumb [items]="[
+    { label: 'Trang chủ', routerLink: '/', icon: 'home' },
+    { label: 'Đặt bàn', icon: 'event_seat' }
+  ]" />
 
   <section class="booking-page__header">
     <h1 class="type-headline-lg">Quản lý đặt bàn</h1>

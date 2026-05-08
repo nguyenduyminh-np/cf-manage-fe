@@ -47,6 +47,7 @@ import { WarehouseService } from '../../core/services/warehouse/warehouse.servic
 import { WarehouseFormDialog } from '../../shared/components/dialogs/warehouse-form-dialog/warehouse-form-dialog';
 import { WarehouseDeleteDialog } from '../../shared/components/dialogs/warehouse-delete-dialog/warehouse-delete-dialog';
 import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
+import { BreadcrumbComponent } from '../../shared/components/ui-component/breadcrumb/breadcrumb';
 
 // ── View state ────────────────────────────────────────────────────────────────
 interface PageViewState<T> {
@@ -76,7 +77,7 @@ interface WarehouseQuery {
 @Component({
   standalone: true,
   selector: 'app-warehouse',
-  imports: [AsyncPipe, AgGridAngular, FormsModule, TuiButton, UiSelectComponent],
+  imports: [AsyncPipe, AgGridAngular, FormsModule, TuiButton, UiSelectComponent, BreadcrumbComponent],
   templateUrl: './warehouse.html',
   styleUrl: './warehouse.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -231,11 +232,12 @@ export class Warehouse implements OnDestroy {
       headerName: 'Thao tác',
       colId: 'wh-actions',
       cellRenderer: () =>
-        `<span class="material-symbols-outlined action-icon action-icon--edit"   data-action="edit"   title="Chỉnh sửa">edit</span>` +
+        `<span class="material-symbols-outlined action-icon action-icon--view" data-action="view" title="Xem chi tiết">visibility</span>` +
+        `<span class="material-symbols-outlined action-icon action-icon--edit" data-action="edit" title="Chỉnh sửa">edit</span>` +
         `<span class="material-symbols-outlined action-icon action-icon--delete" data-action="delete" title="Xóa">delete</span>`,
-      width: 110,
-      minWidth: 110,
-      maxWidth: 130,
+      width: 140,
+      minWidth: 140,
+      maxWidth: 160,
       flex: 0,
       pinned: 'right',
       lockPinned: true,
@@ -271,7 +273,8 @@ export class Warehouse implements OnDestroy {
     const action = (e.event?.target as HTMLElement)
       ?.closest('[data-action]')
       ?.getAttribute('data-action');
-    if (action === 'edit') this.openEditDialog(e.data);
+    if (action === 'view') this.openViewDialog(e.data);
+    else if (action === 'edit') this.openEditDialog(e.data);
     else if (action === 'delete') this.openDeleteDialog(e.data);
   }
 
@@ -377,6 +380,16 @@ export class Warehouse implements OnDestroy {
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe({ next: () => this.refresh(), error: (e) => console.error(e) });
       });
+  }
+
+  private openViewDialog(wh: WarehouseListItem): void {
+    this.dialogService
+      .open<null>(
+        new PolymorpheusComponent(WarehouseFormDialog, this.injector),
+        { data: { mode: 'view', warehouse: wh }, size: 's', dismissible: true, closeable: false },
+      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
   }
 
   private openEditDialog(wh: WarehouseListItem): void {

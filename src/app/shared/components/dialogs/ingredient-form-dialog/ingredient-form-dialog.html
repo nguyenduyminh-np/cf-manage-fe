@@ -45,21 +45,21 @@
         <div class="igf-row">
           <label class="igf-field">
             <span class="igf-field__label">Danh mục <span class="igf-field__req">*</span></span>
-            <select class="igf-field__select" name="ingredientCategoryId"
-              [(ngModel)]="formData.ingredientCategoryId" required>
-              <option [ngValue]="0" disabled>-- Chọn danh mục --</option>
-              @for (c of categories(); track c.id) {
-                <option [ngValue]="c.id">{{ c.ingredientCategoryName }}</option>
+            <select class="igf-field__select" name="ingredientCategoryCode"
+              [(ngModel)]="formData.ingredientCategoryCode" required>
+              <option value="" disabled>-- Chọn danh mục --</option>
+              @for (c of categories(); track c.ingredientCategoryCode) {
+                <option [ngValue]="c.ingredientCategoryCode">{{ c.ingredientCategoryName }}</option>
               }
             </select>
           </label>
           <label class="igf-field">
             <span class="igf-field__label">Đơn vị tính <span class="igf-field__req">*</span></span>
-            <select class="igf-field__select" name="unitId"
-              [(ngModel)]="formData.unitId" required>
-              <option [ngValue]="0" disabled>-- Chọn đơn vị --</option>
-              @for (u of units(); track u.id) {
-                <option [ngValue]="u.id">{{ u.unitName }}</option>
+            <select class="igf-field__select" name="unitCode"
+              [(ngModel)]="formData.unitCode" required>
+              <option value="" disabled>-- Chọn đơn vị --</option>
+              @for (u of units(); track u.unitCode) {
+                <option [ngValue]="u.unitCode">{{ u.unitName }}</option>
               }
             </select>
           </label>
@@ -68,11 +68,11 @@
         <!-- Nhà cung cấp -->
         <label class="igf-field">
           <span class="igf-field__label">Nhà cung cấp <span class="igf-field__req">*</span></span>
-          <select class="igf-field__select" name="supplierId"
-            [(ngModel)]="formData.supplierId" required>
-            <option [ngValue]="0" disabled>-- Chọn nhà cung cấp --</option>
-            @for (s of suppliers(); track s.id) {
-              <option [ngValue]="s.id">{{ s.supplierName }}</option>
+          <select class="igf-field__select" name="supplierCode"
+            [(ngModel)]="formData.supplierCode" required>
+            <option value="" disabled>-- Chọn nhà cung cấp --</option>
+            @for (s of suppliers(); track s.supplierCode) {
+              <option [ngValue]="s.supplierCode">{{ s.supplierName }}</option>
             }
           </select>
         </label>

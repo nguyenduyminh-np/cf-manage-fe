@@ -12,7 +12,7 @@ import {
 } from '../../../../core/models/ingredient-category/ingredient-category.model';
 
 export interface IngredientCategoryFormDialogInput {
-  mode: 'create' | 'edit';
+  mode: 'create' | 'edit' | 'view';
   category: IngredientCategoryListItem | null;
 }
 
@@ -39,6 +39,7 @@ export class IngredientCategoryFormDialog implements OnInit {
   >();
 
   protected readonly isEdit = this.context.data.mode === 'edit';
+  protected readonly isView = this.context.data.mode === 'view';
   private readonly src = this.context.data.category;
 
   // ── Options ─────────────────────────────────────────────────────────────
@@ -76,7 +77,7 @@ export class IngredientCategoryFormDialog implements OnInit {
 
   // ── Submit ─────────────────────────────────────────────────────────────────
   protected submit(): void {
-    if (!this.isValid) return;
+    if (this.isView || !this.isValid) return;
 
     if (this.isEdit) {
       const payload: IngredientCategoryUpdateRequest = {

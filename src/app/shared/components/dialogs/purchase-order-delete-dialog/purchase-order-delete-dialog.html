@@ -1,0 +1,27 @@
+<div class="sd-dialog">
+  <header class="sd-dialog__header">
+    <span class="material-symbols-outlined sd-dialog__icon">warning</span>
+    <h2 class="sd-dialog__title">Xác nhận xóa đơn nhập hàng</h2>
+  </header>
+
+  <div class="sd-dialog__body">
+    <p class="sd-dialog__message">
+      Bạn có chắc chắn muốn xóa đơn nhập hàng
+      <strong class="sd-dialog__name">{{ order.purchaseOrderCode }}</strong>?
+    </p>
+    <p class="sd-dialog__note">
+      Chỉ có thể xóa đơn ở trạng thái <strong>Bản nháp (DRAFT)</strong>.
+      Thao tác này sẽ vô hiệu hóa đơn hàng và toàn bộ chi tiết liên quan.
+    </p>
+  </div>
+
+  <footer class="sd-dialog__footer">
+    <button tuiButton type="button" class="sd-btn sd-btn--ghost" (click)="cancel()">
+      Hủy bỏ
+    </button>
+    <button tuiButton type="button" class="sd-btn sd-btn--danger" (click)="confirm()">
+      <span class="material-symbols-outlined">delete</span>
+      Xác nhận xóa
+    </button>
+  </footer>
+</div>

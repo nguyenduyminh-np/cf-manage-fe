@@ -15,6 +15,11 @@
   border-top: none;
   border-left: none;
   border-right: none;
+  transition: left 0.22s ease; // Đồng bộ với animation của sidebar
+}
+
+.admin-header.admin-header--sidebar-collapsed {
+  left: 84px; // Chiều rộng Sidebar thu gọn
 }
 
 button.search-well {
@@ -23,7 +28,9 @@ button.search-well {
   border: 1px solid rgba($color-outline-variant, 0.4);
   border-radius: 9999px;
   padding: 0.5rem 0.5rem 0.5rem 1rem;
-  width: 24rem;
+  flex: 1 1 0;        // Tự co giãn lấp đầy không gian còn lại
+  min-width: 0;       // Cho phép thu nhỏ hơn nội dung nếu cần
+  max-width: 24rem;   // Không rộng quá 24rem trên màn hình lớn
   transition: all 0.2s ease;
   cursor: pointer;
 
@@ -39,18 +46,23 @@ button.search-well {
 
   .search-trigger-content {
     @include flex-center(flex-start);
+    min-width: 0;   // Cho phép text bên trong bị truncate nếu quá hẹp
 
     .icon {
       color: $color-secondary;
       opacity: 0.7;
       margin-right: 0.5rem;
       font-size: 1.25rem;
+      flex-shrink: 0; // Icon không bị co
     }
 
     .placeholder-text {
       font-size: 0.875rem;
       color: rgba($color-secondary, 0.8);
       font-family: $font-body;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 
@@ -63,6 +75,8 @@ button.search-well {
     border-radius: 9999px;
     border: 1px solid rgba($color-outline-variant, 0.6);
     box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    flex-shrink: 0;   // Badge không bị co
+    margin-left: 0.5rem;
   }
 }
 

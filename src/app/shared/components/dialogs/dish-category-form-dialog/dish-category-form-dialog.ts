@@ -9,7 +9,7 @@ import {
 } from '../../../../core/models/dish-category/dish-category.model';
 
 export interface DishCategoryFormDialogInput {
-  mode: 'create' | 'edit';
+  mode: 'create' | 'edit' | 'view';
   category: DishCategoryListItem | null;
 }
 
@@ -27,6 +27,7 @@ export class DishCategoryFormDialog {
   >();
 
   protected readonly isEdit = this.context.data.mode === 'edit';
+  protected readonly isView = this.context.data.mode === 'view';
 
   protected formData = {
     dishCategoryCode: this.context.data.category?.dishCategoryCode ?? '',
@@ -35,7 +36,7 @@ export class DishCategoryFormDialog {
   };
 
   protected submit(): void {
-    if (!this.formData.dishCategoryName.trim()) return;
+    if (this.isView || !this.formData.dishCategoryName.trim()) return;
 
     if (this.isEdit && this.context.data.category) {
       const payload: DishCategoryUpdateRequest = {

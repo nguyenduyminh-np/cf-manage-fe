@@ -10,7 +10,7 @@ import {
 } from '../../../../core/models/warehouse/warehouse.model';
 
 export interface WarehouseFormDialogInput {
-  mode: 'create' | 'edit';
+  mode: 'create' | 'edit' | 'view';
   warehouse: WarehouseListItem | null;
 }
 
@@ -28,6 +28,7 @@ export class WarehouseFormDialog {
   >();
 
   protected readonly isEdit = this.context.data.mode === 'edit';
+  protected readonly isView = this.context.data.mode === 'view';
   private readonly src = this.context.data.warehouse;
 
   // ── Form data ─────────────────────────────────────────────────────────────
@@ -47,7 +48,7 @@ export class WarehouseFormDialog {
 
   // ── Submit ─────────────────────────────────────────────────────────────────
   protected submit(): void {
-    if (!this.isValid) return;
+    if (this.isView || !this.isValid) return;
 
     if (this.isEdit) {
       const payload: WarehouseUpdateRequest = {

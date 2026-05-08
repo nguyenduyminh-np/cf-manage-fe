@@ -179,10 +179,6 @@
   align-items: flex-end;
 
   @media (max-width: 1024px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  @media (max-width: 720px) {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -234,7 +230,7 @@
     padding: 0 1.08rem;
   }
 
-  @media (max-width: 720px) {
+  @media (max-width: 1024px) {
     flex-direction: column;
     .btn {
       width: 100%;
@@ -457,6 +453,13 @@
     transition:
       background 0.14s,
       color 0.14s;
+    &--view {
+      color: rgba($color-primary, 0.7);
+      &:hover {
+        background: rgba($color-primary-container, 0.22);
+        color: $color-primary;
+      }
+    }
     &--edit {
       color: rgba($color-primary, 0.75);
       &:hover {

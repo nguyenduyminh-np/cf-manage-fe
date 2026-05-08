@@ -38,6 +38,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
+import { BreadcrumbComponent } from '../../shared/components/ui-component/breadcrumb/breadcrumb';
 
 import {
   PurchaseOrderListItem,
@@ -48,6 +49,7 @@ import {
 } from '../../core/models/purchase-order/purchase-order.model';
 import { PurchaseOrderService } from '../../core/services/purchase-order/purchase-order.model';
 import { PurchaseOrderFormDialog } from '../../shared/components/dialogs/purchase-order-form-dialog/purchase-order-form-dialog';
+import { PurchaseOrderDeleteDialog } from '../../shared/components/dialogs/purchase-order-delete-dialog/purchase-order-delete-dialog';
 import { downloadBlobFile } from '../../shared/utils/file-download.utils';
 import {
   PurchaseOrderDetailDialog,
@@ -83,19 +85,12 @@ interface PoQuery {
   filters: PoSearchFilters;
 }
 
-// ── Status config ──────────────────────────────────────────────────────────
-const STATUS_LABEL: Record<string, string> = {
-  DRAFT: 'Nháp',
-  PENDING: 'Chờ duyệt',
-  APPROVED: 'Đã duyệt',
-  COMPLETED: 'Hoàn thành',
-  CANCELLED: 'Đã hủy',
-};
+// ── Status filter options (nhãn dùng cho dropdown lọc) ─────────────────────
 
 @Component({
   standalone: true,
   selector: 'app-purchase-order',
-  imports: [AsyncPipe, AgGridAngular, FormsModule, TuiButton, UiSelectComponent],
+  imports: [AsyncPipe, AgGridAngular, FormsModule, TuiButton, UiSelectComponent, BreadcrumbComponent],
   templateUrl: './purchase-order.html',
   styleUrl: './purchase-order.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -111,6 +106,7 @@ export class PurchaseOrder implements OnDestroy {
   private debounceId: number | null = null;
   private readonly DEBOUNCE_MS = 500;
   protected readonly isExporting = signal(false);
+  protected bannerVisible = signal(true);
 
   private cancelRaf(): void {
     if (this.gridFitRafId !== null) {
@@ -126,11 +122,11 @@ export class PurchaseOrder implements OnDestroy {
   // ── Filter options ────────────────────────────────────────────────────────
   protected readonly statusFilterOptions = [
     { label: 'Tất cả', value: '' },
-    { label: 'Nháp', value: 'DRAFT' },
+    { label: 'Bản nháp', value: 'DRAFT' },
     { label: 'Chờ duyệt', value: 'PENDING' },
     { label: 'Đã duyệt', value: 'APPROVED' },
     { label: 'Hoàn thành', value: 'COMPLETED' },
-    { label: 'Đã hủy', value: 'CANCELLED' },
+    { label: 'Đã huỷ', value: 'CANCELLED' },
   ];
   protected readonly pageSizeOptions = [10, 20, 50];
 
@@ -231,8 +227,9 @@ export class PurchaseOrder implements OnDestroy {
       sortable: true,
       filter: false,
       cellRenderer: (p: ICellRendererParams<PurchaseOrderListItem>) => {
-        const s = p.value ?? '';
-        return `<span class="status-badge status-badge--${s.toLowerCase()}">${STATUS_LABEL[s] ?? s}</span>`;
+        const code = p.value ?? '';
+        const label = p.data?.paymentStatusName ?? code;
+        return `<span class="status-badge status-badge--${code.toLowerCase()}">${label}</span>`;
       },
     },
     {
@@ -268,10 +265,11 @@ export class PurchaseOrder implements OnDestroy {
       colId: 'po-actions',
       cellRenderer: () =>
         `<span class="material-symbols-outlined action-icon action-icon--view" data-action="view" title="Xem chi tiết">visibility</span>` +
-        `<span class="material-symbols-outlined action-icon action-icon--edit" data-action="edit" title="Chỉnh sửa">edit</span>`,
-      width: 110,
-      minWidth: 110,
-      maxWidth: 130,
+        `<span class="material-symbols-outlined action-icon action-icon--edit" data-action="edit" title="Chỉnh sửa">edit</span>` +
+        `<span class="material-symbols-outlined action-icon action-icon--delete" data-action="delete" title="Xóa">delete</span>`,
+      width: 140,
+      minWidth: 140,
+      maxWidth: 160,
       flex: 0,
       pinned: 'right',
       lockPinned: true,
@@ -309,6 +307,7 @@ export class PurchaseOrder implements OnDestroy {
       ?.getAttribute('data-action');
     if (action === 'view') this.openDetailDialog(e.data);
     else if (action === 'edit') this.openEditDialog(e.data);
+    else if (action === 'delete') this.onDeleteClicked(e.data);
   }
 
   protected onRowDoubleClicked(e: RowDoubleClickedEvent<PurchaseOrderListItem>): void {
@@ -472,6 +471,28 @@ export class PurchaseOrder implements OnDestroy {
 
   private refresh(): void {
     this.querySubject.next(this.querySubject.getValue());
+  }
+
+  // ── Delete ─────────────────────────────────────────────────────────────────
+  private onDeleteClicked(item: PurchaseOrderListItem): void {
+    this.dialogService
+      .open<boolean>(new PolymorpheusComponent(PurchaseOrderDeleteDialog, this.injector), {
+        data: { order: item },
+        size: 's',
+        dismissible: true,
+        closeable: false,
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((ok) => {
+        if (!ok) return;
+        this.poService
+          .delete(item.id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => this.refresh(),
+            error: (e) => console.error('Không thể xóa đơn nhập hàng.', e),
+          });
+      });
   }
 
   // ── API fetch ─────────────────────────────────────────────────────────────

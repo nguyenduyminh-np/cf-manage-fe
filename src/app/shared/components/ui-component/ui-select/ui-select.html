@@ -15,22 +15,42 @@
   </button>
 
   @if (isOpen) {
-    <ul class="ui-select__menu" role="listbox" [attr.aria-label]="ariaLabel || name || placeholder">
-      @for (option of options; track option.value) {
-        <li>
-          <button
-            type="button"
-            class="ui-select__option"
-            [class.ui-select__option--selected]="value === option.value"
-            [class.ui-select__option--disabled]="option.disabled"
-            [attr.aria-selected]="value === option.value"
-            [disabled]="option.disabled"
-            (click)="select(option)"
-          >
-            {{ option.label }}
-          </button>
-        </li>
+    <div class="ui-select__menu" role="listbox" [attr.aria-label]="ariaLabel || name || placeholder">
+      @if (searchable) {
+        <div class="ui-select__search-wrap">
+          <span class="material-symbols-outlined ui-select__search-icon" aria-hidden="true">search</span>
+          <input
+            #searchInput
+            class="ui-select__search-input"
+            type="text"
+            [placeholder]="searchPlaceholder"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearchTermChange()"
+          />
+        </div>
       }
-    </ul>
+
+      @if (filteredOptions.length > 0) {
+        <ul class="ui-select__options">
+          @for (option of filteredOptions; track option.value) {
+            <li>
+              <button
+                type="button"
+                class="ui-select__option"
+                [class.ui-select__option--selected]="value === option.value"
+                [class.ui-select__option--disabled]="option.disabled"
+                [attr.aria-selected]="value === option.value"
+                [disabled]="option.disabled"
+                (click)="select(option)"
+              >
+                {{ option.label }}
+              </button>
+            </li>
+          }
+        </ul>
+      } @else {
+        <div class="ui-select__empty">Không tìm thấy kết quả phù hợp.</div>
+      }
+    </div>
   }
 </div>
