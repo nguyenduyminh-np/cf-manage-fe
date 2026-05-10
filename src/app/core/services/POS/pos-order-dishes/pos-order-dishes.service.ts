@@ -7,6 +7,8 @@ import {
   DishOrderResponse,
   DishSearchRequest,
   DishSearchResponse,
+  DishListRequest,
+  DishListApiResponse,
 } from '../../../models/pos-order-dishes/pos-order-dishes.model';
 import { ApiResponse } from '../../../models/base/api-response.model';
 
@@ -16,6 +18,14 @@ export class PosOrderDishesService {
 
   searchDishes(request: DishSearchRequest): Observable<DishSearchResponse> {
     return this.http.post<DishSearchResponse>('/dish-order/dishes-for-pos-order-dishes', request);
+  }
+
+  /**
+   * Lấy toàn bộ món theo danh mục và trạng thái active.
+   * Sử dụng cho tab lọc danh mục trong POS Order Dishes.
+   */
+  listDishes(request: DishListRequest): Observable<DishListApiResponse> {
+    return this.http.post<DishListApiResponse>('/dish/list', request);
   }
 
   /**

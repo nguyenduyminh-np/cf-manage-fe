@@ -48,13 +48,13 @@ import {
   PurchaseOrderDetail,
 } from '../../core/models/purchase-order/purchase-order.model';
 import { PurchaseOrderService } from '../../core/services/purchase-order/purchase-order.model';
-import { PurchaseOrderFormDialog } from '../../shared/components/dialogs/purchase-order-form-dialog/purchase-order-form-dialog';
-import { PurchaseOrderDeleteDialog } from '../../shared/components/dialogs/purchase-order-delete-dialog/purchase-order-delete-dialog';
+import { PurchaseOrderFormDialog } from '../../shared/components/dialogs/purchase-order/purchase-order-form-dialog/purchase-order-form-dialog';
+import { PurchaseOrderDeleteDialog } from '../../shared/components/dialogs/purchase-order/purchase-order-delete-dialog/purchase-order-delete-dialog';
 import { downloadBlobFile } from '../../shared/utils/file-download.utils';
 import {
   PurchaseOrderDetailDialog,
   PurchaseOrderDetailDialogOutput,
-} from '../../shared/components/dialogs/purchase-order-detail-dialog/purchase-order-detail-dialog';
+} from '../../shared/components/dialogs/purchase-order/purchase-order-detail-dialog/purchase-order-detail-dialog';
 
 // ── View state ──────────────────────────────────────────────────────────────
 interface PageViewState<T> {

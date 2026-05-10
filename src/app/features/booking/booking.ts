@@ -10,9 +10,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { TuiAlertService, TuiButton, TuiDialogService } from '@taiga-ui/core';
-import { PolymorpheusComponent } from '@taiga-ui/polymorpheus';
-import { finalize, map, Observable, of, switchMap } from 'rxjs';
+import { filter, finalize, map, Observable, of, switchMap } from 'rxjs';
 
 import { TableStatus } from '../../core/models/table/table.model';
 import {
@@ -21,14 +19,14 @@ import {
   TableBookingResponse,
 } from '../../core/models/table-booking/table-booking.model';
 import { TableBookingService } from '../../core/services/table-booking/table-booking.service';
-import { PosTableBooking } from '../../shared/components/dialogs/pos-table-booking/pos-table-booking';
+import { PosTableBooking } from '../../shared/components/dialogs/table-booking/pos-table-booking/pos-table-booking';
 import {
   PosOrderDishes,
   PosOrderDishesDialogInput,
-} from '../../shared/components/dialogs/pos-order-dishes/pos-order-dishes';
-import { TableBookingDetail } from '../../shared/components/dialogs/table-booking-detail/table-booking-detail';
-import { TableBookingHistory } from '../../shared/components/dialogs/table-booking-history/table-booking-history';
-import { TableDetailDialog } from '../../shared/components/dialogs/table-detail-dialog/table-detail-dialog';
+} from '../../shared/components/dialogs/order-dishes/pos-order-dishes/pos-order-dishes';
+import { TableBookingDetail } from '../../shared/components/dialogs/table-booking/table-booking-detail/table-booking-detail';
+import { TableBookingHistory } from '../../shared/components/dialogs/crud/table-booking-history/table-booking-history';
+import { TableDetailDialog } from '../../shared/components/dialogs/table/table-detail-dialog/table-detail-dialog';
 import {
   BookingFacade,
   BookingSearchFormValue,
@@ -38,10 +36,14 @@ import {
   SeatFilterValue,
   StatusFilterValue,
 } from '../../core/facade/booking.facade';
-import { OrderDishesHistory } from '../../shared/components/dialogs/order-dishes-history/order-dishes-history';
+import { OrderDishesHistory } from '../../shared/components/dialogs/crud/order-dishes-history/order-dishes-history';
 import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
 import { BreadcrumbComponent } from '../../shared/components/ui-component/breadcrumb/breadcrumb';
 import { downloadBlobFile } from '../../shared/utils/file-download.utils';
+import { BookingRealtimeService } from '../../core/services/booking-realtime/booking-realtime.service';
+import { environment } from '../../../environments/environment';
+import { PolymorpheusComponent } from '@taiga-ui/polymorpheus';
+import { TuiAlertService, TuiDialogService } from '@taiga-ui/core';
 
 @Component({
   standalone: true,
@@ -59,6 +61,7 @@ export class Booking implements OnInit {
   private readonly dialogService = inject(TuiDialogService);
   private readonly tableBookingService = inject(TableBookingService);
   private readonly alertService = inject(TuiAlertService);
+  private readonly realtimeService = inject(BookingRealtimeService);
   private tableCardClickTimer: ReturnType<typeof setTimeout> | null = null;
   private tableCardClickTargetId: number | null = null;
   protected readonly isEmptyingTable = signal(false);
@@ -132,6 +135,44 @@ export class Booking implements OnInit {
       )
       .subscribe((filters) => {
         this.facade.onFiltersChanged(filters);
+      });
+
+    // Kết nối WebSocket và tự động reload khi có sự kiện liên quan đến bàn/booking
+    this.realtimeService.connect(environment.apiUrl);
+
+    const reloadTriggerEvents = new Set([
+      'BOOKING_CREATED', 'BOOKING_CONFIRMED', 'BOOKING_CHECKED_IN',
+      'BOOKING_CHECKED_OUT', 'BOOKING_CANCELLED', 'BOOKING_EXPIRED',
+      'BOOKING_EXPIRED_NO_SHOW', 'BOOKING_AUTO_CANCELLED_NO_ORDER',
+      'BOOKING_WALK_IN_CREATED', 'BOOKING_LATE_ARRIVAL_WALK_IN_CREATED',
+      'BOOKING_EXTENDED',
+    ]);
+
+    this.realtimeService.bookingUpdates$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((envelope) => {
+        if (reloadTriggerEvents.has(envelope.event)) {
+          this.facade.forceReload();
+        }
+      });
+
+    this.realtimeService.tableStatus$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.facade.forceReload();
+      });
+
+    // CHECKOUT_OVERDUE: BE gửi lại mỗi 2 phút cho đến khi bàn được giải phóng.
+    // FE không cần polling — chỉ hiển thị toast mỗi khi nhận được event.
+    this.realtimeService.tableAlerts$
+      .pipe(
+        filter((e) => e.event === 'CHECKOUT_OVERDUE'),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((event) => {
+        this.alertService
+          .open(event.message, { appearance: 'error', label: '🔴 Quá giờ checkout' })
+          .subscribe();
       });
   }
 

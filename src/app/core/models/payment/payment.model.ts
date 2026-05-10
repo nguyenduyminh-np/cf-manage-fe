@@ -7,6 +7,7 @@ export interface PaymentPreviewRequest {
 export interface PaymentRequest {
   orderId: number;
   paymentMethod: string; // "CASH" | "BANK_TRANSFER"
+  voucherCode?: string | null;
 }
 
 // ────────────────────────────── RESPONSE DATA ──────────────────────────────
@@ -19,6 +20,10 @@ export interface PaymentPreviewData {
   customer: CustomerInfo | null;
   items: OrderItem[];
   totalAmount: number;
+  // Voucher fields — null khi không truyền voucherCode
+  voucherCode: string | null;
+  discountAmount: number | null;
+  finalAmount: number;
   suggestedPaymentMethods: string[];
 }
 
@@ -73,6 +78,10 @@ export interface InvoiceInfo {
   bookingId: number | null;
   customerName: string;
   customerPhone: string | null;
+  // Voucher snapshot
+  voucherId: number | null;
+  voucherCode: string | null;
+  discountAmount: number | null;
 }
 
 export interface InvoiceDetailInfo {

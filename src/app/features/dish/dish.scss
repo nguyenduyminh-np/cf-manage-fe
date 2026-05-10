@@ -419,6 +419,19 @@
     }
   }
 
+  // Dish code pill
+  .dish-code-cell {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: $color-primary;
+    background: rgba($color-primary-container, 0.12);
+    padding: 0.16rem 0.5rem;
+    border-radius: 0.35rem;
+    border: 1px solid rgba($color-primary-container, 0.28);
+    letter-spacing: 0.03em;
+  }
+
   .ag-header-cell-label {
     text-transform: uppercase;
     letter-spacing: 0.08em;

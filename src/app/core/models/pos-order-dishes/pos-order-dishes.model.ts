@@ -1,13 +1,30 @@
 // pos-order-dishes.model.ts
+
+/** Tương ứng với DishResponseDTO bên backend */
 export interface DishItem {
-  id: number;
-  dishCode: string;
+  dishId: number;
+  dishCode: string | null;
   dishName: string;
   price: number;
   photo: string | null;
-  createdAt: string;
   dishCategoryId: number;
+  dishCategoryCode: string | null;
   dishCategoryName: string;
+  active: boolean;
+  createdTime: string; // ISO-8601
+}
+
+/** Request cho API POST /dish/list */
+export interface DishListRequest {
+  active?: boolean;
+  dishCategoryId?: number;
+}
+
+/** Response của API POST /dish/list */
+export interface DishListApiResponse {
+  status: number;
+  message: string;
+  data: DishItem[];
 }
 
 export interface DishSearchRequest {

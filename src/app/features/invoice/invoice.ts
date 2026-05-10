@@ -40,7 +40,7 @@ import { InvoiceService } from '../../core/services/invoice/invoice.service';
 import {
   InvoiceDetailDialog,
   InvoiceDetailDialogInput,
-} from '../../shared/components/dialogs/invoice-detail-dialog/invoice-detail-dialog';
+} from '../../shared/components/dialogs/invoice/invoice-detail-dialog/invoice-detail-dialog';
 import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
 import { BreadcrumbComponent } from '../../shared/components/ui-component/breadcrumb/breadcrumb';
 import { downloadBlobFile } from '../../shared/utils/file-download.utils';
@@ -165,6 +165,10 @@ export class Invoice {
       flex: 1.2,
       sortable: true,
       filter: true,
+      cellRenderer: (params: ICellRendererParams<InvoiceListItem>) => {
+        const code = params.data?.invoiceCode ?? '—';
+        return `<span class="inv-code-cell">${code}</span>`;
+      },
     },
     {
       headerName: 'Tổng tiền',
@@ -240,9 +244,13 @@ export class Invoice {
       field: 'bookingInvoiceCode',
       minWidth: 150,
       flex: 1.2,
-      valueFormatter: (params: ValueFormatterParams<InvoiceListItem>) => params.value || '-',
       sortable: true,
       filter: true,
+      cellRenderer: (params: ICellRendererParams<InvoiceListItem>) => {
+        const code = params.data?.bookingInvoiceCode;
+        if (!code) return '<span>-</span>';
+        return `<span class="inv-code-cell">${code}</span>`;
+      },
     },
     {
       headerName: 'Thao tác',

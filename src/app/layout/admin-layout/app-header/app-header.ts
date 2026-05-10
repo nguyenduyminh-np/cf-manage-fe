@@ -1,6 +1,8 @@
 import { Component, HostListener, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { NotificationBellComponent } from '../../../shared/components/notification-bell/notification-bell';
+
 import { AuthFacade } from '../../../core/facade/auth.facade';
 import { TokenStore } from '../../../core/services/auth/token.store';
 import { JwtPayload } from '../../../core/models/base/auth.model';
@@ -9,7 +11,7 @@ import { GlobalSearchService } from '../../../core/services/global-search/global
 
 @Component({
   selector: 'app-header',
-  imports: [RouterLink],
+  imports: [RouterLink, NotificationBellComponent],
   templateUrl: './app-header.html',
   styleUrl: './app-header.scss',
 })

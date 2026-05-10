@@ -4,6 +4,7 @@ import { AppHeader } from '../app-header/app-header';
 import { AppFooter } from '../app-footer/app-footer';
 import { GlobalSearchComponent } from '../../../shared/components/global-search/global-search';
 import { GlobalSearchService } from '../../../core/services/global-search/global-search.service';
+import { ChatbotComponent } from '../../../shared/components/chatbot/chatbot';
 
 interface MenuItem {
   name: string;
@@ -13,7 +14,7 @@ interface MenuItem {
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [RouterOutlet, AppHeader, AppFooter, RouterLink, RouterLinkActive, GlobalSearchComponent],
+  imports: [RouterOutlet, AppHeader, AppFooter, RouterLink, RouterLinkActive, GlobalSearchComponent, ChatbotComponent],
   templateUrl: './app-admin-layout.html',
   styleUrl: './app-admin-layout.scss',
 })
@@ -39,6 +40,7 @@ export class AppAdminLayout implements OnInit, OnDestroy {
     { name: 'Đơn đặt hàng', icon: 'input', route: '/purchase-order' },
     { name: 'Nhà cung cấp', icon: 'local_shipping', route: '/supplier' },
     { name: 'Kho hàng', icon: 'inventory_2', route: '/warehouse' },
+    { name: 'Voucher', icon: 'confirmation_number', route: '/voucher' },
     { name: 'Tài khoản', icon: 'manage_accounts', route: '/account' },
   ];
 

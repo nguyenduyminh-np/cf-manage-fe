@@ -1,0 +1,253 @@
+<div class="vf-dialog">
+  <!-- Header -->
+  <header class="vf-dialog__header">
+    <div class="vf-dialog__header-left">
+      <span class="material-symbols-outlined vf-dialog__header-icon">
+        {{ isView ? 'confirmation_number' : 'add_card' }}
+      </span>
+      <h2 class="vf-dialog__title">
+        {{ isView ? 'Chi tiết Voucher' : 'Tạo Voucher mới' }}
+      </h2>
+    </div>
+    <button type="button" class="vf-dialog__close" (click)="cancel()" aria-label="Đóng">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </header>
+
+  <form class="vf-dialog__form" (ngSubmit)="submit()">
+    <div class="vf-dialog__body">
+
+      <!-- Row 1: Code + Discount type -->
+      <div class="vf-row">
+        <label class="vf-field">
+          <span class="vf-field__label">Mã voucher <span class="vf-field__req">*</span></span>
+          <input
+            class="vf-field__input vf-field__input--mono"
+            name="code"
+            type="text"
+            [(ngModel)]="formData.code"
+            placeholder="VD: SUMMER20"
+            autocomplete="off"
+            [disabled]="isView"
+            required
+          />
+          <span class="vf-field__hint">Chỉ A-Z, 0-9, _, - (tự động viết hoa)</span>
+        </label>
+
+        <label class="vf-field">
+          <span class="vf-field__label">Loại giảm giá <span class="vf-field__req">*</span></span>
+          <div class="vf-radio-group">
+            <label class="vf-radio" [class.vf-radio--selected]="formData.discountType === 'PERCENT'">
+              <input
+                type="radio"
+                name="discountType"
+                value="PERCENT"
+                [(ngModel)]="formData.discountType"
+                [disabled]="isView"
+              />
+              <span class="material-symbols-outlined">percent</span>
+              Phần trăm
+            </label>
+            <label class="vf-radio" [class.vf-radio--selected]="formData.discountType === 'FIXED'">
+              <input
+                type="radio"
+                name="discountType"
+                value="FIXED"
+                [(ngModel)]="formData.discountType"
+                [disabled]="isView"
+              />
+              <span class="material-symbols-outlined">currency_exchange</span>
+              Cố định (VNĐ)
+            </label>
+          </div>
+        </label>
+      </div>
+
+      <!-- Row 2: Value + Max Discount -->
+      <div class="vf-row">
+        <label class="vf-field">
+          <span class="vf-field__label">
+            Giá trị giảm <span class="vf-field__req">*</span>
+            <span class="vf-field__badge">{{ formData.discountType === 'PERCENT' ? '%' : 'VNĐ' }}</span>
+          </span>
+          <input
+            class="vf-field__input"
+            name="discountValue"
+            type="number"
+            [(ngModel)]="formData.discountValue"
+            [min]="0.01"
+            [max]="formData.discountType === 'PERCENT' ? 100 : null"
+            [disabled]="isView"
+            required
+          />
+        </label>
+
+        @if (formData.discountType === 'PERCENT') {
+          <label class="vf-field">
+            <span class="vf-field__label">Trần giảm tối đa (VNĐ)</span>
+            <input
+              class="vf-field__input"
+              name="maxDiscount"
+              type="number"
+              [(ngModel)]="formData.maxDiscount"
+              [min]="0"
+              placeholder="Bỏ trống = không giới hạn"
+              [disabled]="isView"
+            />
+          </label>
+        } @else {
+          <div class="vf-field vf-field--placeholder"></div>
+        }
+      </div>
+
+      <!-- Row 3: Min order + Usage limit -->
+      <div class="vf-row">
+        <label class="vf-field">
+          <span class="vf-field__label">Đơn tối thiểu (VNĐ)</span>
+          <input
+            class="vf-field__input"
+            name="minOrderAmount"
+            type="number"
+            [(ngModel)]="formData.minOrderAmount"
+            [min]="0"
+            placeholder="Bỏ trống = không giới hạn"
+            [disabled]="isView"
+          />
+        </label>
+
+        <label class="vf-field">
+          <span class="vf-field__label">Lượt dùng tối đa</span>
+          <input
+            class="vf-field__input"
+            name="usageLimit"
+            type="number"
+            [(ngModel)]="formData.usageLimit"
+            [min]="1"
+            placeholder="Bỏ trống = không giới hạn"
+            [disabled]="isView"
+          />
+          @if (isView && src) {
+            <span class="vf-field__hint">Đã dùng: {{ src.usedCount }} / {{ src.usageLimit ?? '∞' }}</span>
+          }
+        </label>
+      </div>
+
+      <!-- Row 4: Start / End Date -->
+      <div class="vf-row">
+        <label class="vf-field">
+          <span class="vf-field__label">Ngày bắt đầu</span>
+          <input
+            class="vf-field__input"
+            name="startDate"
+            type="datetime-local"
+            [(ngModel)]="formData.startDate"
+            [disabled]="isView"
+          />
+        </label>
+        <label class="vf-field">
+          <span class="vf-field__label">Ngày kết thúc</span>
+          <input
+            class="vf-field__input"
+            name="endDate"
+            type="datetime-local"
+            [(ngModel)]="formData.endDate"
+            [disabled]="isView"
+          />
+        </label>
+      </div>
+
+      <!-- Description -->
+      <label class="vf-field">
+        <span class="vf-field__label">Mô tả</span>
+        <textarea
+          class="vf-field__textarea"
+          name="description"
+          [(ngModel)]="formData.description"
+          rows="2"
+          placeholder="Mô tả ngắn về voucher..."
+          [disabled]="isView"
+          maxlength="500"
+        ></textarea>
+      </label>
+
+      <!-- View-mode: status / createdAt -->
+      @if (isView && src) {
+        <div class="vf-info-row">
+          <div class="vf-info-item">
+            <span class="vf-info-item__label">Trạng thái</span>
+            <span class="vf-status-badge" [class.vf-status-badge--active]="src.active" [class.vf-status-badge--inactive]="!src.active">
+              {{ src.active ? 'Đang hoạt động' : 'Đã vô hiệu hóa' }}
+            </span>
+          </div>
+          <div class="vf-info-item">
+            <span class="vf-info-item__label">Ngày tạo</span>
+            <span class="vf-info-item__value">{{ fmtDT(src.createdAt) }}</span>
+          </div>
+        </div>
+      }
+
+      <!-- Preview section -->
+      <div class="vf-preview-box">
+        <p class="vf-preview-box__title">
+          <span class="material-symbols-outlined">calculate</span>
+          Kiểm tra nhanh giảm giá
+        </p>
+        <div class="vf-preview-box__row">
+          <input
+            class="vf-field__input"
+            type="number"
+            [(ngModel)]="previewAmount"
+            name="previewAmount"
+            placeholder="Nhập số tiền đơn hàng (VNĐ)"
+            [min]="1"
+          />
+          <button
+            type="button"
+            class="vf-btn vf-btn--preview"
+            (click)="runPreview()"
+            [disabled]="previewing()"
+          >
+            @if (previewing()) {
+              <span class="vf-spinner vf-spinner--inline"></span>
+            }
+            {{ previewing() ? 'Đang tính...' : 'Tính thử' }}
+          </button>
+        </div>
+
+        @if (previewError) {
+          <p class="vf-preview-box__error">{{ previewError }}</p>
+        }
+        @if (previewResult) {
+          <div class="vf-preview-box__result">
+            <div class="vf-preview-box__result-row">
+              <span>Tổng đơn</span>
+              <span>{{ fmtCurrency(previewResult.totalAmount) }}</span>
+            </div>
+            <div class="vf-preview-box__result-row vf-preview-box__result-row--discount">
+              <span>Giảm giá</span>
+              <span>- {{ fmtCurrency(previewResult.discountAmount) }}</span>
+            </div>
+            <div class="vf-preview-box__result-row vf-preview-box__result-row--final">
+              <span>Thực thu</span>
+              <span>{{ fmtCurrency(previewResult.finalAmount) }}</span>
+            </div>
+          </div>
+        }
+      </div>
+
+    </div><!-- /body -->
+
+    <!-- Footer -->
+    <footer class="vf-dialog__footer">
+      <button tuiButton type="button" class="vf-btn vf-btn--ghost" (click)="cancel()">
+        {{ isView ? 'Đóng' : 'Hủy bỏ' }}
+      </button>
+      @if (!isView) {
+        <button tuiButton type="submit" class="vf-btn vf-btn--primary" [disabled]="!isValid">
+          <span class="material-symbols-outlined">add_card</span>
+          Tạo voucher
+        </button>
+      }
+    </footer>
+  </form>
+</div>

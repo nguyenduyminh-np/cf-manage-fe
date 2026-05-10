@@ -1,0 +1,100 @@
+@use 'sass:color';
+@use '../../../../../../assets/styles/color-kit' as *;
+
+:host {
+  display: flex;
+  width: 26rem;
+}
+
+.vd-dialog {
+  background: $color-surface;
+  border-radius: 0.9rem;
+  padding: 2rem 1.75rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  flex: 1 1 auto;
+  border: 1px solid rgba($color-outline-variant, 0.3);
+  box-shadow: 0 20px 50px -24px rgba($color-primary, 0.3);
+
+  &__icon-wrap {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background: rgba(#ba1a1a, 0.1);
+    display: grid;
+    place-items: center;
+    border: 2px solid rgba(#ba1a1a, 0.18);
+  }
+
+  &__icon {
+    font-size: 1.7rem;
+    color: #ba1a1a;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: $color-primary;
+  }
+
+  &__body {
+    margin: 0;
+    font-size: 0.9rem;
+    color: rgba($color-secondary, 0.85);
+    line-height: 1.55;
+  }
+
+  &__code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.88rem;
+    background: rgba($color-primary-container, 0.12);
+    color: $color-primary;
+    padding: 0.1rem 0.4rem;
+    border-radius: 0.3rem;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+    width: 100%;
+  }
+}
+
+.vd-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.55rem 1.25rem;
+  border-radius: 0.55rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s ease;
+  font-family: inherit;
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .material-symbols-outlined { font-size: 1rem; }
+
+  &--ghost {
+    background: transparent;
+    color: rgba($color-secondary, 0.8);
+    border: 1px solid rgba($color-outline-variant, 0.65);
+    &:hover { background: rgba($color-surface-container, 0.8); color: $color-primary; }
+  }
+
+  &--danger {
+    background: #ba1a1a;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(#ba1a1a, 0.3);
+    &:hover { background: color.adjust(#ba1a1a, $lightness: -6%); }
+  }
+}

@@ -68,6 +68,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/account/account').then(m => m.Account),
       },
       {
+        path: 'voucher',
+        canMatch: [rolesGuard(['ADMIN', 'MANAGER'])],
+        loadComponent: () => import('./features/voucher/voucher').then(m => m.Voucher),
+      },
+      {
         path: 'user-profile',
         loadComponent: () => import('./features/user-profile/user-profile').then(m => m.UserProfile),
       },

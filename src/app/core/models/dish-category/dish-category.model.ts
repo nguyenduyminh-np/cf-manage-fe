@@ -81,3 +81,25 @@ export interface DishCategoryOptionsApiResponse {
   message: string;
   data: DishCategoryOption[];
 }
+
+// ────────── LIST API (/dish-category/list) ──────────
+/** Tương ứng với DishCategoryListRequestDTO bên backend */
+export interface DishCategoryListRequest {
+  /** Lọc theo trạng thái active. Mặc định true (chỉ lấy danh mục đang hoạt động) */
+  active?: boolean;
+}
+
+/** Tương ứng với DishCategoryResponseDTO bên backend */
+export interface DishCategoryResponseDTO {
+  dishCategoryId: number;
+  dishCategoryCode: string | null;
+  dishCategoryName: string;
+  active: boolean;
+  createdTime: string; // ISO-8601 Instant
+}
+
+export interface DishCategoryListApiResponse {
+  status: number;
+  message: string;
+  data: DishCategoryResponseDTO[];
+}

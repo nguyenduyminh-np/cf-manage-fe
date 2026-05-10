@@ -1,0 +1,107 @@
+<div class="noti-bell-wrap" (click)="$event.stopPropagation()">
+  <!-- Bell button -->
+  <button
+    class="btn-icon notify-btn"
+    id="noti-bell-btn"
+    type="button"
+    [attr.aria-expanded]="isOpen()"
+    aria-haspopup="true"
+    aria-label="Thông báo"
+    (click)="togglePanel($event)"
+  >
+    <span class="material-symbols-outlined">notifications</span>
+    @if (realtimeService.connected()) {
+      <span class="ws-dot ws-dot--online" title="Đang kết nối realtime"></span>
+    } @else {
+      <span class="ws-dot ws-dot--offline" title="Mất kết nối realtime"></span>
+    }
+    @if (unreadCount() > 0) {
+      <span class="badge" aria-live="polite">{{ unreadCount() > 99 ? '99+' : unreadCount() }}</span>
+    }
+  </button>
+
+  <!-- Notification panel -->
+  @if (isOpen()) {
+    <div class="noti-panel" role="dialog" aria-label="Bảng thông báo">
+      <!-- Header -->
+      <div class="noti-panel__header">
+        <div class="noti-panel__title">
+          <span class="material-symbols-outlined">notifications_active</span>
+          <h3>Thông báo
+            @if (unreadCount() > 0) {
+              <span class="unread-chip">{{ unreadCount() }} chưa đọc</span>
+            }
+          </h3>
+        </div>
+        <div class="noti-panel__header-actions">
+          @if (realtimeService.connected()) {
+            <span class="conn-badge conn-badge--on">🟢 Live</span>
+          } @else {
+            <span class="conn-badge conn-badge--off">🔴 Offline</span>
+          }
+          @if (unreadCount() > 0) {
+            <button class="btn-mark-all" type="button" title="Đánh dấu tất cả đã đọc" (click)="markAllRead()">
+              <span class="material-symbols-outlined">done_all</span>
+            </button>
+          }
+          <button class="btn-clear" type="button" title="Đóng" (click)="closePanel()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Notification list -->
+      <div class="noti-panel__body">
+        @if (isLoading() && notifications().length === 0) {
+          <div class="noti-loading">
+            <span class="material-symbols-outlined spin">sync</span>
+            <p>Đang tải...</p>
+          </div>
+        } @else if (notifications().length === 0) {
+          <div class="noti-empty">
+            <span class="material-symbols-outlined">notifications_none</span>
+            <p>Chưa có thông báo nào</p>
+            <small>Thông báo mới sẽ xuất hiện khi có sự kiện đặt bàn</small>
+          </div>
+        } @else {
+          <ul class="noti-list">
+            @for (noti of notifications(); track noti.id) {
+              <li
+                class="noti-item noti-item--{{ getSeverityClass(noti.eventType) }}"
+                [class.noti-item--unread]="!noti.read"
+                (click)="markRead(noti)"
+                role="button"
+                tabindex="0"
+              >
+                <div class="noti-item__indicator"></div>
+                <div class="noti-item__content">
+                  <div class="noti-item__row">
+                    <span class="noti-item__label">{{ getLabel(noti.eventType) }}</span>
+                    @if (!noti.read) {
+                      <span class="noti-item__dot" aria-label="Chưa đọc"></span>
+                    }
+                  </div>
+                  <p class="noti-item__message">{{ noti.description }}</p>
+                  <span class="noti-item__time" [title]="formatDateTime(noti.createdAt)">
+                    {{ formatTime(noti.createdAt) }}
+                  </span>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <!-- Footer -->
+      <div class="noti-panel__footer">
+        <span class="noti-count">{{ notifications().length }} thông báo</span>
+        @if (isLoading()) {
+          <span class="noti-syncing">
+            <span class="material-symbols-outlined spin" style="font-size:0.875rem">sync</span>
+            Đang cập nhật...
+          </span>
+        }
+      </div>
+    </div>
+  }
+</div>

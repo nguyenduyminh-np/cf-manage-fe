@@ -44,8 +44,8 @@ import {
   WarehouseUpdateRequest,
 } from '../../core/models/warehouse/warehouse.model';
 import { WarehouseService } from '../../core/services/warehouse/warehouse.service';
-import { WarehouseFormDialog } from '../../shared/components/dialogs/warehouse-form-dialog/warehouse-form-dialog';
-import { WarehouseDeleteDialog } from '../../shared/components/dialogs/warehouse-delete-dialog/warehouse-delete-dialog';
+import { WarehouseFormDialog } from '../../shared/components/dialogs/warehouse/warehouse-form-dialog/warehouse-form-dialog';
+import { WarehouseDeleteDialog } from '../../shared/components/dialogs/warehouse/warehouse-delete-dialog/warehouse-delete-dialog';
 import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
 import { BreadcrumbComponent } from '../../shared/components/ui-component/breadcrumb/breadcrumb';
 
@@ -77,7 +77,14 @@ interface WarehouseQuery {
 @Component({
   standalone: true,
   selector: 'app-warehouse',
-  imports: [AsyncPipe, AgGridAngular, FormsModule, TuiButton, UiSelectComponent, BreadcrumbComponent],
+  imports: [
+    AsyncPipe,
+    AgGridAngular,
+    FormsModule,
+    TuiButton,
+    UiSelectComponent,
+    BreadcrumbComponent,
+  ],
   templateUrl: './warehouse.html',
   styleUrl: './warehouse.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -384,10 +391,12 @@ export class Warehouse implements OnDestroy {
 
   private openViewDialog(wh: WarehouseListItem): void {
     this.dialogService
-      .open<null>(
-        new PolymorpheusComponent(WarehouseFormDialog, this.injector),
-        { data: { mode: 'view', warehouse: wh }, size: 's', dismissible: true, closeable: false },
-      )
+      .open<null>(new PolymorpheusComponent(WarehouseFormDialog, this.injector), {
+        data: { mode: 'view', warehouse: wh },
+        size: 's',
+        dismissible: true,
+        closeable: false,
+      })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
   }

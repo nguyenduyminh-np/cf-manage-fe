@@ -1,0 +1,24 @@
+<div class="vd-dialog">
+  <div class="vd-dialog__icon-wrap">
+    <span class="material-symbols-outlined vd-dialog__icon">block</span>
+  </div>
+
+  <h2 class="vd-dialog__title">Vô hiệu hóa voucher?</h2>
+
+  <p class="vd-dialog__body">
+    Bạn có chắc muốn vô hiệu hóa voucher
+    <strong class="vd-dialog__code">{{ voucher.code }}</strong>?
+    <br />
+    Voucher sẽ không thể áp dụng cho đơn hàng mới, nhưng lịch sử sử dụng vẫn được giữ nguyên.
+  </p>
+
+  <footer class="vd-dialog__footer">
+    <button tuiButton type="button" class="vd-btn vd-btn--ghost" (click)="cancel()">
+      Hủy bỏ
+    </button>
+    <button tuiButton type="button" class="vd-btn vd-btn--danger" (click)="confirm()">
+      <span class="material-symbols-outlined">block</span>
+      Vô hiệu hóa
+    </button>
+  </footer>
+</div>

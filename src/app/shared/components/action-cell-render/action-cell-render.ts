@@ -5,8 +5,8 @@ import { ICellRendererParams } from 'ag-grid-community';
 import { TuiAlertService, TuiDialogService } from '@taiga-ui/core';
 import { PolymorpheusComponent } from '@taiga-ui/polymorpheus';
 import { TableBookingHistoryService } from '../../../core/services/table-booking-history/table-booking-history.service';
-import { TableBookingDetail } from '../dialogs/table-booking-detail/table-booking-detail';
-import { ConfirmDeleteDialog } from '../dialogs/confirm-delete-dialog/confirm-delete-dialog';
+import { TableBookingDetail } from '../dialogs/table-booking/table-booking-detail/table-booking-detail';
+import { ConfirmDeleteDialog } from '../dialogs/confirm/confirm-delete-dialog/confirm-delete-dialog';
 import {
   DeleteTableBookingRequest,
   DeleteTableBookingResponse,

@@ -1,0 +1,138 @@
+<!-- ─── Floating Toggle Button ─── -->
+<button
+  type="button"
+  class="chatbot-fab"
+  [class.chatbot-fab--open]="isOpen()"
+  (click)="toggleChat()"
+  aria-label="Mở trợ lý AI"
+>
+  @if (!isOpen()) {
+    <span class="material-symbols-outlined chatbot-fab__icon">smart_toy</span>
+  } @else {
+    <span class="material-symbols-outlined chatbot-fab__icon">close</span>
+  }
+</button>
+
+<!-- ─── Chat Panel ─── -->
+@if (isOpen()) {
+  <div class="chatbot-panel">
+    <!-- Header -->
+    <header class="chatbot-header">
+      <div class="chatbot-header__info">
+        <div class="chatbot-header__avatar">
+          <span class="material-symbols-outlined">smart_toy</span>
+        </div>
+        <div>
+          <h3 class="chatbot-header__title">Trợ lý CF Manager</h3>
+          <span class="chatbot-header__status">
+            <span class="chatbot-header__dot"></span>
+            Trực tuyến
+          </span>
+        </div>
+      </div>
+      <div class="chatbot-header__actions">
+        <button
+          type="button"
+          class="chatbot-header__btn"
+          title="Cuộc trò chuyện mới"
+          (click)="newConversation()"
+        >
+          <span class="material-symbols-outlined">add_comment</span>
+        </button>
+        <button
+          type="button"
+          class="chatbot-header__btn"
+          title="Đóng"
+          (click)="closeChat()"
+        >
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Messages Area -->
+    <div class="chatbot-messages" #messageContainer>
+      @for (msg of messages(); track msg.id) {
+        <!-- Loading indicator -->
+        @if (msg.isLoading) {
+          <div class="chat-bubble chat-bubble--bot">
+            <div class="chat-bubble__avatar">
+              <span class="material-symbols-outlined">smart_toy</span>
+            </div>
+            <div class="chat-bubble__body">
+              <div class="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <!-- Regular message -->
+          <div
+            class="chat-bubble"
+            [class.chat-bubble--user]="msg.role === 'user'"
+            [class.chat-bubble--bot]="msg.role === 'bot'"
+          >
+            @if (msg.role === 'bot') {
+              <div class="chat-bubble__avatar">
+                <span class="material-symbols-outlined">smart_toy</span>
+              </div>
+            }
+            <div class="chat-bubble__body">
+              <div class="chat-bubble__content" [style.white-space]="'pre-line'">{{ msg.content }}</div>
+              <span class="chat-bubble__time">{{ formatTime(msg.timestamp) }}</span>
+            </div>
+          </div>
+
+          <!-- Suggested Actions -->
+          @if (msg.suggestedActions && msg.suggestedActions.length > 0) {
+            <div class="suggested-actions">
+              @for (action of msg.suggestedActions; track action.label) {
+                <button
+                  type="button"
+                  class="suggested-actions__btn"
+                  [disabled]="isSending()"
+                  (click)="onActionClick(action)"
+                >
+                  {{ action.label }}
+                </button>
+              }
+            </div>
+          }
+        }
+      }
+    </div>
+
+    <!-- Input Area -->
+    <footer class="chatbot-input">
+      <div class="chatbot-input__wrapper">
+        <textarea
+          #messageInput
+          class="chatbot-input__field"
+          placeholder="Nhập tin nhắn..."
+          rows="1"
+          [(ngModel)]="inputText"
+          (keydown)="onKeydown($event)"
+          [disabled]="isSending()"
+          maxlength="1000"
+        ></textarea>
+        <button
+          type="button"
+          class="chatbot-input__send"
+          [disabled]="!inputText.trim() || isSending() || isOverLimit"
+          (click)="sendMessage()"
+          title="Gửi tin nhắn"
+        >
+          <span class="material-symbols-outlined">send</span>
+        </button>
+      </div>
+      @if (inputText.length > 900) {
+        <span class="chatbot-input__counter" [class.chatbot-input__counter--danger]="isOverLimit">
+          {{ remainingChars }}
+        </span>
+      }
+
+    </footer>
+  </div>
+}

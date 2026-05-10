@@ -44,8 +44,8 @@ import {
   SupplierUpdateRequest,
 } from '../../core/models/supplier/supplier.model';
 import { SupplierService } from '../../core/services/supplier/supplier.service';
-import { SupplierFormDialog } from '../../shared/components/dialogs/supplier-form-dialog/supplier-form-dialog';
-import { SupplierDeleteDialog } from '../../shared/components/dialogs/supplier-delete-dialog/supplier-delete-dialog';
+import { SupplierFormDialog } from '../../shared/components/dialogs/supplier/supplier-form-dialog/supplier-form-dialog';
+import { SupplierDeleteDialog } from '../../shared/components/dialogs/supplier/supplier-delete-dialog/supplier-delete-dialog';
 import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
 import { BreadcrumbComponent } from '../../shared/components/ui-component/breadcrumb/breadcrumb';
 
@@ -368,10 +368,12 @@ export class Supplier implements OnDestroy {
 
   private openViewDialog(sup: SupplierListItem): void {
     this.dialogService
-      .open<null>(
-        new PolymorpheusComponent(SupplierFormDialog, this.injector),
-        { data: { mode: 'view', supplier: sup }, size: 's', dismissible: true, closeable: false },
-      )
+      .open<null>(new PolymorpheusComponent(SupplierFormDialog, this.injector), {
+        data: { mode: 'view', supplier: sup },
+        size: 's',
+        dismissible: true,
+        closeable: false,
+      })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
   }

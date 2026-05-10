@@ -44,8 +44,8 @@ import {
   IngredientCategoryUpdateRequest,
 } from '../../core/models/ingredient-category/ingredient-category.model';
 import { IngredientCategoryService } from '../../core/services/ingredient-category/ingredient-category.service';
-import { IngredientCategoryFormDialog } from '../../shared/components/dialogs/ingredient-category-form-dialog/ingredient-category-form-dialog';
-import { IngredientCategoryDeleteDialog } from '../../shared/components/dialogs/ingredient-category-delete-dialog/ingredient-category-delete-dialog';
+import { IngredientCategoryFormDialog } from '../../shared/components/dialogs/ingredient-category/ingredient-category-form-dialog/ingredient-category-form-dialog';
+import { IngredientCategoryDeleteDialog } from '../../shared/components/dialogs/ingredient-category/ingredient-category-delete-dialog/ingredient-category-delete-dialog';
 
 import {
   IngredientListItem,
@@ -54,8 +54,8 @@ import {
   IngredientUpdateRequest,
 } from '../../core/models/ingredient/ingredient.model';
 import { IngredientService } from '../../core/services/ingredient/ingredient.service';
-import { IngredientFormDialog } from '../../shared/components/dialogs/ingredient-form-dialog/ingredient-form-dialog';
-import { IngredientDeleteDialog } from '../../shared/components/dialogs/ingredient-delete-dialog/ingredient-delete-dialog';
+import { IngredientFormDialog } from '../../shared/components/dialogs/ingredient/ingredient-form-dialog/ingredient-form-dialog';
+import { IngredientDeleteDialog } from '../../shared/components/dialogs/ingredient/ingredient-delete-dialog/ingredient-delete-dialog';
 import { downloadBlobFile } from '../../shared/utils/file-download.utils';
 import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
 import { BreadcrumbComponent } from '../../shared/components/ui-component/breadcrumb/breadcrumb';
@@ -207,7 +207,10 @@ export class Ingredient implements OnDestroy {
       flex: 1.2,
       sortable: true,
       filter: true,
-      valueFormatter: (p: ValueFormatterParams<IngredientCategoryListItem>) => p.value || '-',
+      cellRenderer: (p: ICellRendererParams<IngredientCategoryListItem>) => {
+        const code = p.data?.ingredientCategoryCode ?? '—';
+        return `<span class="ing-code-cell">${code}</span>`;
+      },
     },
     {
       headerName: 'Tên danh mục',
@@ -256,7 +259,8 @@ export class Ingredient implements OnDestroy {
       filter: false,
       valueFormatter: (p: ValueFormatterParams<IngredientCategoryListItem>) => this.fmtDT(p.value),
     },
-    {      headerName: 'Thao tác',
+    {
+      headerName: 'Thao tác',
       colId: 'cat-actions',
       cellRenderer: () =>
         `<span class="material-symbols-outlined action-icon action-icon--view" data-action="view" title="Xem chi tiết">visibility</span>` +
@@ -372,10 +376,12 @@ export class Ingredient implements OnDestroy {
 
   private openCatViewDialog(cat: IngredientCategoryListItem): void {
     this.dialogService
-      .open<null>(
-        new PolymorpheusComponent(IngredientCategoryFormDialog, this.injector),
-        { data: { mode: 'view', category: cat }, size: 's', dismissible: true, closeable: false },
-      )
+      .open<null>(new PolymorpheusComponent(IngredientCategoryFormDialog, this.injector), {
+        data: { mode: 'view', category: cat },
+        size: 's',
+        dismissible: true,
+        closeable: false,
+      })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
   }
@@ -731,10 +737,12 @@ export class Ingredient implements OnDestroy {
 
   private openIngViewDialog(ing: IngredientListItem): void {
     this.dialogService
-      .open<null>(
-        new PolymorpheusComponent(IngredientFormDialog, this.injector),
-        { data: { mode: 'view', ingredient: { id: ing.id } }, size: 's', dismissible: true, closeable: false },
-      )
+      .open<null>(new PolymorpheusComponent(IngredientFormDialog, this.injector), {
+        data: { mode: 'view', ingredient: { id: ing.id } },
+        size: 's',
+        dismissible: true,
+        closeable: false,
+      })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
   }
@@ -743,7 +751,12 @@ export class Ingredient implements OnDestroy {
     this.dialogService
       .open<IngredientUpdateRequest | null>(
         new PolymorpheusComponent(IngredientFormDialog, this.injector),
-        { data: { mode: 'edit', ingredient: { id: ing.id } }, size: 's', dismissible: true, closeable: false },
+        {
+          data: { mode: 'edit', ingredient: { id: ing.id } },
+          size: 's',
+          dismissible: true,
+          closeable: false,
+        },
       )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((payload) => {

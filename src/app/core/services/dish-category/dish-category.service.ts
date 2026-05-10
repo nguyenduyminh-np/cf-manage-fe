@@ -10,6 +10,9 @@ import {
   DishCategoryDetailApiResponse,
   DishCategoryDeleteApiResponse,
   DishCategoryOptionsApiResponse,
+  DishCategoryListRequest,
+  DishCategoryListApiResponse,
+  DishCategoryResponseDTO,
 } from '../../models/dish-category/dish-category.model';
 
 @Injectable({ providedIn: 'root' })
@@ -62,5 +65,13 @@ export class DishCategoryService {
    */
   getOptions(): Observable<DishCategoryOptionsApiResponse> {
     return this.http.post<DishCategoryOptionsApiResponse>('/dish-category/options', {});
+  }
+
+  /**
+   * Lấy danh sách danh mục để hiển thị trên tab lọc của POS.
+   * Mặc định lấy tất cả danh mục đang active (active = true).
+   */
+  list(request: DishCategoryListRequest = {}): Observable<DishCategoryListApiResponse> {
+    return this.http.post<DishCategoryListApiResponse>('/dish-category/list', request);
   }
 }

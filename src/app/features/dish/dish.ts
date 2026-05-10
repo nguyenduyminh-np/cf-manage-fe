@@ -45,8 +45,8 @@ import {
   DishCategoryUpdateRequest,
 } from '../../core/models/dish-category/dish-category.model';
 import { DishCategoryService } from '../../core/services/dish-category/dish-category.service';
-import { DishCategoryFormDialog } from '../../shared/components/dialogs/dish-category-form-dialog/dish-category-form-dialog';
-import { DishCategoryDeleteDialog } from '../../shared/components/dialogs/dish-category-delete-dialog/dish-category-delete-dialog';
+import { DishCategoryFormDialog } from '../../shared/components/dialogs/dish-category/dish-category-form-dialog/dish-category-form-dialog';
+import { DishCategoryDeleteDialog } from '../../shared/components/dialogs/dish-category/dish-category-delete-dialog/dish-category-delete-dialog';
 import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
 
 import {
@@ -56,8 +56,8 @@ import {
   DishUpdateRequest,
 } from '../../core/models/dish/dish.model';
 import { DishService } from '../../core/services/dish/dish.service';
-import { DishFormDialog } from '../../shared/components/dialogs/dish-form-dialog/dish-form-dialog';
-import { DishDeleteDialog } from '../../shared/components/dialogs/dish-delete-dialog/dish-delete-dialog';
+import { DishFormDialog } from '../../shared/components/dialogs/dish/dish-form-dialog/dish-form-dialog';
+import { DishDeleteDialog } from '../../shared/components/dialogs/dish/dish-delete-dialog/dish-delete-dialog';
 import { downloadBlobFile } from '../../shared/utils/file-download.utils';
 import { BreadcrumbComponent } from '../../shared/components/ui-component/breadcrumb/breadcrumb';
 
@@ -212,7 +212,10 @@ export class Dish implements OnDestroy {
       flex: 1.2,
       sortable: true,
       filter: true,
-      valueFormatter: (p: ValueFormatterParams<DishCategoryListItem>) => p.value || '-',
+      cellRenderer: (p: ICellRendererParams<DishCategoryListItem>) => {
+        const code = p.data?.dishCategoryCode ?? '—';
+        return `<span class="dish-code-cell">${code}</span>`;
+      },
     },
     {
       headerName: 'Tên danh mục',
@@ -394,10 +397,12 @@ export class Dish implements OnDestroy {
 
   private openCatViewDialog(cat: DishCategoryListItem): void {
     this.dialogService
-      .open<null>(
-        new PolymorpheusComponent(DishCategoryFormDialog, this.injector),
-        { data: { mode: 'view', category: cat }, size: 's', dismissible: true, closeable: false },
-      )
+      .open<null>(new PolymorpheusComponent(DishCategoryFormDialog, this.injector), {
+        data: { mode: 'view', category: cat },
+        size: 's',
+        dismissible: true,
+        closeable: false,
+      })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
   }
@@ -531,7 +536,10 @@ export class Dish implements OnDestroy {
       flex: 1,
       sortable: true,
       filter: true,
-      valueFormatter: (p: ValueFormatterParams<DishListItem>) => p.value || '-',
+      cellRenderer: (p: ICellRendererParams<DishListItem>) => {
+        const code = p.data?.dishCode ?? '—';
+        return `<span class="dish-code-cell">${code}</span>`;
+      },
     },
     {
       headerName: 'Tên món ăn',

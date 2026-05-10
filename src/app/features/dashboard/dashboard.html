@@ -1,168 +1,329 @@
 <div class="dashboard-page">
+  <!-- ─── Header ─── -->
   <header class="dashboard-header">
     <div>
-      <h1 class="dashboard-title">Thống kê chi tiết</h1>
-      <p class="dashboard-subtitle">Phân tích hiệu suất kinh doanh từ 01/10 - 07/10</p>
+      <h1 class="dashboard-title">Tổng quan</h1>
+      <p class="dashboard-subtitle">Thống kê & phân tích dữ liệu quán hôm nay</p>
     </div>
-
     <div class="dashboard-actions">
-      <button type="button" class="dashboard-btn dashboard-btn--ghost">
-        <span class="material-symbols-outlined">calendar_today</span>
-        <span>Tuần này</span>
-      </button>
-      <button type="button" class="dashboard-btn dashboard-btn--primary">
-        <span class="material-symbols-outlined">download</span>
-        <span>Xuất báo cáo</span>
+      <button type="button" class="dashboard-btn dashboard-btn--ghost" (click)="refreshDashboard()">
+        <span class="material-symbols-outlined">refresh</span>
+        <span>Tải lại</span>
       </button>
     </div>
   </header>
 
-  <section class="dashboard-metrics" aria-label="Chỉ số tổng quan">
-    @for (metric of metrics; track metric.title) {
-      <article class="metric-card">
-        <div class="metric-card__head">
-          <span class="metric-card__icon" [class]="metric.iconToneClass">
-            <span
-              class="material-symbols-outlined metric-card__icon-symbol"
-              [class.metric-card__icon-symbol--filled]="metric.iconFilled"
-            >
-              {{ metric.icon }}
-            </span>
-          </span>
-
-          <span
-            class="metric-card__trend"
-            [class.metric-card__trend--down]="metric.trendDirection === 'down'"
-          >
-            <span class="material-symbols-outlined">{{ metric.trendIcon }}</span>
-            {{ metric.trend }}
-          </span>
+  <!-- ─── KPI Section ─── -->
+  <section class="kpi-grid" aria-label="Chỉ số tổng quan">
+    @for (card of kpiCards(); track card.title) {
+      <article
+        class="kpi-card"
+        [class.kpi-card--warning]="card.alertLevel === 'warning'"
+        [class.kpi-card--danger]="card.alertLevel === 'danger'"
+      >
+        <div class="kpi-card__icon-bg" [class.kpi-card__icon-bg--warning]="card.alertLevel === 'warning'" [class.kpi-card__icon-bg--danger]="card.alertLevel === 'danger'">
+          <span class="material-symbols-outlined kpi-card__icon-symbol">{{ card.icon }}</span>
         </div>
-
-        <p class="metric-card__title">{{ metric.title }}</p>
-        <p class="metric-card__value">{{ metric.value }}</p>
-
-        @if (metric.progress !== null) {
-          <div class="metric-card__progress-track">
-            <div class="metric-card__progress-fill" [style.width.%]="metric.progress"></div>
-          </div>
-        }
-
-        @if (metric.satisfactionBars.length > 0) {
-          <div class="metric-card__satisfaction">
-            @for (active of metric.satisfactionBars; track $index) {
-              <span
-                class="metric-card__satisfaction-bar"
-                [class.metric-card__satisfaction-bar--off]="!active"
-              ></span>
-            }
-          </div>
-        }
-
-        @if (metric.note) {
-          <p class="metric-card__note">{{ metric.note }}</p>
-        }
+        <h3 class="kpi-card__title">{{ card.title }}</h3>
+        <p
+          class="kpi-card__value"
+          [class.kpi-card__value--success]="card.alertLevel === 'normal'"
+          [class.kpi-card__value--warning]="card.alertLevel === 'warning'"
+          [class.kpi-card__value--danger]="card.alertLevel === 'danger'"
+        >
+          {{ card.value }}
+        </p>
+        <div class="kpi-card__footer">
+          @if (card.subtitleIcon) {
+            <span
+              class="material-symbols-outlined kpi-card__footer-icon"
+              [class.kpi-card__footer-icon--warning]="card.alertLevel === 'warning'"
+              [class.kpi-card__footer-icon--danger]="card.alertLevel === 'danger'"
+            >
+              {{ card.subtitleIcon }}
+            </span>
+          }
+          <span class="kpi-card__subtitle">{{ card.subtitle }}</span>
+        </div>
       </article>
     }
   </section>
 
-  <section class="dashboard-insights">
-    <article class="panel panel--chart" aria-label="Biểu đồ xu hướng doanh thu">
-      <div class="panel__head panel__head--chart">
-        <div>
-          <h2>Xu hướng doanh thu tuần</h2>
-          <p>So sánh doanh thu thực tế và dự báo</p>
-        </div>
-
-        <div class="chart-legend">
-          <span><i class="dot dot--actual"></i> Thực tế</span>
-          <span><i class="dot dot--forecast"></i> Dự báo</span>
-        </div>
+  <!-- ─── Charts Section ─── -->
+  <section class="charts-grid" aria-label="Biểu đồ thống kê">
+    <!-- Chart 1: 7-day Revenue -->
+    <div class="chart-card">
+      <h3 class="chart-card__title">Doanh thu 7 ngày</h3>
+      <div class="chart-card__body">
+        <div echarts [options]="revenueChartOptions()" class="chart-canvas"></div>
       </div>
+    </div>
 
-      <div class="weekly-chart">
-        <div class="weekly-chart__grid-lines" aria-hidden="true">
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-
-        @for (point of weeklyRevenue; track point.day) {
-          <div class="weekly-chart__item">
-            <div class="weekly-chart__track">
-              <div class="weekly-chart__bar" [style.height.px]="point.actual"></div>
-            </div>
-            <span class="weekly-chart__label">{{ point.day }}</span>
-          </div>
-        }
+    <!-- Chart 2: Hourly Orders -->
+    <div class="chart-card">
+      <h3 class="chart-card__title">Đơn hàng theo giờ</h3>
+      <div class="chart-card__body">
+        <div echarts [options]="hourlyOrdersChartOptions()" class="chart-canvas"></div>
       </div>
-    </article>
+    </div>
 
-    <article class="panel panel--products" aria-label="Sản phẩm bán chạy">
-      <div class="panel__head">
-        <div>
-          <h2>Sản phẩm bán chạy</h2>
-          <p>7 ngày vừa qua</p>
-        </div>
+    <!-- Chart 3: Order Status -->
+    <div class="chart-card">
+      <h3 class="chart-card__title">Trạng thái đơn hàng</h3>
+      <div class="chart-card__body">
+        <div echarts [options]="orderStatusChartOptions()" class="chart-canvas"></div>
       </div>
+    </div>
 
-      <div class="product-list">
-        @for (product of topProducts; track product.name) {
-          <div class="product-item">
-            <div class="product-item__image-wrap">
-              <img [src]="product.image" [alt]="product.alt" class="product-item__image" />
-            </div>
-
-            <div class="product-item__main">
-              <p class="product-item__name">{{ product.name }}</p>
-              <p class="product-item__sold">{{ product.sold }}</p>
-            </div>
-
-            <div class="product-item__trend-wrap">
-              <span
-                class="product-item__trend"
-                [class.product-item__trend--down]="product.trendDirection === 'down'"
-              >
-                {{ product.trend }}
-              </span>
-              <span class="product-item__note">{{ product.note }}</span>
-            </div>
-          </div>
-        }
+    <!-- Chart 4: Top 5 Best Sellers -->
+    <div class="chart-card">
+      <h3 class="chart-card__title">Top 5 bán chạy</h3>
+      <div class="chart-card__body">
+        <div echarts [options]="topDishesChartOptions()" class="chart-canvas"></div>
       </div>
+    </div>
 
-      <button type="button" class="product-list__action">Xem toàn bộ thực đơn</button>
-    </article>
+    <!-- Chart 5: Table Occupancy -->
+    <div class="chart-card">
+      <h3 class="chart-card__title">Trạng thái bàn theo tầng</h3>
+      <div class="chart-card__body">
+        <div echarts [options]="tableStatusChartOptions()" class="chart-canvas"></div>
+      </div>
+    </div>
+
+    <!-- Chart 6: Debt Structure -->
+    <div class="chart-card">
+      <h3 class="chart-card__title">Cơ cấu công nợ</h3>
+      <div class="chart-card__body">
+        <div echarts [options]="debtChartOptions()" class="chart-canvas"></div>
+      </div>
+    </div>
   </section>
 
-  <section class="panel panel--heatmap" aria-label="Mật độ khách hàng theo giờ">
-    <div class="panel__head panel__head--heatmap">
-      <div>
-        <h2>Mật độ khách hàng theo giờ</h2>
-        <p>Xác định khung giờ cao điểm để điều phối nhân sự</p>
-      </div>
-
-      <div class="heatmap-legend">
-        <span>Cường độ:</span>
-        <i class="heatmap-legend__cell heatmap-legend__cell--1"></i>
-        <i class="heatmap-legend__cell heatmap-legend__cell--2"></i>
-        <i class="heatmap-legend__cell heatmap-legend__cell--3"></i>
-      </div>
+  <!-- ─── Quick Tables Section ─── -->
+  <section class="quick-tables" aria-label="Bảng dữ liệu nhanh">
+    <!-- Tabs -->
+    <div class="quick-tables__tabs">
+      <button
+        type="button"
+        class="quick-tables__tab"
+        [class.quick-tables__tab--active]="activeTab() === 'kitchen'"
+        (click)="setTab('kitchen')"
+      >
+        <span class="material-symbols-outlined quick-tables__tab-icon">restaurant</span>
+        Bếp đang xử lý
+      </button>
+      <button
+        type="button"
+        class="quick-tables__tab"
+        [class.quick-tables__tab--active]="activeTab() === 'bookings'"
+        (click)="setTab('bookings')"
+      >
+        <span class="material-symbols-outlined quick-tables__tab-icon">calendar_today</span>
+        Đặt bàn sắp tới
+      </button>
+      <button
+        type="button"
+        class="quick-tables__tab"
+        [class.quick-tables__tab--active]="activeTab() === 'inventory'"
+        (click)="setTab('inventory')"
+      >
+        <span class="material-symbols-outlined quick-tables__tab-icon">inventory_2</span>
+        Cảnh báo tồn kho
+      </button>
+      <button
+        type="button"
+        class="quick-tables__tab"
+        [class.quick-tables__tab--active]="activeTab() === 'invoices'"
+        (click)="setTab('invoices')"
+      >
+        <span class="material-symbols-outlined quick-tables__tab-icon">receipt</span>
+        HĐ chưa thanh toán
+      </button>
+      <button
+        type="button"
+        class="quick-tables__tab"
+        [class.quick-tables__tab--active]="activeTab() === 'purchases'"
+        (click)="setTab('purchases')"
+      >
+        <span class="material-symbols-outlined quick-tables__tab-icon">local_shipping</span>
+        Đơn nhập nháp
+      </button>
     </div>
 
-    <div class="heatmap-grid">
-      @for (item of heatmap; track $index) {
-        <div [class]="heatClass(item)"></div>
+    <!-- Tab Content -->
+    <div class="quick-tables__content">
+
+      <!-- Kitchen / Processing Orders -->
+      @if (activeTab() === 'kitchen') {
+        <div class="quick-table-wrap">
+          @if (processingOrders().length === 0) {
+            <div class="quick-table-empty">
+              <span class="material-symbols-outlined quick-table-empty__icon">check_circle</span>
+              <p>Không có đơn đang chế biến</p>
+            </div>
+          } @else {
+            <table class="quick-table">
+              <thead>
+                <tr>
+                  <th>Mã đơn</th>
+                  <th>Bàn</th>
+                  <th>Thời gian</th>
+                  <th>Món ăn</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (order of processingOrders(); track order.orderId) {
+                  <tr>
+                    <td class="cell-bold">#{{ order.orderId }}</td>
+                    <td>{{ order.tableName }}</td>
+                    <td class="cell-muted">{{ formatTime(order.createdAt) }}</td>
+                    <td class="cell-items">{{ order.itemsSummary }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
       }
-    </div>
 
-    <div class="heatmap-hours">
-      <span>0h</span>
-      <span>6h</span>
-      <span>12h</span>
-      <span>18h</span>
-      <span>23h</span>
+      <!-- Upcoming Bookings -->
+      @if (activeTab() === 'bookings') {
+        <div class="quick-table-wrap">
+          @if (upcomingBookings().length === 0) {
+            <div class="quick-table-empty">
+              <span class="material-symbols-outlined quick-table-empty__icon">event_available</span>
+              <p>Không có booking sắp tới</p>
+            </div>
+          } @else {
+            <table class="quick-table">
+              <thead>
+                <tr>
+                  <th>Giờ đến</th>
+                  <th>Khách hàng</th>
+                  <th>SĐT</th>
+                  <th>Bàn</th>
+                  <th>Ghi chú</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (booking of upcomingBookings(); track booking.expectedArriveTime) {
+                  <tr>
+                    <td class="cell-bold">{{ formatTime(booking.expectedArriveTime) }}</td>
+                    <td>{{ booking.customerName }}</td>
+                    <td class="cell-muted">{{ booking.phoneNumber }}</td>
+                    <td>{{ booking.tableName }}</td>
+                    <td class="cell-muted cell-note">{{ booking.note || '-' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      }
+
+      <!-- Stock Alerts -->
+      @if (activeTab() === 'inventory') {
+        <div class="quick-table-wrap">
+          @if (stockAlerts().length === 0) {
+            <div class="quick-table-empty">
+              <span class="material-symbols-outlined quick-table-empty__icon">inventory</span>
+              <p>Không có cảnh báo tồn kho</p>
+            </div>
+          } @else {
+            <table class="quick-table">
+              <thead>
+                <tr>
+                  <th>Nguyên liệu</th>
+                  <th>Mã lô</th>
+                  <th>Số lượng</th>
+                  <th>Hết hạn</th>
+                  <th>Kho</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (alert of stockAlerts(); track alert.batchId) {
+                  <tr [class.row--critical]="isStockCritical(alert)">
+                    <td class="cell-bold">{{ alert.ingredientName }}</td>
+                    <td class="cell-muted">#{{ alert.batchId }}</td>
+                    <td>{{ alert.quantity }}</td>
+                    <td [class.cell-danger]="isStockCritical(alert)">{{ formatDate(alert.expirationAt) }}</td>
+                    <td class="cell-muted">{{ alert.warehouseName }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      }
+
+      <!-- Pending Invoices -->
+      @if (activeTab() === 'invoices') {
+        <div class="quick-table-wrap">
+          @if (pendingInvoices().length === 0) {
+            <div class="quick-table-empty">
+              <span class="material-symbols-outlined quick-table-empty__icon">paid</span>
+              <p>Tất cả hóa đơn đã thanh toán</p>
+            </div>
+          } @else {
+            <table class="quick-table">
+              <thead>
+                <tr>
+                  <th>Mã HĐ</th>
+                  <th>Bàn</th>
+                  <th>Tổng tiền</th>
+                  <th>Thời gian tạo</th>
+                  <th>Khách hàng</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (inv of pendingInvoices(); track inv.invoiceCode) {
+                  <tr>
+                    <td class="cell-bold">{{ inv.invoiceCode }}</td>
+                    <td>{{ inv.tableName }}</td>
+                    <td class="cell-bold">{{ formatCurrency(inv.totalAmount) }}</td>
+                    <td class="cell-muted">{{ formatDateTime(inv.createdAt) }}</td>
+                    <td class="cell-muted">{{ inv.customerName || '-' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      }
+
+      <!-- Draft Purchase Orders -->
+      @if (activeTab() === 'purchases') {
+        <div class="quick-table-wrap">
+          @if (draftPurchaseOrders().length === 0) {
+            <div class="quick-table-empty">
+              <span class="material-symbols-outlined quick-table-empty__icon">local_shipping</span>
+              <p>Không có đơn nhập nháp</p>
+            </div>
+          } @else {
+            <table class="quick-table">
+              <thead>
+                <tr>
+                  <th>Mã đơn nhập</th>
+                  <th>Nhà cung cấp</th>
+                  <th>Tổng tiền</th>
+                  <th>Ngày tạo</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (po of draftPurchaseOrders(); track po.purchaseOrderCode) {
+                  <tr>
+                    <td class="cell-bold">{{ po.purchaseOrderCode }}</td>
+                    <td>{{ po.supplierName }}</td>
+                    <td class="cell-bold">{{ po.totalAmount !== null ? formatCurrency(po.totalAmount) : '-' }}</td>
+                    <td class="cell-muted">{{ formatDateTime(po.createdAt) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      }
     </div>
   </section>
 </div>

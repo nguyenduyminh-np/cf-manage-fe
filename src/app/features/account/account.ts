@@ -44,8 +44,8 @@ import {
   AccountUpdateRequest,
 } from '../../core/models/account/account.model';
 import { AccountService } from '../../core/services/account/account.service';
-import { AccountFormDialog } from '../../shared/components/dialogs/account-form-dialog/account-form-dialog';
-import { AccountDeleteDialog } from '../../shared/components/dialogs/account-delete-dialog/account-delete-dialog';
+import { AccountFormDialog } from '../../shared/components/dialogs/account/account-form-dialog/account-form-dialog';
+import { AccountDeleteDialog } from '../../shared/components/dialogs/account/account-delete-dialog/account-delete-dialog';
 import { UiSelectComponent } from '../../shared/components/ui-component/ui-select/ui-select';
 import { BreadcrumbComponent } from '../../shared/components/ui-component/breadcrumb/breadcrumb';
 
@@ -81,7 +81,14 @@ interface AccountQuery {
 @Component({
   standalone: true,
   selector: 'app-account',
-  imports: [AsyncPipe, AgGridAngular, FormsModule, TuiButton, UiSelectComponent, BreadcrumbComponent],
+  imports: [
+    AsyncPipe,
+    AgGridAngular,
+    FormsModule,
+    TuiButton,
+    UiSelectComponent,
+    BreadcrumbComponent,
+  ],
   templateUrl: './account.html',
   styleUrl: './account.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

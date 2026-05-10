@@ -1,0 +1,126 @@
+<div class="voucher-page">
+  <!-- Breadcrumb -->
+  <app-breadcrumb [items]="[
+    { label: 'Trang chủ', routerLink: '/', icon: 'home' },
+    { label: 'Quản lý Voucher', icon: 'confirmation_number' }
+  ]" />
+
+  <!-- Page Header -->
+  <header class="voucher-page__header">
+    <div class="voucher-page__title-wrap">
+      <span class="material-symbols-outlined" aria-hidden="true">confirmation_number</span>
+      <div>
+        <h1 class="voucher-page__title">Quản lý Voucher</h1>
+        <p class="voucher-page__subtitle">Tạo và quản lý mã giảm giá cho đơn hàng POS.</p>
+      </div>
+    </div>
+    <div class="voucher-page__actions">
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="openCreateDialog()"
+      >
+        <span class="material-symbols-outlined">add</span>
+        Tạo voucher
+      </button>
+    </div>
+  </header>
+
+  <!-- Filters -->
+  <section class="voucher-filters" aria-label="Bộ lọc voucher">
+    <div class="voucher-filters__grid">
+      <label class="voucher-field">
+        <span>Mã voucher</span>
+        <div class="voucher-searchbox">
+          <span class="material-symbols-outlined voucher-searchbox__icon">search</span>
+          <input
+            class="voucher-field__input"
+            type="text"
+            [(ngModel)]="searchCode"
+            placeholder="Tìm mã..."
+            autocomplete="off"
+            name="searchCode"
+          />
+        </div>
+      </label>
+
+      <label class="voucher-field">
+        <span>Trạng thái</span>
+        <app-ui-select
+          ariaLabel="Lọc trạng thái voucher"
+          placeholder="Tất cả"
+          [options]="activeStatusOptions"
+          [value]="filterActive"
+          (valueChange)="setActiveFilter($event)"
+        />
+      </label>
+
+      <label class="voucher-field">
+        <span>Loại giảm giá</span>
+        <app-ui-select
+          ariaLabel="Lọc loại giảm giá"
+          placeholder="Tất cả"
+          [options]="discountTypeOptions"
+          [value]="filterType"
+          (valueChange)="setTypeFilter($event)"
+        />
+      </label>
+
+      <div class="voucher-field voucher-field--actions">
+        <button type="button" class="btn btn--ghost" (click)="resetSearch()">
+          <span class="material-symbols-outlined">refresh</span>
+          Làm mới
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Grid -->
+  @if (state$ | async; as state) {
+    @if (state.isLoading) {
+      <div class="panel-loading" aria-live="polite">Đang tải danh sách voucher...</div>
+    }
+    @if (state.error) {
+      <div class="panel-error" role="alert">{{ state.error }}</div>
+    }
+
+    @if (!state.isLoading && !state.error) {
+      <div class="voucher-summary">
+        <span class="voucher-summary__count">
+          Hiển thị {{ applyFilter(state.all).length }} / {{ state.all.length }} voucher
+        </span>
+        <span class="voucher-summary__active">
+          <span class="dot dot--active"></span>
+          {{ countActive(state.all) }} đang hoạt động
+        </span>
+      </div>
+    }
+
+    <div class="panel-grid-wrap">
+      <ag-grid-angular
+        class="panel-grid ag-theme-quartz"
+        [columnDefs]="columnDefs"
+        [defaultColDef]="defaultColDef"
+        [rowData]="applyFilter(state.all)"
+        [pagination]="false"
+        [loading]="state.isLoading"
+        [overlayLoadingTemplate]="'Đang tải dữ liệu...'"
+        [overlayNoRowsTemplate]="'Không có voucher nào'"
+        [suppressCellFocus]="true"
+        [headerHeight]="46"
+        [rowHeight]="52"
+        (gridReady)="onGridReady($event)"
+        (gridSizeChanged)="onGridSizeChanged($event)"
+        (cellClicked)="onCellClicked($event)"
+      ></ag-grid-angular>
+    </div>
+
+    <footer class="panel-pagination">
+      <div class="panel-pagination__info">
+        <span>Tổng: {{ state.all.length }} voucher</span>
+        <span class="panel-pagination__sep">|</span>
+        <span>Đang hiển thị: {{ applyFilter(state.all).length }}</span>
+      </div>
+    </footer>
+  }
+</div>
