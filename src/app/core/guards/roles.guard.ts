@@ -6,7 +6,8 @@ import { TokenStore } from '../services/auth/token.store';
 
 /**
  * Roles Guard Factory — tạo guard kiểm tra role của user.
- * @param allowedRoles — danh sách role codes được phép (e.g., ['ADMIN', 'QL-002'])
+ * @param allowedRoles — danh sách role codes được phép.
+ *   Hỗ trợ exact match ('ADMIN') và prefix wildcard ('QL-*' khớp mọi QL-xxx).
  *
  * Nếu role đã hydrate và không nằm trong danh sách → redirect /forbidden.
  * Nếu role chưa hydrate (vừa reload, access token chưa có) → cho phép tạm thời,
@@ -17,24 +18,28 @@ export const rolesGuard = (allowedRoles: string[]): CanMatchFn => {
     const tokenStore = inject(TokenStore);
     const router = inject(Router);
 
-    // Nếu chưa có refresh token => chưa login
+    // Chưa login
     if (!tokenStore.refreshToken()) {
       return false; // authGuard sẽ xử lý redirect
     }
 
     const userRole = tokenStore.role();
-    // Nếu role đã có, kiểm tra luôn
     if (userRole) {
-      if (allowedRoles.includes(userRole)) {
-        return true;
-      } else {
-        router.navigate(['/forbidden']);
-        return false;
-      }
+      const allowed = allowedRoles.some((rule) => {
+        if (rule.endsWith('*')) {
+          // Prefix wildcard: 'QL-*' khớp 'QL-002', 'QL-005', v.v.
+          return userRole.startsWith(rule.slice(0, -1));
+        }
+        return userRole === rule;
+      });
+
+      if (allowed) return true;
+
+      router.navigate(['/forbidden']);
+      return false;
     }
 
-    // Role chưa hydrate (ví dụ vừa reload trang, access token chưa có)
-    // Cho phép tạm thời, interceptor sẽ refresh và hydrate role.
+    // Role chưa hydrate (reload page) → cho qua tạm thời
     return true;
   };
 };

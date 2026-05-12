@@ -16,7 +16,7 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { TuiButton, TuiDialogContext } from '@taiga-ui/core';
+import { TuiAlertService, TuiButton, TuiDialogContext } from '@taiga-ui/core';
 import { injectContext } from '@taiga-ui/polymorpheus';
 import {
   catchError,
@@ -192,6 +192,7 @@ export class PosTableBooking {
   private readonly fb = inject(FormBuilder);
   private readonly authFacade = inject(AuthFacade);
   private readonly posTableBookingService = inject(PosTableBookingService);
+  private readonly alertService = inject(TuiAlertService);
   private readonly dialogContext =
     injectContext<
       TuiDialogContext<PosTableBookingDialogResult | null, PosTableBookingDialogInput>
@@ -508,6 +509,20 @@ export class PosTableBooking {
       )
       .subscribe({
         next: (response) => {
+          // Hiển thị cảnh báo mềm (nếu có) trước khi đóng dialog
+          const warnings = response.warnings;
+          if (Array.isArray(warnings) && warnings.length > 0) {
+            warnings.forEach((msg) => {
+              this.alertService
+                .open(msg, {
+                  appearance: 'warning',
+                  label: '⚠️ Cảnh báo đặt bàn',
+                  autoClose: 8000,
+                })
+                .subscribe();
+            });
+          }
+
           const bookingId = response.data.bookingId;
           const tableId = response.data.tableId;
 

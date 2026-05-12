@@ -51,13 +51,15 @@
 
   <!-- ─── Charts Section ─── -->
   <section class="charts-grid" aria-label="Biểu đồ thống kê">
-    <!-- Chart 1: 7-day Revenue -->
-    <div class="chart-card">
-      <h3 class="chart-card__title">Doanh thu 7 ngày</h3>
-      <div class="chart-card__body">
-        <div echarts [options]="revenueChartOptions()" class="chart-canvas"></div>
+    <!-- Chart 1: 7-day Revenue (ADMIN/MANAGER only) -->
+    @if (isAdminOrManager()) {
+      <div class="chart-card">
+        <h3 class="chart-card__title">Doanh thu 7 ngày</h3>
+        <div class="chart-card__body">
+          <div echarts [options]="revenueChartOptions()" class="chart-canvas"></div>
+        </div>
       </div>
-    </div>
+    }
 
     <!-- Chart 2: Hourly Orders -->
     <div class="chart-card">
@@ -67,13 +69,15 @@
       </div>
     </div>
 
-    <!-- Chart 3: Order Status -->
-    <div class="chart-card">
-      <h3 class="chart-card__title">Trạng thái đơn hàng</h3>
-      <div class="chart-card__body">
-        <div echarts [options]="orderStatusChartOptions()" class="chart-canvas"></div>
+    <!-- Chart 3: Order Status (ADMIN/MANAGER only) -->
+    @if (isAdminOrManager()) {
+      <div class="chart-card">
+        <h3 class="chart-card__title">Trạng thái đơn hàng</h3>
+        <div class="chart-card__body">
+          <div echarts [options]="orderStatusChartOptions()" class="chart-canvas"></div>
+        </div>
       </div>
-    </div>
+    }
 
     <!-- Chart 4: Top 5 Best Sellers -->
     <div class="chart-card">
@@ -91,13 +95,15 @@
       </div>
     </div>
 
-    <!-- Chart 6: Debt Structure -->
-    <div class="chart-card">
-      <h3 class="chart-card__title">Cơ cấu công nợ</h3>
-      <div class="chart-card__body">
-        <div echarts [options]="debtChartOptions()" class="chart-canvas"></div>
+    <!-- Chart 6: Debt Structure (ADMIN/MANAGER only) -->
+    @if (isAdminOrManager()) {
+      <div class="chart-card">
+        <h3 class="chart-card__title">Cơ cấu công nợ</h3>
+        <div class="chart-card__body">
+          <div echarts [options]="debtChartOptions()" class="chart-canvas"></div>
+        </div>
       </div>
-    </div>
+    }
   </section>
 
   <!-- ─── Quick Tables Section ─── -->
@@ -125,30 +131,35 @@
       <button
         type="button"
         class="quick-tables__tab"
-        [class.quick-tables__tab--active]="activeTab() === 'inventory'"
-        (click)="setTab('inventory')"
+        [class.quick-tables__tab--active]="activeTab() === 'pending-bookings'"
+        (click)="setTab('pending-bookings')"
       >
-        <span class="material-symbols-outlined quick-tables__tab-icon">inventory_2</span>
-        Cảnh báo tồn kho
+        <span class="material-symbols-outlined quick-tables__tab-icon">pending_actions</span>
+        Chờ xác nhận
+        @if (pendingBookings().length > 0) {
+          <span class="tab-badge">{{ pendingBookings().length }}</span>
+        }
       </button>
-      <button
-        type="button"
-        class="quick-tables__tab"
-        [class.quick-tables__tab--active]="activeTab() === 'invoices'"
-        (click)="setTab('invoices')"
-      >
-        <span class="material-symbols-outlined quick-tables__tab-icon">receipt</span>
-        HĐ chưa thanh toán
-      </button>
-      <button
-        type="button"
-        class="quick-tables__tab"
-        [class.quick-tables__tab--active]="activeTab() === 'purchases'"
-        (click)="setTab('purchases')"
-      >
-        <span class="material-symbols-outlined quick-tables__tab-icon">local_shipping</span>
-        Đơn nhập nháp
-      </button>
+      @if (isAdminOrManager()) {
+        <button
+          type="button"
+          class="quick-tables__tab"
+          [class.quick-tables__tab--active]="activeTab() === 'inventory'"
+          (click)="setTab('inventory')"
+        >
+          <span class="material-symbols-outlined quick-tables__tab-icon">inventory_2</span>
+          Cảnh báo tồn kho
+        </button>
+        <button
+          type="button"
+          class="quick-tables__tab"
+          [class.quick-tables__tab--active]="activeTab() === 'purchases'"
+          (click)="setTab('purchases')"
+        >
+          <span class="material-symbols-outlined quick-tables__tab-icon">local_shipping</span>
+          Đơn nhập nháp
+        </button>
+      }
     </div>
 
     <!-- Tab Content -->
@@ -222,8 +233,47 @@
         </div>
       }
 
-      <!-- Stock Alerts -->
-      @if (activeTab() === 'inventory') {
+      <!-- Pending Bookings — Đặt bàn chờ xác nhận (mọi role) -->
+      @if (activeTab() === 'pending-bookings') {
+        <div class="quick-table-wrap">
+          @if (pendingBookings().length === 0) {
+            <div class="quick-table-empty">
+              <span class="material-symbols-outlined quick-table-empty__icon">event_available</span>
+              <p>Không có đơn đặt bàn nào chờ xác nhận</p>
+            </div>
+          } @else {
+            <table class="quick-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Khách hàng</th>
+                  <th>SĐT</th>
+                  <th>Bàn</th>
+                  <th>Giờ đến</th>
+                  <th>Chờ</th>
+                  <th>Ghi chú</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (b of pendingBookings(); track b.bookingId) {
+                  <tr [class.row--critical]="isBookingUrgent(b.createdAt)">
+                    <td class="cell-muted">#{{ b.bookingId }}</td>
+                    <td class="cell-bold">{{ b.customerName }}</td>
+                    <td class="cell-muted">{{ b.phoneNumber }}</td>
+                    <td>{{ b.tableName }}</td>
+                    <td class="cell-bold">{{ formatTime(b.expectedArriveTime) }}</td>
+                    <td [class.cell-danger]="isBookingUrgent(b.createdAt)">{{ waitingTime(b.createdAt) }}</td>
+                    <td class="cell-muted cell-note">{{ b.note || '-' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      }
+
+      <!-- Stock Alerts (ADMIN/MANAGER only) -->
+      @if (activeTab() === 'inventory' && isAdminOrManager()) {
         <div class="quick-table-wrap">
           @if (stockAlerts().length === 0) {
             <div class="quick-table-empty">
@@ -257,43 +307,10 @@
         </div>
       }
 
-      <!-- Pending Invoices -->
-      @if (activeTab() === 'invoices') {
-        <div class="quick-table-wrap">
-          @if (pendingInvoices().length === 0) {
-            <div class="quick-table-empty">
-              <span class="material-symbols-outlined quick-table-empty__icon">paid</span>
-              <p>Tất cả hóa đơn đã thanh toán</p>
-            </div>
-          } @else {
-            <table class="quick-table">
-              <thead>
-                <tr>
-                  <th>Mã HĐ</th>
-                  <th>Bàn</th>
-                  <th>Tổng tiền</th>
-                  <th>Thời gian tạo</th>
-                  <th>Khách hàng</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (inv of pendingInvoices(); track inv.invoiceCode) {
-                  <tr>
-                    <td class="cell-bold">{{ inv.invoiceCode }}</td>
-                    <td>{{ inv.tableName }}</td>
-                    <td class="cell-bold">{{ formatCurrency(inv.totalAmount) }}</td>
-                    <td class="cell-muted">{{ formatDateTime(inv.createdAt) }}</td>
-                    <td class="cell-muted">{{ inv.customerName || '-' }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          }
-        </div>
-      }
+      <!-- Pending Invoices: Đã xóa theo yêu cầu -->
 
-      <!-- Draft Purchase Orders -->
-      @if (activeTab() === 'purchases') {
+      <!-- Draft Purchase Orders (ADMIN/MANAGER only) -->
+      @if (activeTab() === 'purchases' && isAdminOrManager()) {
         <div class="quick-table-wrap">
           @if (draftPurchaseOrders().length === 0) {
             <div class="quick-table-empty">

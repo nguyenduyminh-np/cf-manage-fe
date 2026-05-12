@@ -88,3 +88,13 @@ export interface DraftPurchaseOrder {
   createdAt: string;       // ISO 8601 UTC
   supplierName: string;
 }
+
+export interface PendingBooking {
+  bookingId: number;
+  customerName: string;
+  phoneNumber: string;
+  tableName: string;
+  expectedArriveTime: string; // ISO 8601 UTC
+  createdAt: string;          // ISO 8601 UTC — dùng tính thời gian chờ
+  note: string | null;
+}

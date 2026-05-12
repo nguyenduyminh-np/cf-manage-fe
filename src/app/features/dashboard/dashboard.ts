@@ -13,6 +13,7 @@ import { EChartsOption } from 'echarts';
 import dayjs from 'dayjs';
 
 import { DashboardService } from '../../core/services/dashboard/dashboard.service';
+import { TokenStore } from '../../core/services/auth/token.store';
 import {
   DashboardKpi,
   RevenueDayPoint,
@@ -26,6 +27,7 @@ import {
   StockAlert,
   PendingInvoice,
   DraftPurchaseOrder,
+  PendingBooking,
 } from '../../core/models/dashboard/dashboard.model';
 
 // ─── KPI Card config ───
@@ -39,7 +41,7 @@ interface KpiCard {
 }
 
 // ─── Quick Table Tab ───
-type QuickTab = 'kitchen' | 'bookings' | 'inventory' | 'invoices' | 'purchases';
+type QuickTab = 'kitchen' | 'bookings' | 'inventory' | 'purchases' | 'pending-bookings';
 
 @Component({
   selector: 'app-dashboard',
@@ -52,6 +54,14 @@ type QuickTab = 'kitchen' | 'bookings' | 'inventory' | 'invoices' | 'purchases';
 export class Dashboard implements OnInit {
   private readonly dashboardService = inject(DashboardService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly tokenStore = inject(TokenStore);
+
+  /** True nếu user là ADMIN hoặc bất kỳ manager (QL-xxx). */
+  protected readonly isAdminOrManager = computed(() => {
+    const role = this.tokenStore.role();
+    if (!role) return false;
+    return role === 'ADMIN' || role.startsWith('QL-');
+  });
 
   // ─── State Signals ───
   protected readonly isLoading = signal(true);
@@ -69,8 +79,8 @@ export class Dashboard implements OnInit {
   protected readonly processingOrders = signal<ProcessingOrder[]>([]);
   protected readonly upcomingBookings = signal<UpcomingBooking[]>([]);
   protected readonly stockAlerts = signal<StockAlert[]>([]);
-  protected readonly pendingInvoices = signal<PendingInvoice[]>([]);
   protected readonly draftPurchaseOrders = signal<DraftPurchaseOrder[]>([]);
+  protected readonly pendingBookings = signal<PendingBooking[]>([]);
 
   // Active tab
   protected readonly activeTab = signal<QuickTab>('kitchen');
@@ -477,8 +487,8 @@ export class Dashboard implements OnInit {
           this.processingOrders.set(data.processingOrders);
           this.upcomingBookings.set(data.upcomingBookings);
           this.stockAlerts.set(data.stockAlerts);
-          this.pendingInvoices.set(data.pendingInvoices);
           this.draftPurchaseOrders.set(data.draftPurchaseOrders);
+          this.pendingBookings.set(data.pendingBookings);
           this.isLoading.set(false);
         },
         error: () => {
@@ -543,5 +553,20 @@ export class Dashboard implements OnInit {
   protected isStockCritical(alert: StockAlert): boolean {
     const daysUntilExpiry = dayjs(alert.expirationAt).diff(dayjs(), 'day');
     return daysUntilExpiry <= 3 || alert.quantity <= 2;
+  }
+
+  /** Hiển thị thời gian chờ xác nhận: “5 phút trước”, “2 giờ trước”. */
+  protected waitingTime(isoString: string): string {
+    if (!isoString) return '-';
+    const diff = dayjs().diff(dayjs(isoString), 'minute');
+    if (diff < 1) return 'Vừa tạo';
+    if (diff < 60) return `${diff} phút trước`;
+    const hours = Math.floor(diff / 60);
+    return `${hours} giờ trước`;
+  }
+
+  /** True nếu booking đã chờ quá 30 phút không được xác nhận. */
+  protected isBookingUrgent(isoString: string): boolean {
+    return dayjs().diff(dayjs(isoString), 'minute') >= 30;
   }
 }

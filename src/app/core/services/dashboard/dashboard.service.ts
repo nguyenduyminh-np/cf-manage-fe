@@ -16,6 +16,7 @@ import {
   StockAlert,
   PendingInvoice,
   DraftPurchaseOrder,
+  PendingBooking,
 } from '../../models/dashboard/dashboard.model';
 
 const BASE = '/dashboard';
@@ -99,6 +100,12 @@ export class DashboardService {
       .pipe(map((r) => r.data));
   }
 
+  getPendingBookings(): Observable<PendingBooking[]> {
+    return this.http
+      .post<DashboardApiResponse<PendingBooking[]>>(`${BASE}/table/pending-bookings`, null)
+      .pipe(map((r) => r.data));
+  }
+
   // ─── Batch loaders ───
   loadAllCharts() {
     return forkJoin({
@@ -118,6 +125,7 @@ export class DashboardService {
       stockAlerts: this.getStockAlerts(),
       pendingInvoices: this.getPendingInvoices(),
       draftPurchaseOrders: this.getDraftPurchaseOrders(),
+      pendingBookings: this.getPendingBookings(),
     });
   }
 }
